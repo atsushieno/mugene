@@ -616,6 +616,9 @@ namespace Commons.Music.Midi.Mml
 				case '\\':
 					ch = Line.ReadChar ();
 					switch (ch) {
+					case '/': // This is a quick workaround to avoid "//" being treated as comment, even within a string literal
+						sb.Append ('/');
+						break;
 					case '"':
 						sb.Append ('"');
 						break;
