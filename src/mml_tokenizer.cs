@@ -381,13 +381,22 @@ namespace Commons.Music.Midi.Mml
 			return mms;
 		}
 
+		int [] previous_range;
+
 		MmlSourceLineSet ProcessTrackLine (MmlLine line)
 		{
 			if (in_comment_mode)
 				return null;
 			result.Lexer.SetCurrentInput (line);
 
-			int [] range = result.Lexer.ReadRange ().ToArray ();
+			int [] range;
+			if (result.Lexer.IsWhitespace (line.PeekChar ()))
+				range = previous_range;
+			else
+				range = result.Lexer.ReadRange ().ToArray ();
+			if (range == null)
+				throw new MmlException ("Current line indicates no track number, and there was no indicated tracks previously.", line.Location);
+			previous_range = range;
 			result.Lexer.SkipWhitespaces (true);
 			var ts = new MmlTrackSource (range);
 			ts.Lines.Add (line);
