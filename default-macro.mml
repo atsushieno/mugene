@@ -81,6 +81,10 @@
 #macro M val:number { __LET{"__modulation", $val} CC1,$val }
 #macro M+ val:number { M $__modulation + $val }
 #macro M- val:number { M $__modulation - $val }
+#variable __main_volume:number
+#macro V val:number { __LET{"__main_volume", $val} CC7,$val }
+#macro V+ val:number { V $__main_volume + $val }
+#macro V- val:number { V $__main_volume - $val }
 #variable __pan:number
 #macro P val:number { __LET{"__pan", $val} CC#0A,$val }
 #macro P+ val:number { P $__pan + $val }
@@ -215,6 +219,7 @@
 	}
 
 #macro P_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+#macro V_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "V", "V+", SPECTRA_ONESHOT_ARG_USE }
 #macro E_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "E", "E+", SPECTRA_ONESHOT_ARG_USE }
 #macro t_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "t", "t+", SPECTRA_ONESHOT_ARG_USE }
 #macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
@@ -242,6 +247,7 @@
 	}
 
 #macro Pt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "P", "P+", "P-", SPECTRA_TRIANGLE_ARG_USE }
+#macro Vt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "V", "V+", "V-", SPECTRA_TRIANGLE_ARG_USE }
 #macro Et SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "E", "E+", "E-", SPECTRA_TRIANGLE_ARG_USE }
 #macro tt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "t", "t+", "t-", SPECTRA_TRIANGLE_ARG_USE }
 #macro Mt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "M", "M+", "M-", SPECTRA_TRIANGLE_ARG_USE }
