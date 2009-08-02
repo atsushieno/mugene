@@ -49,7 +49,7 @@ namespace Commons.Music.Midi.Mml
 			var inputs = new List<MmlInputSource> ();
 			string outfilename = null;
 			foreach (string file in files) {
-				if (Path.GetFileName (file) != "default-macro.mml" && outfilename == null)
+				if (Path.GetFileName (file) != "default-macro.mml")
 					outfilename = Path.ChangeExtension (file, ".mid");
 				inputs.Add (new MmlInputSource (file, Resolver.Resolve (file)));
 			}
