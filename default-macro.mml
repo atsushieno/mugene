@@ -130,7 +130,7 @@
 #macro < { __LET{"__octave", $__octave - 1} }
 
 // NoteOn/Off events
-#alias KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=-1
+#alias KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=0
 #alias KEYARGAPPLY $step, $gate, $vel, $offvel
 #macro n key:number, KEYARGDEF   { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
@@ -138,7 +138,7 @@
 	NON$key, $vel \
 	NOP$__current_note_gate \
 	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \
-	NOFF$key, {$offvel + 1 ? $offvel, $vel} \
+	NOFF$key, $offvel \
 	NOP$step - $__current_note_gate }
 
 // These + and - are nasty, but to be defined as macro, they had better be
