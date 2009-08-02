@@ -29,18 +29,18 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="default-macro.mml" />
-    <None Include="gs_macro.mml" />
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
+    <None Include="gs-sysex.mml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src/mml_compiler_main.cs" />
-    <Compile Include="src/mml_macro_expander.cs" />
-    <Compile Include="src/mml_semantic_builder.cs" />
-    <Compile Include="src/mml_smf_generator.cs" />
-    <Compile Include="src/mml_tokenizer.cs" />
-    <Compile Include="src/mml_variable_processor.cs" />
-    <Compile Include="src/SMF.cs" />
+    <Compile Include="src\mml_compiler_main.cs" />
+    <Compile Include="src\mml_macro_expander.cs" />
+    <Compile Include="src\mml_semantic_builder.cs" />
+    <Compile Include="src\mml_smf_generator.cs" />
+    <Compile Include="src\mml_tokenizer.cs" />
+    <Compile Include="src\mml_variable_processor.cs" />
+    <Compile Include="src\SMF.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
