@@ -72,10 +72,11 @@
 #macro E+ val:number { E $__expression + $val }
 #macro E- val:number { E $__expression - $val }
 #variable __tempo:number
-#macro TEMPO val:number { __LET{"__tempo", $val * $__base_count} __MIDI_META {#51, $__tempo / #4000, {$__tempo % #4000} / #80, $__tempo % #80} }
+#variable __tempo_tmp:number
+#macro TEMPO val:number { __LET{"__tempo", $val} __LET{"__tempo_tmp", 1000000 * {60 / $val}} __MIDI_META {#51, $__tempo_tmp / #10000, {$__tempo_tmp % #10000} / #100, $__tempo_tmp % #100} }
 #macro t val:number { TEMPO $val }
-#macro t+ val:number { t {$__tempo / $__base_count} + $val }
-#macro t- val:number { t {$__tempo / $__base_count} - $val }
+#macro t+ val:number { t $__tempo + $val }
+#macro t- val:number { t $__tempo - $val }
 #variable __modulation:number
 #macro M val:number { __LET{"__modulation", $val} CC1,$val }
 #macro M+ val:number { M $__modulation + $val }
@@ -199,9 +200,29 @@
 
 // ---- SPECTRA ----
 #variable __work_step_start:number = 0
-#alias SPECTRA_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
-#alias SPECTRA_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
-#macro SPECTRA_SQUARE mabs:string, mpos:string, mneg:string, SPECTRA_ARG_DEF { \
+
+#alias SPECTRA_ONESHOT_ARG_DEF sv:number, sd:number, es:number, delta:number, rt:number
+#alias SPECTRA_ONESHOT_ARG_USE $sv, $sd, $es, $delta, $rt
+#macro SPECTRA_ONESHOT mabs:string, mrel:string, SPECTRA_ONESHOT_ARG_DEF { \
+	__LET {"__work_step_start", $__timeline_position} \
+	__LET {"__timeline_position", $__timeline_position + $sd} \
+	__APPLY {$mabs, $sv} \
+	[ \
+	__LET {"__timeline_position", $__timeline_position + $es} \
+	__APPLY {$mrel, $delta} \
+	] $rt \
+	__LET {"__timeline_position", $__work_step_start}  \
+	}
+
+#macro P_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+#macro E_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "E", "E+", SPECTRA_ONESHOT_ARG_USE }
+#macro t_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "t", "t+", SPECTRA_ONESHOT_ARG_USE }
+#macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
+#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "B", "B+", SPECTRA_ONESHOT_ARG_USE }
+
+#alias SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
+#alias SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
+#macro SPECTRA_TRIANGLE mabs:string, mpos:string, mneg:string, SPECTRA_TRIANGLE_ARG_DEF { \
 	__LET {"__work_step_start", $__timeline_position} \
 	__LET {"__timeline_position", $__timeline_position + $sd} \
 	__APPLY {$mabs, $sv} \
@@ -220,9 +241,8 @@
 	__LET {"__timeline_position", $__work_step_start}  \
 	}
 
-#macro P_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "P", "P+", "P-", SPECTRA_ARG_USE }
-#macro E_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "E", "E+", "E-", SPECTRA_ARG_USE }
-#macro t_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "t", "t+", "t-", SPECTRA_ARG_USE }
-#macro M_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "M", "M+", "M-", SPECTRA_ARG_USE }
-#macro B_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "B", "B+", "B-", SPECTRA_ARG_USE }
-
+#macro Pt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "P", "P+", "P-", SPECTRA_TRIANGLE_ARG_USE }
+#macro Et SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "E", "E+", "E-", SPECTRA_TRIANGLE_ARG_USE }
+#macro tt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "t", "t+", "t-", SPECTRA_TRIANGLE_ARG_USE }
+#macro Mt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "M", "M+", "M-", SPECTRA_TRIANGLE_ARG_USE }
+#macro Bt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "B", "B+", "B-", SPECTRA_TRIANGLE_ARG_USE }
