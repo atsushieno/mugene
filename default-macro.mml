@@ -41,7 +41,7 @@
 
 #macro NOFF key:number,vel:number { __MIDI {#80 + $__channel, $key, $vel} }
 #macro NON key:number,vel:number { __MIDI {#90 + $__channel, $key, $vel} }
-#macro PAF key:number,val:number { __MIDI {#A0 + $__channel, $key, $val} }
+#macro PAF key:number,vel:number { __MIDI {#A0 + $__channel, $key, $vel} }
 #macro CC opcode:number, val:number { __MIDI {#B0 + $__channel, $opcode, $val} }
 #macro PROGRAM val:number { __MIDI {#C0 + $__channel, $val, 0} }
 #macro CAF val:number { __MIDI {#D0 + $__channel, $val, 0} }
