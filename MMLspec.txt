@@ -1,0 +1,624 @@
+* MML compiler and syntax design notes
+
+** The general syntax
+
+	The general syntax explanation includes those from default macros.
+
+*** General structures
+
+	The MML is parsed per line sequences. The line can be either:
+	- #compiler_instructions args
+	- ScopeSpec_opt Track operations
+
+*** Multiple lines
+
+	While an MML line is split per line, two or more text lines can be treated
+	as to construct single mml line (virtually) when a line is terminated with
+	a backslash ( \ ).
+
+*** Multiple files
+
+	The compiler always generates exactly one SMF output (whenever successful)
+	from one or more input sources. The sources are parsed in passed order.
+
+*** Events
+
+	An event has a type and a set of arguments. The type of an event is defined
+	in either "macro definition" category, or "primitive operation" category.
+
+	An argument can be either a variable or one or more literals. Note
+	that macros cannot be used recursively in an argument expression.
+
+*** Macros
+
+	A macro is not a function. It never returns a value.
+
+	global and track macros
+
+	#macro targettrack name (arg(,arg(,arg ...))) { recursive-replacement }
+		where arg := name:type (= default value MML) and
+
+	targettrack can be optionally specified as range, to limit the scope
+	of the macro to certain tracks. It is often useful for drum channel
+	track (for example, define 'b' as bass drum, 's' as snare drum).
+
+	$ or $$ as parameter reference in its body. $ may conflict
+
+**** Conflicts
+
+	Macros are very easy to conflict each other. By default (and currently
+	this is the only option), the longest macro matches in alphabetical order.
+	(I may introduce "priority" parameter in macro definition syntax later.)
+
+	It is an error if two or more macro definitions indicate the same
+	name.
+
+*** Variables
+
+	<del>global variables and local (track) variables</del>
+	Variables are always per-track. (including gate denominator, tempo and
+	base counts).
+
+	reference with $
+
+	#variable name(:type) = default_value
+		FIXME: do we introduce checked/unchecked?
+
+	types: string, number, length
+
+	Declaration is always required.
+	<del>
+	Declaration is not required for local, but can be optionally forced.
+	#option require_variable_declaration
+	</del>
+	For (allowed) undeclared variable, the default value is 0 for a
+	number, or "" for string.
+	For not-allowed use, the compiler raises an error.
+
+	$ resolution priority: track variables, <del>global variables, </del>arguments
+	to take higher priority, use $$ for arguments<del> and $$$ for global</del>.
+
+**** Implicitly-declared variable: __timeline_position
+
+	It is to hold absolute step from the beginning. It is totally
+	calculated as an usual variable inside macros but also referenced
+	from the compiler. It is the only variable that the compiler
+	recognizes as pre-existing.
+
+*** Numbers
+
+	[0-9]+ ... decimal number
+	'#' [0-9][a-f][A-F]+ ... hex number
+
+**** Reserved variables
+
+	See default-macro.mml for the full definitions. Here I list just a few.
+
+	- __channel:number
+	- __trans_C:number ... __trans_B:number
+	- __trans:number
+	- __octave:number = 5
+	- __length:length = 4
+	- __velocity:number
+	- __velocity_sense:number
+	- __base_count:number = 192
+
+	variable binding:
+		__LET{"name", value} // give variable name as a string variable
+
+*** Operations over steps
+
+	__timeline_position is an implicitly-predefined variable to hold
+	its timeline position in a track. It can be controlled inside MML,
+	but is referenced by the compiler.
+
+	NOP is a default macro that is to wait (increases event position in
+	timeline relatevely) for specified steps.
+
+	REWIND is a default macro that is to rewind (decreases event
+	position in timeline relatively) for specified steps.
+
+	JUMP is to jump to specified step absolutely.
+
+	We don't support '&' (slur) on SMF track; for monophonic channels, it is hard but
+	possible by adding REWIND operation back to immediate note off before the slur itself,
+	but it brings confusion when the channel is polyphonic. MIDI output is polyphonic.
+
+*** Spectra
+
+	SPECTRA is a macro argument type that takes a sequence
+	of numbers to be translated into a sequence of events.
+
+**** General syntax
+
+	In MML, it is defined as LFO[abs, inc, dec, sv, ev, sd, ed, ts, es, rt]
+	where:
+
+		abs: macro for abstract value
+		inc: macro for incremental value
+		dec: macro for decremental value
+		sv: start value
+		ev: end value
+		sd: start delay
+		ed: end delay
+		ts: total step
+		es: each step
+		rt: repeat time
+
+	'sd' and 'ed' can be implemented as NOP inside the macro.
+
+	In Each step a spectra is expanded as operations in MML level. Hence
+	it is expanded at compile time and is flexible in action sequence.
+
+	A spectra can be an infinite loop. In this case, the loop continues
+	as long as any other sequences that are not infinite loop exist.
+
+**** TODO: LFO; advanced spectra specification
+
+	LFO operation is an advanced form of Spectra. Unlike spectra, LFO is
+	activated on every note on (__ON_MIDI_NOTE_ON) operation, until note off
+	(__ON_MIDI_NOTE_OFF) operation.
+
+	In MML, it is defined as LFO[id, wt, abs, inc, dec, sv, ev, sd, ed, ts, es, rt]
+	where all remaining parameters after "wt" are the same as spectra, and:
+
+		id: numeric ID, referenced by LFO switch operations
+		wt: wave type
+
+		Other than above, "rt" could be specified as 0, to indicate an
+		infinite loop.
+
+	Each parameter has a reference to a variable that represents a ratio
+	against its actual value. It is to make LFO-over-LFO possible.
+
+	MON[id] and MOFF[id] to start/resume and stop the spectra expansion.
+	They are defined as macros to enable or disable expansion flag.
+
+	wave type [wt] are: (FIXME: define them all)
+		0: direct value list
+		1: random values
+		2: sin wave
+		3: triangle wave (0 >> v >> -v >> v)
+		4: saw wave (0 >> v, -v >> v, -v >> v)
+		5: square wave (0__ v__ -v__ 0)
+		6: mountain wave (0 >> v >> 0 >> v)
+
+	(NOTE: all MUC MML active parameters are one-shot, though with wave types.)
+
+	High level syntax:
+
+	#macro MA { LFO 0, } -> NOP v1 NOP v2 NOP v3 ...
+	#macro MO { LFO 3, } -> SPEC
+	#macro MQ { LFO 4, } -> [ NOP +v NOP -2v NOP +v ]x
+	#macro MT { LFO 5, } -> [ SPEC invSPEC invSPEC SPEC ]x
+	#macro MW { LFO 6, } -> [ SPEC invSPEC SPEC SPEC ]x
+	#macro MM { LFO 7, } -> [ SPEC invSPEC ]x
+
+	NOP length is always 'es'.
+	Each macro starts with SD SV and ends with ED EV
+
+*** Reserved macros
+
+	See default-macro.mml.
+
+*** Comments
+
+	#comment directive indicates that the following lines are commented out until
+	#endcomment directive appears.
+
+	"//" indicates that the remaining of the lines are dropped. Though a line
+	that begins with // is simply cut even if it is between multi line MML.
+
+*** Aliases
+
+	#alias IDENTIFIER_TEXT REPLACEMENT_TEXT
+
+	It supports raw-text replacement. Sometimes macro definition is a mess
+	and this easy replacement text helps a lot.
+	(See c/d/e/f/g/a/b operation for example.)
+
+*** Scope
+
+	head of each line
+	when ! follows, then forced compilation (ex. "A! 1 @156" ... "A 1 cde4")
+
+*** Conditional compilation
+
+	#conditional track x-y,z
+	#conditional source x-y,z
+	#conditional scope x,y,z
+	#conditional bar xx(-yy)(,xx(-yy))*
+	#conditional tick xx(-yy)(,xx(-yy))*
+
+*** Loop
+
+	[ ... (loop_break) ... ]n  :x (x = loop count condition, optional)
+	/x also works in the same way as ':' does. Note that '/' is also
+	used for division.
+
+	The compiler internals handle a loop as an iteration of MML events,
+	not an iteration of literal MML representation.
+
+*** Step control
+
+	__NOP $val:length { moves step pointer by specified length }
+	__ASSERT_STEP $bars:number,$steps:length { stops compilation with error }
+
+*** Standard MIDI operations
+
+	NOFF (8n), NON (9n), PAF (An), CC (Bn), PROGRAM (Cn), CAF (Dn),
+	PITCH (En), EX (F0,F7), META (FF)
+
+	note (0x8n/0x9n):
+		cdefgab
+		c+
+		c-
+		n
+		. ^
+
+	rest (wait/__NOP):
+		r
+
+	poly key pressure (0xAn):
+		PAF
+
+	channel pressure (0xDn):
+		CAF
+
+	control change (0xBn):
+		CC
+
+	prg/bank change (0xBn 0, 0xBn 0x20, /0xCn):
+		@
+
+	pitchbend (0xEn):
+		B(END)
+
+	SysEx (0xF0 / 0xF7):
+		EX{}
+
+	Meta (0xFF)
+		META{}
+
+*** GM compliant controls
+
+	Moduration (0xBn 0x01):
+		M
+	Data Entry (0xBn 0x06, 0xBn 0x26)
+		DTE
+	Volume (0xBn 0x07):
+		V
+	Panpot (0xBn 0x0A):
+		P(AN)
+	Expression (0xBn 0x0B):
+		E
+	Dumper Pedal (0xBn 0x40):
+		H
+	RPN (0xBn 0x64, 0xBn 0x65)
+		RPN
+
+*** GM compliant RPNs
+
+	Pitch bend sensitivity (00/00)
+		(undefined)
+	Fine tuning (00/01)
+		(undefined)
+	Coarse tuning (00/02)
+		(undefined)
+
+*** GM compliant Mode messages
+
+	Reset all controllers (0xF9)
+	All note off (0xFB)
+
+*** GM compliant system messages
+
+	System ON (F0 7E 7F 09 01 F7)
+	System OFF (F0 7E 7F 09 02 F7)
+
+
+
+
+
+** Formal syntax
+
+*** Principle
+
+	Everything goes a set of few primitive operations and directives
+	Generates SMF format 1 (not only to play but also to compose songs.)
+
+*** Types
+
+	The MML syntax contains the following types:
+	- number
+		A single number.
+		Relative number could be specified, prefixed by '+' or '-'
+		ex.) 1
+		ex.) #60
+		ex.) -20
+		ex.) +60
+	- length
+		A single length.
+		It is converted to the actual steps at parse time.
+		2..&32 1..^32
+	- string
+		A string literal, always surrounded by a quotation mark (").
+		A character could be escaped by # (#hex) in the literal.
+		"literal"
+
+*** Identifier
+	An identifier is used for name of a macro, or a variable.
+	There are three caregories of allowed character for identifiers:
+
+	(1) prohibited anywhere
+
+	- numbers (0-9), as it will bring confusion like "c4" (which should
+	  be interpreted as c and 4).
+	- " (double-quotation), as it is a string starter
+	- , (comma), as it is the argument separator
+	- { (open curly), as they are used for parenthesizing macro body.
+	- } (close curly), ditto.
+
+	(2) not allowed at head part of an identifier
+	- - (minus), as it is the (unary) negative number indicator
+	- + (plus), as it is the (unary) positive number indicator
+	- ? (question), as it is used for conditional operator.
+	- # (number-sign), as it is a hexadecimal number starter
+
+	(3) not allowed at non-heading part of an identifier
+
+	- / (slash), as it is used for division.
+	- : (colon), as it is used for separation between name and type.
+	- ) (open paren)
+	- ( (close paren)
+
+	It is often sloppy to allow strange characters than other languages. For example:
+
+	- @ (at-mark), to indicate program change
+	- < (smaller) and > (bigger), to indicate octave-updown
+	- : (colon), to indicate loop breaker
+	- / (slash), to indicate loop breaker too
+	- % (percent), to indicate length by step too
+	- = (equal), to indicate "natural" key e.g. c=
+
+	( '+' and '-' are prohibited while '/' is allowed because they can
+	 be unary operators. )
+
+*** Grammar
+
+	FIXME: this mixed literal structure and logial structure, so they should be separated.
+
+	MML ::=
+		MML_line |
+		MML end_of_line MML_line
+
+	end_of_line ::= '\xA' | '\xD' | '\xD' '\xA' // LF, CR, CRLF
+
+	MML_line ::=
+		directive | track_sequence
+
+	directive ::=
+		comment_directive |
+		end_comment_directive |
+		include_directive |
+		conditional_compilation_directive |
+		macro_definition |
+		variable_declaration |
+		meta_directive
+
+	meta_directive ::=
+		"#meta" meta_type string_constant
+
+	meta_type ::=
+		"title" | "copyright" | "text"
+
+	comment_directive ::=
+		"#comment"
+	end_comment_directive ::=
+		"#endcomment"
+
+	conditional_compilation_directive ::=
+		"#conditional" conditional_compilation_content
+
+	conditional_compilation_content ::=
+		"tracks" tracks
+		"sources" ranges
+		"scopes" scopes
+		"bars" ranges
+		"steps" ranges
+
+	include_directive ::=
+		"#include" string	// filename
+
+	macro_definition ::=
+		"#macro" identifier opt_macro_args '{' macro_body '}'
+
+	opt_macro_args ::=
+		/* empty */ |
+		macro_args
+
+	macro_args ::=
+		macro_arg |
+		macro_args ',' macro_arg
+
+	macro_arg ::=
+		identifier |
+		identifier opt_macro_type_arg
+
+	opt_macro_type_arg ::=
+		/* empty */ |
+		':' type_name opt_default_value
+
+	type_name ::=
+		"string" |
+		"number" |
+		"length" |
+
+	opt_default_value ::=
+		/* empty */ |
+		'=' value
+	
+	track_sequence ::=
+		scopes? tracks? MML_operation+
+
+	scopes ::=
+		identifier_list
+
+	tracks ::=
+		number_token_list
+
+	MML_operation ::=
+		primitive_operation |
+		macro_use
+
+	primitive_operation ::=
+		primitive_output |
+		primitive_track_control
+
+	primitive_output ::=
+		"__MIDI" number_expr, number_expr_list |
+		"__MIDI_META" number_expr, number_expr, string
+
+	primitive_track_control ::=
+		"__LET" string ',' number_expr |
+		"__LOOP_BEGIN" |
+		"__LOOP_BREAK number_token_list | /* explicit numbers only */
+		"__LOOP_END" number_token |       /* explicit number only */
+
+	macro_use ::=
+		identifier |
+		identifier arguments
+
+	arguments ::=
+		argument | arguments
+
+	argument ::=
+		value
+
+	value ::=
+		string |
+		number |
+		length
+
+	identifier_list ::=
+		identifier |
+		identifier ',' identifier_list
+
+	identifier ::=
+		token_IDENTIFIER
+
+	number_expr_list ::=
+		number_expr |
+		number_expr ',' number_expr_list
+
+	number_expr ::=
+		cond_expr |
+		'{' number_expr '}'
+
+	cond_expr ::=
+		add_sub_expr |
+		add_sub_expr '?' cond_expr ',' cond_expr
+
+	add_sub_expr ::=
+		mul_div_mod_expr |
+		mul_div_mod_expr '+' add_sub_expr |
+		mul_div_mod_expr '-' add_sub_expr
+
+	mul_div_mod_expr ::=
+		number |
+		number '*' mul_div_mod_expr |
+		number '/' mul_div_mod_expr |
+		number '%' mul_div_mod_expr
+
+	number ::=
+		number_token |
+		variable_reference
+
+	number_token ::=
+		'#' token_HEX_DIGITS |
+		token_DECIMAL_DIGITS
+
+	number_token_list ::= // does not allow calculation or reference
+		number_token |
+		number_token ',' number_token_list
+
+	ranges ::=
+		range |
+		range ',' ranges
+
+	range ::=
+		number |
+		number '-' number
+
+	string ::=
+		string_constant |
+		variable_reference
+
+	string_constant ::=
+		'"' token_ESCAPED_LITERAL_BODY '"' |
+
+	length ::=
+		length_element |
+		length '&' length |
+		length '^' length |
+		length '-' length |
+		length '+' length
+
+	length_element ::=
+		'%' number |
+		diacritical_points
+
+	diacritical_points ::=
+		diacritical_points_base opt_dots
+
+	opt_dots ::=
+		/* empty */ |
+		'.' opt_dots
+
+	variable_reference ::=
+		'$' identifier
+
+
+*** Processing Model
+
+	The parser parses the MML and constructs an AST. During parse, it
+	processes included sources recursively, rejecting mutual recursion
+	of inclusion as an error.
+
+	An AST track consists of a sequence of MML operation, which can be
+	either a primitive operation or a macro use. Both consist of the
+	name and a sequence of arguments.
+
+	Then it proceeds to AST expansion, which contains the following
+	operations:
+
+	- Macro verification. It expands every macro use into a sequence
+	  of primitive operations, recursively, rejecting mutual recursion
+	  of macro use as an error. Note that variables are not resolved
+	  at this stage.
+
+	- Variable resolution and primitive operation processing.
+	  Every __LET operation is executed and variable
+	  reference is extracted, including __timeline_position.
+
+	  * NOTE: Removal of loop; it iterates primitive operations
+	    recursively and verifies that
+
+		- every __LOOP_BEGIN has a matching __LOOP_END (i.e. it is
+		  an error if there is an open loop at end of the track).
+		- no __LOOP_BREAK exists outside a loop.
+		- no explicit count at __LOOP_BREAK exceeds the maximum
+		  count (at __LOOP_END it verifies that every count at
+		  __LOOP_BREAK).
+
+	    ... and stores every loop count except for the last one at 
+	    __LOOP_BREAK (i.e. the default behavior).
+
+	    Then the compiler expands the loop.
+
+	  Primitive "output" operations are assigned an absolute
+	  time position to them, based on __timeline_position.
+
+** The compiler design
+
+	The compiler is written in C#.

@@ -1,0 +1,228 @@
+// FIXME: maybe it should be rewritten to strictly use local arguments {$$}
+// instead of ambiguous reference ($) to avoid accidental overrides.
+
+// The following variable is implicitly declared:
+// #variable __timeline_position:number
+
+// timeline operation:
+#macro NOP val:number { __LET {"__timeline_position", $__timeline_position + $val } }
+#macro JUMP val:length { __LET{"__timeline_position", $val} }
+#macro REWIND val:length { __LET {"__timeline_position", $__timeline_position - $val} }
+
+// They should go before primitive MIDI operation definitions
+#variable __channel:number = 0
+#variable __dummy:number
+#variable __length:length = 4
+#macro CH val:number { __LET {"__channel", $val} }
+// note that __ERROR is undefined and it indeed is an error (literally).
+#macro ASSERT_STEP val:length { __LET {"__dummy", {$__timeline_position - $val ? $__ERROR, $__dummy}} }
+
+// primitive variables used in primitive macro operations
+#variable __base_count:number = 192
+#variable __octave:number = 4
+#variable __trans:number
+#variable __trans_c:number
+#variable __trans_d:number
+#variable __trans_e:number
+#variable __trans_f:number
+#variable __trans_g:number
+#variable __trans_a:number
+#variable __trans_b:number
+#variable __velocity:number = 100
+#variable __velocity_sense:number = 4
+#variable __gate_rel:number = 8
+#variable __gate_rel_denom:number = 8
+#variable __gate_abs:number
+#variable __current_note_step:number = 0 // temporary (work) variable
+#variable __current_note_gate:number = 0 // temporary (work) variable
+
+// Primitive MIDI operations
+// NON (8n), NOFF (9n), PAF (An), CC (Bn), PROGRAM (Cn), CAF (Dn), PITCH (En), EX (F0,F7), META (FF)
+
+#macro NOFF key:number,vel:number { __MIDI {#80 + $__channel, $key, $vel} }
+#macro NON key:number,vel:number { __MIDI {#90 + $__channel, $key, $vel} }
+#macro PAF key:number,val:number { __MIDI {#A0 + $__channel, $key, $val} }
+#macro CC opcode:number, val:number { __MIDI {#B0 + $__channel, $opcode, $val} }
+#macro PROGRAM val:number { __MIDI {#C0 + $__channel, $val, 0} }
+#macro CAF val:number { __MIDI {#D0 + $__channel, $val, 0} }
+#macro PITCH val:number { __MIDI {#E0 + $__channel, $val % #80, $val / #80} }
+
+// Variable storage
+#macro l val:length { __LET{"__length", $val} }
+#macro K val:number { __LET{"__trans", $val} }
+#macro Kc { __LET{"__trans_c", 1} }
+#macro Kd { __LET{"__trans_d", 1} }
+#macro Ke { __LET{"__trans_e", 1} }
+#macro Kf { __LET{"__trans_f", 1} }
+#macro Kg { __LET{"__trans_g", 1} }
+#macro Ka { __LET{"__trans_a", 1} }
+#macro Kb { __LET{"__trans_b", 1} }
+#macro Kc- { __LET{"__trans_c", -1} }
+#macro Kd- { __LET{"__trans_d", -1} }
+#macro Ke- { __LET{"__trans_e", -1} }
+#macro Kf- { __LET{"__trans_f", -1} }
+#macro Kg- { __LET{"__trans_g", -1} }
+#macro Ka- { __LET{"__trans_a", -1} }
+#macro Kb- { __LET{"__trans_b", -1} }
+#macro v val:number { __LET{"__velocity", $val} }
+#macro ( val:number=$__velocity_sense { __LET{"__velocity", $__velocity - $val} }
+#macro ) val:number=$__velocity_sense { __LET{"__velocity", $__velocity + $val} }
+#variable __expression:number
+#macro E val:number { __LET{"__expression", $val} CC#0B,$val }
+#macro E+ val:number { E $__expression + $val }
+#macro E- val:number { E $__expression - $val }
+#variable __tempo:number
+#macro TEMPO val:number { __LET{"__tempo", $val * $__base_count} __MIDI_META {#51, $__tempo / #4000, {$__tempo % #4000} / #80, $__tempo % #80} }
+#macro t val:number { TEMPO $val }
+#macro t+ val:number { t {$__tempo / $__base_count} + $val }
+#macro t- val:number { t {$__tempo / $__base_count} - $val }
+#variable __modulation:number
+#macro M val:number { __LET{"__modulation", $val} CC1,$val }
+#macro M+ val:number { M $__modulation + $val }
+#macro M- val:number { M $__modulation - $val }
+#variable __pan:number
+#macro P val:number { __LET{"__pan", $val} CC#0A,$val }
+#macro P+ val:number { P $__pan + $val }
+#macro P- val:number { P $__pan - $val }
+#macro PAN val:number { P $val }
+#macro PAN+ val:number { P+ $val }
+#macro PAN- val:number { P- $val }
+#macro H val:number { CC#40,$val } // dumper pedal
+#macro @ prg:number,bmsb:number=0,blsb:number=0 { CC0,$bmsb CC#20,$blsb PROGRAM$prg }
+#variable __bend:number
+#macro BEND val:number { __LET{"__bend", $val} PITCH$val }
+#macro B val:number { BEND$val }
+#macro B+ val:number { BEND $__bend + $val }
+#macro B- val:number { BEND $__bend - $val }
+#macro POLTATIME val:number { CC5,$val }
+#macro DTE msb:number,lsb:number { CC6,$msb CC#26,$lsb }
+#macro POLTA val:number { CC#41,$val }
+#macro SOS val:number { CC#42,$val } // sostenuto
+#macro SOFT val:number { CC#43,$val } // soft pedal
+#macro LEGATO val:number { CC#54,$val }
+#macro RSD val:number { CC#5B, $val } // generally reverb send depth
+#macro CSD val:number { CC#5D, $val } // generally chorus send depth
+#macro NRPN msb:number,lsb:number { CC#63, $msb CC#62,$lsb }
+#macro RPN msb:number,lsb:number { CC#65, $msb CC#64,$lsb }
+#macro TEXT val:string { __MIDI_META{1, $val} }
+#macro COPYRIGHT val:string { __MIDI_META{2, $val} }
+#macro TRACKNAME val:string { __MIDI_META{3, $val} }
+#macro INSTRUMENTNAME val:string { __MIDI_META{4, $val} }
+#macro LYRIC val:string { __MIDI_META{5, $val} }
+#macro MARKER val:string { __MIDI_META{6, $val} }
+#macro CUE val:string { __MIDI_META{7, $val} }
+#macro BEAT num:number,denom:number { __MIDI_META{58, $num, $denom} }
+// #macro KEY TBD {__MIDI_META{ 59h}}
+
+// Gate time. This command is dependent on personal favor, so should be easily redefined.
+#macro GATE_DENOM val:number { __LET{"__gate_rel_denom", $val} }
+#macro Q val:number { __LET{"__gate_rel", $val} }
+#macro q val:number { __LET{"__gate_abs", $val} }
+
+// Octave. The relative syntax is also dependent on personal favor.
+#macro o val:number { __LET{"__octave", $val} }
+#macro > { __LET{"__octave", $__octave + 1} }
+#macro < { __LET{"__octave", $__octave - 1} }
+
+// NoteOn/Off events
+#alias KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=-1
+#alias KEYARGAPPLY $step, $gate, $vel, $offvel
+#macro n key:number, KEYARGDEF   { \
+	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
+	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
+	NON$key, $vel \
+	NOP$__current_note_gate \
+	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \
+	NOFF$key, {$offvel + 1 ? $offvel, $vel} \
+	NOP$step - $__current_note_gate }
+
+// These + and - are nasty, but to be defined as macro, they had better be
+// formalized as below, without being treated specially by the parser.
+#macro c__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + $mod, KEYARGAPPLY }
+#macro c- KEYARGDEF { c__= - 1, KEYARGAPPLY } // should be used for some chord
+#macro c= KEYARGDEF { c__= 0, KEYARGAPPLY }
+#macro c KEYARGDEF { c__= $__trans_c, KEYARGAPPLY }
+#macro c+ KEYARGDEF { c__= 1, KEYARGAPPLY }
+#macro d__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 2 + $mod, KEYARGAPPLY }
+#macro d- KEYARGDEF { d__= - 1, KEYARGAPPLY }
+#macro d= KEYARGDEF { d__= 0, KEYARGAPPLY }
+#macro d KEYARGDEF { d__= $__trans_d, KEYARGAPPLY }
+#macro d+ KEYARGDEF { d__= 1, KEYARGAPPLY }
+#macro e__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 4 + $mod, KEYARGAPPLY }
+#macro e- KEYARGDEF { e__= - 1, KEYARGAPPLY }
+#macro e= KEYARGDEF { e__= 0, KEYARGAPPLY }
+#macro e KEYARGDEF { e__= $__trans_e, KEYARGAPPLY }
+#macro e+ KEYARGDEF { e__= 1, KEYARGAPPLY } // should be used for some chord
+#macro f__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 5 + $mod, KEYARGAPPLY }
+#macro f- KEYARGDEF { f__= - 1, KEYARGAPPLY } // should be used for some chord
+#macro f= KEYARGDEF { f__= 0, KEYARGAPPLY }
+#macro f KEYARGDEF { f__= $__trans_f, KEYARGAPPLY }
+#macro f+ KEYARGDEF { f__= 1, KEYARGAPPLY }
+#macro g__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 7 + $mod, KEYARGAPPLY }
+#macro g- KEYARGDEF { g__= - 1, KEYARGAPPLY }
+#macro g= KEYARGDEF { g__= 0, KEYARGAPPLY }
+#macro g KEYARGDEF { g__= $__trans_g, KEYARGAPPLY }
+#macro g+ KEYARGDEF { g__= 1, KEYARGAPPLY }
+#macro a__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 9 + $mod, KEYARGAPPLY }
+#macro a- KEYARGDEF { a__= - 1, KEYARGAPPLY }
+#macro a= KEYARGDEF { a__= 0, KEYARGAPPLY }
+#macro a KEYARGDEF { a__= $__trans_a, KEYARGAPPLY }
+#macro a+ KEYARGDEF { a__= 1, KEYARGAPPLY }
+#macro b__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 11 + $mod, KEYARGAPPLY }
+#macro b- KEYARGDEF { b__= - 1, KEYARGAPPLY }
+#macro b= KEYARGDEF, KEYARGDEF { b__= 0, KEYARGAPPLY }
+#macro b KEYARGDEF { b__= $__trans_b, KEYARGAPPLY }
+#macro b+ KEYARGDEF { b__= 1, KEYARGAPPLY } // should be used for some chord
+
+#macro r step:length=$__length { NOP{$step} }
+
+// Tie is equivalent to + for length.
+// FIXME: this could replace ^ in textual representation (such as song titles)
+// with + - it is problematic
+#alias ^ +
+
+// general Loop syntax
+#macro [ { __LOOP_BEGIN{} }
+#alias LOOP_BREAK_ARG_DEF \
+	a:number, b:number, c:number, d:number, e:number, f:number, g:number, h:number
+#alias LOOP_BREAK_ARG_USE $a, $b, $c, $d, $e, $f, $g, $h
+#macro : LOOP_BREAK_ARG_DEF { __LOOP_BREAK{LOOP_BREAK_ARG_USE} } // count may follow
+// note that this conclicts division operator (but it won't appear without left operand).
+#macro / LOOP_BREAK_ARG_DEF { __LOOP_BREAK{LOOP_BREAK_ARG_USE} }
+// (it should be allowewd because / is not a primitive operation but an operator for
+// mul_div_expr.)
+#macro ] repeat:number { __LOOP_END{$repeat} }
+
+// ---- common system exclusive ----
+#macro GM_SYSTEM_ON { __MIDI {#F0, #7E, #7F, #09, #01, #F7 } }
+#macro XG_RESET { __MIDI {#F0, #43, #10, #4C, #00, #00, #7E, #00, #F7 }}
+
+// ---- SPECTRA ----
+#variable __work_step_start:number = 0
+#alias SPECTRA_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
+#alias SPECTRA_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
+#macro SPECTRA_SQUARE mabs:string, mpos:string, mneg:string, SPECTRA_ARG_DEF { \
+	__LET {"__work_step_start", $__timeline_position} \
+	__LET {"__timeline_position", $__timeline_position + $sd} \
+	__APPLY {$mabs, $sv} \
+	[ \
+	 [ \
+	__LET {"__timeline_position", $__timeline_position + $es} \
+	__APPLY {$mpos, $delta} \
+	 ] $ts / $es \
+	 [ \
+	__LET {"__timeline_position", $__timeline_position + $es} \
+	__APPLY {$mneg, $delta} \
+	 ] $ts / $es \
+	] $rt \
+	__LET {"__timeline_position", $__timeline_position + $ed} \
+	__APPLY {$mabs, $ev} \
+	__LET {"__timeline_position", $__work_step_start}  \
+	}
+
+#macro P_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "P", "P+", "P-", SPECTRA_ARG_USE }
+#macro E_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "E", "E+", "E-", SPECTRA_ARG_USE }
+#macro t_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "t", "t+", "t-", SPECTRA_ARG_USE }
+#macro M_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "M", "M+", "M-", SPECTRA_ARG_USE }
+#macro B_ SPECTRA_ARG_DEF { SPECTRA_SQUARE "B", "B+", "B-", SPECTRA_ARG_USE }
+

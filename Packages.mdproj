@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ItemType>PackagingProject</ItemType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{03DFAB46-325C-41E2-BDEC-6F81A0EE9F1D}</ProjectGuid>
+    <Packages>
+      <Packages>
+        <Package name="Mono Makefile ソースファイル">
+          <Builder targetFile="mugene-.tar.gz" format="MonoDevelop.Projects.FileFormat" ctype="SourcesZipPackageBuilder">
+            <ChildEntries>
+              <SolutionItemReference path="mugene.csproj" />
+            </ChildEntries>
+            <RootEntry path="mugene.sln" id=":root:" />
+          </Builder>
+        </Package>
+        <Package name="Tarball">
+          <Builder TargetDirectory="/Users/atsushieno/svn/commons-music-prog/mugene" DefaultConfiguration="Debug" ctype="TarballDeployTarget">
+            <ChildEntries>
+              <SolutionItemReference path="mugene.csproj" />
+            </ChildEntries>
+            <RootEntry path="mugene.sln" id=":root:" />
+          </Builder>
+        </Package>
+      </Packages>
+    </Packages>
+  </PropertyGroup>
+</Project>

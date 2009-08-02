@@ -1,0 +1,184 @@
+// used reference: http://homepage2.nifty.com/mkmk/midi_lab/exref.htm
+
+#macro GS_RESET { __MIDI {#F0, #41, #10, #42, #12, #40, #00, #7F, #00, #41, #F7 } }
+#macro GS_REG regH:number, regM:number, regL:number, val:number { \
+		__MIDI {#F0, #41, #10, #42, #12, $regH, $regM, $regL, $val, \
+		#80 - {{$regH + $regM + $regL + $val} % #80}, #F7 } }
+#macro GS_REGW regH:number, regM:number, regL:number, vH:number, vL:number { \
+		__MIDI {#F0, #41, #10, #42, #12, $regH, $regM, $regL, $vH, $vL, \
+		#80 - {{$regH + $regM + $regL + $vH + $vL} % #80}, #F7 } }
+#macro SYSTEM_MODE val:number { GS_REG #00,#00,#7F, $val - 2 ? 1, 0 } // only 1 or 2 are valid
+
+// valid only after SC-88
+#macro PORT_A ch:number { GS_REG #00,#01,$ch, 0 }
+#macro PORT_B ch:number { GS_REG #00,#01,$ch, 1 }
+
+#macro RX_CHANNEL ch_from:number, ch_to:number { GS_REG #40,#10 + $ch_from, 02, $ch_to }
+
+#macro MASTER_TUNE val:number { GS_REG #40,#00,#00, $val }
+#macro MASTER_VOLUME val:number { GS_REG #40,#00,#04, $val }
+#macro MASTER_KEY_SHIFT val:number { GS_REG #40,#00,#05, $val }
+#macro MASTER_PAN val:number { GS_REG #40,#00,#06, $val }
+
+// Reverb
+#macro REVERB val:number { GS_REG #40,#01,#30, $val }
+#macro REVERB_CHR val:number { GS_REG #40,#01,#31, $val }
+#macro REVERB_PRE_LPF val:number { GS_REG #40,#01,#32, $val }
+#macro REVERB_LEVEL val:number { GS_REG #40,#01,#33, $val }
+#macro REVERB_TIME val:number { GS_REG #40,#01,#34, $val }
+#macro REVERB_DELAY_FB val:number { GS_REG #40,#01,#35, $val }
+#macro REVERB_PRED_TIME val:number { GS_REG #40,#01,#37, $val }
+
+// Chorus
+#macro CHORUS val:number { GS_REG #40,#01,#38, $val }
+#macro CHORUS_PRE_LPF val:number { GS_REG #40,#01,#39, $val }
+#macro CHORUS_LEVEL val:number { GS_REG #40,#01,#3A, $val }
+#macro CHORUS_FB val:number { GS_REG #40,#01,#3B, $val }
+#macro CHORUS_DELAY val:number { GS_REG #40,#01,#3C, $val }
+#macro CHORUS_RATE val:number { GS_REG #40,#01,#3D, $val }
+#macro CHORUS_DEPTH val:number { GS_REG #40,#01,#3E, $val }
+#macro CHORUS_REVERB_LEVEL val:number { GS_REG #40,#01,#3F, $val }
+#macro CHORUS_DELAY_LEVEL val:number { GS_REG #40,#01,#40, $val }
+
+// Delay
+#macro DELAY val:number { GS_REG #40,#01,#50, $val }
+#macro DELAY_PRE_LPF val:number { GS_REG #40,#01,#51, $val }
+#macro DELAY_TIME_C val:number { GS_REG #40,#01,#52, $val }
+#macro DELAY_TIME_LRATIO val:number { GS_REG #40,#01,#53, $val }
+#macro DELAY_TIME_RRATIO val:number { GS_REG #40,#01,#54, $val }
+#macro DELAY_LEVEL_C val:number { GS_REG #40,#01,#55, $val }
+#macro DELAY_LEVEL_L val:number { GS_REG #40,#01,#56, $val }
+#macro DELAY_LEVEL_R val:number { GS_REG #40,#01,#57, $val }
+#macro DELAY_LEVEL val:number { GS_REG #40,#01,#58, $val }
+#macro DELAY_FB val:number { GS_REG #40,#01,#59, $val }
+#macro DELAY_REVERB_LEVEL val:number { GS_REG #40,#01,#5A, $val }
+
+// EQ
+#macro EQ_L_FREQ val:number { GS_REG #40,#02,#00, $val }
+#macro EQ_L_GAIN val:number { GS_REG #40,#02,#01, $val }
+#macro EQ_H_FREQ val:number { GS_REG #40,#02,#02, $val }
+#macro EQ_H_GAIN val:number { GS_REG #40,#02,#03, $val }
+#macro EQ_ON { GS_REG #40,#40 + $__channel,#20, 1 }
+#macro EQ_OFF { GS_REG #40,#40 + $__channel,#20, 0 }
+
+// EFX
+#macro EFX_ON { GS_REG #40,#40 + $__channel,#22, 1 }
+#macro EFX_OFF { GS_REG #40,#40 + $__channel,#22, 0 }
+#macro EFX_TYPE vh:number,vl:number { GS_REGW #40,#03,#00, $vh,$vl }
+#macro EFX_PARA p:number,val:number { GS_REG #40,#03,$para, $val }
+#macro EFX_SEND_REVERB val:number { GS_REG #40,#03,#17, $val }
+#macro EFX_SEND_CHORUS val:number { GS_REG #40,#03,#18, $val }
+#macro EFX_SEND_DELAY val:number { GS_REG #40,#03,#19, $val }
+#macro EFX_SEND_EQ_ON { GS_REG #40,#03,#1F, 1 }
+#macro EFX_SEND_EQ_OFF { GS_REG #40,#03,#1F, 0 }
+#macro EFX_CTL_SRC_A val:number { GS_REG #40,#03,#1B, $val }
+#macro EFX_CTL_SRC_B val:number { GS_REG #40,#03,#1D, $val }
+#macro EFX_CTL_DEPTH_A val:number { GS_REG #40,#03,#1C, $val }
+#macro EFX_CTL_DEPTH_B val:number { GS_REG #40,#03,#1E, $val }
+
+// Drum mappings
+#macro DRUM_MAP_NO { GS_REG #40,#10 + $__channel,#15, 0 }
+#macro DRUM_MAP_A { GS_REG #40,#10 + $__channel,#15, 1 }
+#macro DRUM_MAP_B { GS_REG #40,#10 + $__channel,#15, 2 }
+// DRUM_NAME map:number, name:string { ... }
+#macro DRUM_ASSIGN map:number, note:number, val:number { GS_REG #40, #03 + $map * #10, $note, $val }
+#alias USER_DRUM_ARG_DEF map:number, note:number, val:number
+#alias USER_DRUM_ARG_USE $map,$note,$val
+#macro USER_DRUM op:number, USER_DRUM_ARG_DEF { GS_REG #21, $op + #10 * $map, $note, $val }
+#macro DRUM_PITCH USER_DRUM_ARG_DEF { USER_DRUM #01, USER_DRUM_ARG_USE }
+#macro DRUM_LEVEL USER_DRUM_ARG_DEF { USER_DRUM #02, USER_DRUM_ARG_USE }
+#macro DRUM_GROUP USER_DRUM_ARG_DEF { USER_DRUM #03, USER_DRUM_ARG_USE }
+#macro DRUM_PAN USER_DRUM_ARG_DEF { USER_DRUM #04, USER_DRUM_ARG_USE }
+#macro DRUM_RSD USER_DRUM_ARG_DEF { USER_DRUM #05, USER_DRUM_ARG_USE }
+#macro DRUM_CSD USER_DRUM_ARG_DEF { USER_DRUM #06, USER_DRUM_ARG_USE }
+#macro DRUM_DSD USER_DRUM_ARG_DEF { USER_DRUM #09, USER_DRUM_ARG_USE }
+#macro DRUM_SRC_MAP USER_DRUM_ARG_DEF { USER_DRUM #0A, USER_DRUM_ARG_USE }
+#macro DRUM_SRC_PROG USER_DRUM_ARG_DEF { USER_DRUM #0B, USER_DRUM_ARG_USE }
+#macro DRUM_SRC_NOTE USER_DRUM_ARG_DEF { USER_DRUM #0C, USER_DRUM_ARG_USE }
+
+#macro PART_PAN val:number { GS_REG #40,#10 + $__channel,#1C, $val }
+#macro KEY_RANGE_L val:number { GS_REG #40,#10 + $__channel,#1D, $val }
+#macro KEY_RANGE_H val:number { GS_REG #40,#10 + $__channel,#1E, $val }
+
+// CC
+#macro CC_A val:number { GS_REG #40,#10 + $__channel, #1F, $val }
+#macro CC_B val:number { GS_REG #40,#10 + $__channel, #20, $val }
+
+// Modulation
+#macro MOD_PITCH val:number { GS_REG #40,#20 + $__channel,#00, $val }
+#macro MOD_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#01, $val }
+#macro MOD_AMP val:number { GS_REG #40,#20 + $__channel,#02, $val }
+#macro MOD_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#03, $val }
+#macro MOD_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#04, $val }
+#macro MOD_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#05, $val }
+#macro MOD_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#06, $val }
+#macro MOD_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#07, $val }
+#macro MOD_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#08, $val }
+#macro MOD_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#09, $val }
+#macro MOD_LFO_TVA_B val:number { GS_REG #40,#20 + $__channel,#0A, $val }
+
+// Bend
+#macro BEND_PITCH val:number { GS_REG #40,#20 + $__channel,#10, $val }
+#macro BEND_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#11, $val }
+#macro BEND_AMP val:number { GS_REG #40,#20 + $__channel,#12, $val }
+#macro BEND_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#13, $val }
+#macro BEND_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#14, $val }
+#macro BEND_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#15, $val }
+#macro BEND_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#16, $val }
+#macro BEND_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#17, $val }
+#macro BEND_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#18, $val }
+#macro BEND_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#19, $val }
+#macro BEND_LFO_TVA_B val:number { GS_REG #40,#20 + $__channel,#1A, $val }
+
+// CAf
+#macro CAF_PITCH val:number { GS_REG #40,#20 + $__channel,#20, $val }
+#macro CAF_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#21, $val }
+#macro CAF_AMP val:number { GS_REG #40,#20 + $__channel,#22, $val }
+#macro CAF_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#23, $val }
+#macro CAF_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#24, $val }
+#macro CAF_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#25, $val }
+#macro CAF_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#26, $val }
+#macro CAF_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#27, $val }
+#macro CAF_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#28, $val }
+#macro CAF_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#29, $val }
+#macro CAF_LFO_TVA_B val:number { GS_REG #40,#20 + $__channel,#2A, $val }
+
+// PAf
+#macro PAF_PITCH val:number { GS_REG #40,#20 + $__channel,#30, $val }
+#macro PAF_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#31, $val }
+#macro PAF_AMP val:number { GS_REG #40,#20 + $__channel,#32, $val }
+#macro PAF_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#33, $val }
+#macro PAF_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#34, $val }
+#macro PAF_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#35, $val }
+#macro PAF_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#36, $val }
+#macro PAF_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#37, $val }
+#macro PAF_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#38, $val }
+#macro PAF_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#39, $val }
+#macro PAF_LFO_TVA_B val:number { GS_REG #40,#20 + $__channel,#3A, $val }
+
+// CC1
+#macro CC_A_PITCH val:number { GS_REG #40,#20 + $__channel,#40, $val }
+#macro CC_A_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#41, $val }
+#macro CC_A_AMP val:number { GS_REG #40,#20 + $__channel,#42, $val }
+#macro CC_A_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#43, $val }
+#macro CC_A_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#44, $val }
+#macro CC_A_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#45, $val }
+#macro CC_A_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#46, $val }
+#macro CC_A_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#47, $val }
+#macro CC_A_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#48, $val }
+#macro CC_A_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#49, $val }
+
+// CC2
+#macro CC_B_PITCH val:number { GS_REG #40,#20 + $__channel,#50, $val }
+#macro CC_B_TVF_CUT val:number { GS_REG #40,#20 + $__channel,#51, $val }
+#macro CC_B_AMP val:number { GS_REG #40,#20 + $__channel,#52, $val }
+#macro CC_B_LFO_RATE_A val:number { GS_REG #40,#20 + $__channel,#53, $val }
+#macro CC_B_LFO_PITCH_A val:number { GS_REG #40,#20 + $__channel,#54, $val }
+#macro CC_B_LFO_TVF_A val:number { GS_REG #40,#20 + $__channel,#55, $val }
+#macro CC_B_LFO_TVA_A val:number { GS_REG #40,#20 + $__channel,#56, $val }
+#macro CC_B_LFO_RATE_B val:number { GS_REG #40,#20 + $__channel,#57, $val }
+#macro CC_B_LFO_PITCH_B val:number { GS_REG #40,#20 + $__channel,#58, $val }
+#macro CC_B_LFO_TVF_B val:number { GS_REG #40,#20 + $__channel,#59, $val }
+#macro CC_B_LFO_TVA_B val:number { GS_REG #40,#20 + $__channel,#5A, $val }
+
+
