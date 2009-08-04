@@ -13,7 +13,7 @@
 #variable __channel:number = 0
 #variable __dummy:number
 #variable __length:length = 4
-#macro CH val:number { __LET {"__channel", $val} }
+#macro CH val:number { __LET {"__channel", $val - 1} } // CH1-CH16 are valid.
 // note that __ERROR is undefined and it indeed is an error (literally).
 #macro ASSERT_STEP val:length { __LET {"__dummy", {$__timeline_position - $val ? $__ERROR, $__dummy}} }
 
@@ -130,8 +130,8 @@
 #macro < { __LET{"__octave", $__octave - 1} }
 
 // NoteOn/Off events
-#alias KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=0
-#alias KEYARGAPPLY $step, $gate, $vel, $offvel
+#define KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=0
+#define KEYARGAPPLY $step, $gate, $vel, $offvel
 #macro n key:number, KEYARGDEF   { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
@@ -184,13 +184,13 @@
 // Tie is equivalent to + for length.
 // FIXME: this could replace ^ in textual representation (such as song titles)
 // with + - it is problematic
-#alias ^ +
+#define ^ +
 
 // general Loop syntax
 #macro [ { __LOOP_BEGIN{} }
-#alias LOOP_BREAK_ARG_DEF \
+#define LOOP_BREAK_ARG_DEF \
 	a:number, b:number, c:number, d:number, e:number, f:number, g:number, h:number
-#alias LOOP_BREAK_ARG_USE $a, $b, $c, $d, $e, $f, $g, $h
+#define LOOP_BREAK_ARG_USE $a, $b, $c, $d, $e, $f, $g, $h
 #macro : LOOP_BREAK_ARG_DEF { __LOOP_BREAK{LOOP_BREAK_ARG_USE} } // count may follow
 // note that this conclicts division operator (but it won't appear without left operand).
 #macro / LOOP_BREAK_ARG_DEF { __LOOP_BREAK{LOOP_BREAK_ARG_USE} }
@@ -205,8 +205,8 @@
 // ---- SPECTRA ----
 #variable __work_step_start:number = 0
 
-#alias SPECTRA_ONESHOT_ARG_DEF sv:number, sd:number, es:number, delta:number, rt:number
-#alias SPECTRA_ONESHOT_ARG_USE $sv, $sd, $es, $delta, $rt
+#define SPECTRA_ONESHOT_ARG_DEF sv:number, sd:number, es:number, delta:number, rt:number
+#define SPECTRA_ONESHOT_ARG_USE $sv, $sd, $es, $delta, $rt
 #macro SPECTRA_ONESHOT mabs:string, mrel:string, SPECTRA_ONESHOT_ARG_DEF { \
 	__LET {"__work_step_start", $__timeline_position} \
 	__LET {"__timeline_position", $__timeline_position + $sd} \
@@ -225,8 +225,8 @@
 #macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
 #macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "B", "B+", SPECTRA_ONESHOT_ARG_USE }
 
-#alias SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
-#alias SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
+#define SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
+#define SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
 #macro SPECTRA_TRIANGLE mabs:string, mpos:string, mneg:string, SPECTRA_TRIANGLE_ARG_DEF { \
 	__LET {"__work_step_start", $__timeline_position} \
 	__LET {"__timeline_position", $__timeline_position + $sd} \

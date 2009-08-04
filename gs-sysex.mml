@@ -82,8 +82,8 @@
 #macro DRUM_MAP_B { GS_REG #40,#10 + $__channel,#15, 2 }
 // DRUM_NAME map:number, name:string { ... }
 #macro DRUM_ASSIGN map:number, note:number, val:number { GS_REG #40, #03 + $map * #10, $note, $val }
-#alias USER_DRUM_ARG_DEF map:number, note:number, val:number
-#alias USER_DRUM_ARG_USE $map,$note,$val
+#define USER_DRUM_ARG_DEF map:number, note:number, val:number
+#define USER_DRUM_ARG_USE $map,$note,$val
 #macro USER_DRUM op:number, USER_DRUM_ARG_DEF { GS_REG #21, $op + #10 * $map, $note, $val }
 #macro DRUM_PITCH USER_DRUM_ARG_DEF { USER_DRUM #01, USER_DRUM_ARG_USE }
 #macro DRUM_LEVEL USER_DRUM_ARG_DEF { USER_DRUM #02, USER_DRUM_ARG_USE }

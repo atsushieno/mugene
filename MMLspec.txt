@@ -211,7 +211,7 @@
 
 *** Aliases
 
-	#alias IDENTIFIER_TEXT REPLACEMENT_TEXT
+	#define IDENTIFIER_TEXT REPLACEMENT_TEXT
 
 	It supports raw-text replacement. Sometimes macro definition is a mess
 	and this easy replacement text helps a lot.

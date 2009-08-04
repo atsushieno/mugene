@@ -343,7 +343,7 @@ namespace Commons.Music.Midi.Mml
 				return null;
 			case "include":
 				throw new NotImplementedException ();
-			case "alias":
+			case "define":
 			case "conditional":
 			case "variable":
 			case "meta":
@@ -363,19 +363,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (in_comment_mode)
 				return null;
-			result.Lexer.SetCurrentInput (line);
-
-			int [] range = null;
-			var ch = result.Lexer.Line.PeekChar ();
-			if (ch == '#' || result.Lexer.IsNumber ((char) ch)) {
-				range = result.Lexer.ReadRange ().ToArray ();
-				result.Lexer.SkipWhitespaces (true);
-			}
-
-			// get identifier
-			var identifier = result.Lexer.ReadNewIdentifier ();
-			result.Lexer.SkipWhitespaces (true);
-			var mms = new MmlMacroSource (identifier, range);
+			var mms = new MmlMacroSource ();
 			mms.Lines.Add (line);
 			result.Macros.Add (mms);
 			return mms;
@@ -462,15 +450,11 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlMacroSource : MmlSourceLineSet
 	{
-		public MmlMacroSource (string name, int [] targetTracks)
+		public MmlMacroSource ()
 		{
-			Name = name;
-			TargetTracks = targetTracks;
 		}
 
-		public string Name { get; private set; }
-
-		public IList<int> TargetTracks { get; private set; }
+		public string ParsedName { get; set; }
 	}
 
 	public class MmlPragmaSource : MmlSourceLineSet
@@ -848,7 +832,8 @@ namespace Commons.Music.Midi.Mml
 				foreach (var a in TokenizerSource.CurrentMacroDefinition.Arguments)
 					yield return a.Name;
 			foreach (var m in TokenizerSource.Macros)
-				yield return m.Name;
+				if (m.ParsedName != null)
+					yield return m.ParsedName;
 			foreach (var pname in TokenizerSource.PrimitiveOperations)
 				yield return pname;
 		}
@@ -1005,11 +990,13 @@ namespace Commons.Music.Midi.Mml
 				}
 				result.MetaTexts.Add (new KeyValuePair<byte,string> (meta_map [identifier], text));
 				break;
-			case "alias":
+			case "define":
 				source.Lexer.NewIdentifierMode = true;
 				identifier = source.Lexer.ReadNewIdentifier ();
 				source.Lexer.SkipWhitespaces (true);
-				aliases.Add (identifier, source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition));
+				if (aliases.ContainsKey (identifier))
+					Console.WriteLine ("Warning: overwriting definition {0}, redefined at {1}", identifier, source.Lexer.Line.Location);
+				aliases [identifier] = source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition);
 				break;
 			case "variable":
 				source.Lexer.NewIdentifierMode = true;
@@ -1022,12 +1009,26 @@ namespace Commons.Music.Midi.Mml
 		void ParseMacroLines (MmlMacroSource src)
 		{
 //Util.DebugWriter.WriteLine ("Parsing Macro: " + src.Name);
-			var m = new MmlMacroDefinition (src.Name, src.TargetTracks, src.Lines [0].Location);
-			source.CurrentMacroDefinition = m;
 			foreach (var line in src.Lines)
 				foreach (var entry in aliases)
 					line.Text = line.Text.Replace (entry.Key, entry.Value);
 			source.Lexer.SetCurrentInput (src);
+
+			int [] range = null;
+			var ch = source.Lexer.Line.PeekChar ();
+			if (ch == '#' || source.Lexer.IsNumber ((char) ch)) {
+				range = source.Lexer.ReadRange ().ToArray ();
+				source.Lexer.SkipWhitespaces (true);
+			}
+
+			// get identifier
+			var identifier = source.Lexer.ReadNewIdentifier ();
+			source.Lexer.SkipWhitespaces (true);
+
+			src.ParsedName = identifier;
+
+			var m = new MmlMacroDefinition (identifier, range, src.Lines [0].Location);
+			source.CurrentMacroDefinition = m;
 			if (m.Tokens.Count == 0) {
 				// get args
 				source.Lexer.NewIdentifierMode = true;
@@ -1038,7 +1039,7 @@ namespace Commons.Music.Midi.Mml
 			while (source.Lexer.Advance ())
 				m.Tokens.Add (source.Lexer.CreateParsedToken ());
 			if (m.Tokens.Count == 0 || m.Tokens [m.Tokens.Count - 1].TokenType != MmlToken.CloseCurly)
-				source.Lexer.LexerError (String.Format ("'{{' is expected at the end of macro definition for '{0}'", src.Name));
+				source.Lexer.LexerError (String.Format ("'{{' is expected at the end of macro definition for '{0}'", identifier));
 			m.Tokens.RemoveAt (m.Tokens.Count - 1);
 			result.Macros.Add (m);
 			source.CurrentMacroDefinition = null;

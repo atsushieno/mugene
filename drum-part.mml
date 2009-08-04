@@ -1,19 +1,19 @@
+#define DRUMTRACKS 10
+#macro DRUMTRACKS b KEYARGDEF { n36, KEYARGAPPLY } // bass drum 1
+#macro DRUMTRACKS B KEYARGDEF { n35, KEYARGAPPLY } // bass drum 2
+#macro DRUMTRACKS s KEYARGDEF { n38, KEYARGAPPLY } // snare drum 1
+#macro DRUMTRACKS S KEYARGDEF { n40, KEYARGAPPLY } // snare drum 2
 
-#macro 10 b KEYARGDEF { n36, KEYARGAPPLY } // bass drum 1
-#macro 10 B KEYARGDEF { n35, KEYARGAPPLY } // bass drum 2
-#macro 10 s KEYARGDEF { n38, KEYARGAPPLY } // snare drum 1
-#macro 10 S KEYARGDEF { n40, KEYARGAPPLY } // snare drum 2
+#macro DRUMTRACKS TL KEYARGDEF { n43, KEYARGAPPLY } // low tom
+#macro DRUMTRACKS TM KEYARGDEF { n47, KEYARGAPPLY } // mid tom
+#macro DRUMTRACKS TH KEYARGDEF { n50, KEYARGAPPLY } // hi tom
 
-#macro 10 TL KEYARGDEF { n43, KEYARGAPPLY } // low tom
-#macro 10 TM KEYARGDEF { n47, KEYARGAPPLY } // mid tom
-#macro 10 TH KEYARGDEF { n50, KEYARGAPPLY } // hi tom
+#macro DRUMTRACKS c KEYARGDEF { n42, KEYARGAPPLY } // closed hihat
+#macro DRUMTRACKS o KEYARGDEF { n46, KEYARGAPPLY } // open hihat
+#macro DRUMTRACKS RC KEYARGDEF { n51, KEYARGAPPLY } // ride cymbal
 
-#macro 10 c KEYARGDEF { n42, KEYARGAPPLY } // closed hihat
-#macro 10 o KEYARGDEF { n46, KEYARGAPPLY } // open hihat
-#macro 10 RC KEYARGDEF { n51, KEYARGAPPLY } // ride cymbal
-
-#macro 10 CR KEYARGDEF { n49, KEYARGAPPLY } // crash cymbal
-#macro 10 R KEYARGDEF { n37, KEYARGAPPLY } // side stick (rimshot)
-#macro 10 MT KEYARGDEF { n80, KEYARGAPPLY } // muted triangle
-#macro 10 OT KEYARGDEF { n81, KEYARGAPPLY } // open triangle
+#macro DRUMTRACKS CR KEYARGDEF { n49, KEYARGAPPLY } // crash cymbal
+#macro DRUMTRACKS R KEYARGDEF { n37, KEYARGAPPLY } // side stick (rimshot)
+#macro DRUMTRACKS MT KEYARGDEF { n80, KEYARGAPPLY } // muted triangle
+#macro DRUMTRACKS OT KEYARGDEF { n81, KEYARGAPPLY } // open triangle
 

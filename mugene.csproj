@@ -32,6 +32,7 @@
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
     <None Include="gs-sysex.mml" />
+    <None Include="drum-part.mml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\mml_compiler_main.cs" />
