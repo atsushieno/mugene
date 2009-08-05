@@ -62,10 +62,12 @@ DATA_FILES =
 RESOURCES = 
 
 EXTRAS = \
-	default-macro.mml \
 	LICENSE \
 	MMLspec.txt \
-	gs-sysex.mml \
+	mml/default-macro.mml \
+	mml/drum-part.mml \
+	mml/gs-sysex.mml \
+	mml \
 	mugene.in 
 
 REFERENCES =  \
@@ -103,7 +105,8 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)'
 	$(call cp,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	mkdir -p '$(DESTDIR)$(libdir)\$(PACKAGE)'
+	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)\$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(bindir)'
 	$(call cp,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-install-local-hook prefix=$(prefix)
@@ -113,6 +116,6 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	make uninstall-satellite-assemblies prefix=$(prefix)
 	$(call rm,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)\$(PACKAGE))
 	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)

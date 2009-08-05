@@ -1,7 +1,7 @@
-prefix=/usr/local
-libdir=/usr/local/lib
-bindir=/usr/local/bin
-datadir=/usr/local/share
+prefix=c:/cygwin/usr/local
+libdir=c:/cygwin/usr/local/lib
+bindir=c:/cygwin/usr/local/bin
+datadir=c:/cygwin/usr/local/share
 RUNTIME=mono
 ASSEMBLY_VERSION=0.1.0.0
 VERSION=0.1
