@@ -28,24 +28,18 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="default-macro.mml">
-      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
-    </None>
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
-    <None Include="gs-sysex.mml">
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </None>
-    <None Include="drum-part.mml">
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </None>
     <None Include="mml\default-macro.mml">
       <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
     </None>
     <None Include="mml\drum-part.mml">
+      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
       <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
     </None>
     <None Include="mml\gs-sysex.mml">
+      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
       <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
     </None>
   </ItemGroup>
