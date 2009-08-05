@@ -28,11 +28,26 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="default-macro.mml" />
+    <None Include="default-macro.mml">
+      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
+    </None>
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
-    <None Include="gs-sysex.mml" />
-    <None Include="drum-part.mml" />
+    <None Include="gs-sysex.mml">
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+    </None>
+    <None Include="drum-part.mml">
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+    </None>
+    <None Include="mml\default-macro.mml">
+      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
+    </None>
+    <None Include="mml\drum-part.mml">
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+    </None>
+    <None Include="mml\gs-sysex.mml">
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\mml_compiler_main.cs" />
@@ -48,5 +63,8 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="mml\" />
   </ItemGroup>
 </Project>
