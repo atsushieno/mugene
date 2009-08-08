@@ -33,6 +33,7 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		StreamResolver resolver;
+		bool verbose;
 
 		public StreamResolver Resolver {
 			get { return resolver; }
@@ -43,15 +44,32 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public void Compile (string [] files)
+		public void Compile (string [] args)
+		{
+			try {
+				CompileCore (args);
+			} catch (MmlException ex) {
+				Console.Error.WriteLine (ex);
+			} catch (Exception ex) {
+				if (verbose)
+					throw;
+				Console.Error.WriteLine (ex);
+			}
+		}
+
+		void CompileCore (string [] args)
 		{
 			// file names -> input sources
 			var inputs = new List<MmlInputSource> ();
 			string outfilename = null;
-			foreach (string file in files) {
-				if (Path.GetFileName (file) != "default-macro.mml")
-					outfilename = Path.ChangeExtension (file, ".mid");
-				inputs.Add (new MmlInputSource (file, Resolver.Resolve (file)));
+			foreach (string arg in args) {
+				switch (arg) {
+				case "--verbose":
+					verbose = true;
+					continue;
+				}
+				outfilename = Path.ChangeExtension (arg, ".mid");
+				inputs.Add (new MmlInputSource (arg, Resolver.Resolve (arg)));
 			}
 
 			// input sources -> tokenizer sources
