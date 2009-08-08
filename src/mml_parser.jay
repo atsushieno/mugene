@@ -1,0 +1,298 @@
+%{
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Commons.Music.Midi.Mml;
+
+namespace Commons.Music.Midi.Mml.Parser
+{
+	public class MmlParserInput : yyParser.yyInput
+	{
+		IList<MmlToken> tokens;
+		int idx = -1;
+
+		public MmlParserInput (IList<MmlToken> tokens)
+		{
+			this.tokens = tokens;
+		}
+		
+		public bool advance ()
+		{
+			if (++idx > tokens.Count)
+				return false;
+			return true;
+		}
+		
+		public object value ()
+		{
+			if (idx >= tokens.Count)
+				return null;
+			return (MmlToken) tokens [idx];
+		}
+
+		public int token ()
+		{
+			if (idx >= tokens.Count)
+				return Token.EOF;
+			switch (tokens [idx].TokenType) {
+			case MmlTokenType.Identifier:
+				return Token.Identifier;
+			case MmlTokenType.StringLiteral:
+				return Token.StringLiteral;
+			case MmlTokenType.NumberLiteral:
+				return Token.NumberLiteral;
+			case MmlTokenType.Period:
+				return Token.Dot;
+			case MmlTokenType.Comma:
+				return Token.Comma;
+			case MmlTokenType.Percent:
+				return Token.Percent;
+			case MmlTokenType.OpenCurly:
+				return Token.OpenCurly;
+			case MmlTokenType.CloseCurly:
+				return Token.CloseCurly;
+			case MmlTokenType.Question:
+				return Token.Question;
+			case MmlTokenType.Plus:
+				return Token.Plus;
+			case MmlTokenType.Minus:
+				return Token.Minus;
+			case MmlTokenType.Asterisk:
+				return Token.Asterisk;
+			case MmlTokenType.Slash:
+				return Token.Slash;
+			case MmlTokenType.Dollar:
+				return Token.Dollar;
+			case MmlTokenType.Colon:
+				return Token.Colon;
+			case MmlTokenType.KeywordNumber:
+				return Token.KeywordNumber;
+			case MmlTokenType.KeywordLength:
+				return Token.KeywordLength;
+			case MmlTokenType.KeywordString:
+				return Token.KeywordString;
+			}
+			throw new Exception ("Internal error: unexpected MmlTokenType: " + tokens [idx].TokenType);
+		}
+	}
+
+	public class MmlParser
+	{
+		MmlParserInput input;
+		int yacc_verbose_flag;
+
+		public static List<MmlOperationUse> Parse (IList<MmlToken> tokens)
+		{
+			return new MmlParser (tokens).Parse ();
+		}
+		
+		MmlParser (IList<MmlToken> tokens)
+		{
+			try {
+				yacc_verbose_flag = int.Parse (Environment.GetEnvironmentVariable ("MUGENE_MML_DEBUG"));
+			} catch (FormatException) {
+			}
+			input = new MmlParserInput (tokens);
+		}
+
+		public List<MmlOperationUse> Parse ()
+		{
+			debug = new yydebug.yyDebugSimple ();
+
+			return (List<MmlOperationUse>) yyparse (input);
+		}
+
+%}
+%token EOF
+%left Identifier
+%left StringLiteral
+%left NumberLiteral
+%left Comma
+%left OpenParen
+%left CloseParen
+%left OpenCurly
+%left CloseCurly
+%left Question
+%left Plus
+%left Minus
+%left Asterisk
+%left Slash
+%left Percent
+%left Dollar
+%left Colon
+%left Dot
+%left KeywordNumber
+%left KeywordLength
+%left KeywordString
+
+%start OptOperationUses
+
+%%
+
+OptOperationUses :
+	EOF
+	{
+		$$ = new List<MmlOperationUse> ();
+	}
+	| OperationUses EOF
+	{
+		$$ = $1;
+	}
+
+OperationUses :
+	OperationUse
+	{
+		var l = new List<MmlOperationUse> ();
+		l.Add ((MmlOperationUse) $1);
+		$$ = l;
+	}
+	| OperationUses OperationUse
+	{
+		var l = (List<MmlOperationUse>) $1;
+		l.Add ((MmlOperationUse) $2);
+		$$ = l;
+	}
+
+OperationUse :
+	Identifier ArgumentsOptCurly
+	{
+		var i = (MmlToken) $1;
+		Console.WriteLine ("NOW at : " + i.Location);
+		var o = new MmlOperationUse ((string) i.Value, i.Location);
+		foreach (MmlValueExpr a in (IEnumerable<MmlValueExpr>) $2)
+			o.Arguments.Add (a);
+		$$ = o;
+	}
+
+ArgumentsOptCurly :
+	OptArguments
+	| OpenCurly OptArguments CloseCurly
+	{
+		$$ = $2;
+	}
+
+OptArguments :
+	/* empty */
+	{
+		$$ = new List<MmlValueExpr> ();
+	}
+	| Arguments
+
+Arguments :
+	Argument
+	{
+		var l = new List<MmlValueExpr> ();
+		l.Add ((MmlValueExpr) $1);
+		$$ = l;
+	}
+	| Arguments Comma Argument
+	{
+		var l = (List<MmlValueExpr>) $1;
+		l.Add ((MmlValueExpr) $3);
+		$$ = l;
+	}
+
+Argument :
+	Expression
+
+Expression :
+	ConditionalExpr
+
+ConditionalExpr :
+	AddSubExpr
+	| AddSubExpr Question ConditionalExpr Comma ConditionalExpr
+	{
+		$$ = new MmlConditionalExpr ((MmlValueExpr) $1, (MmlValueExpr) $3, (MmlValueExpr) $5);
+	}
+
+AddSubExpr :
+	MulDivModExpr
+	| AddSubExpr Plus MulDivModExpr
+	{
+		$$ = new MmlAddExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
+	| AddSubExpr Minus MulDivModExpr
+	{
+		$$ = new MmlSubtractExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
+
+MulDivModExpr :
+	Value
+	| MulDivModExpr Asterisk Value
+	{
+		$$ = new MmlMultiplyExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
+	| MulDivModExpr Slash Value
+	{
+		$$ = new MmlDivideExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
+	| MulDivModExpr Percent Value
+	{
+		$$ = new MmlModuloExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
+
+Value :
+	VariableReference
+	| StringConstant
+	| StepConstant
+	| NumberOrLengthConstant
+	| OpenCurly Expression CloseCurly
+	{
+		$$ = new MmlParenthesizedExpr ((MmlValueExpr) $2);
+	}
+
+VariableReference :
+	Dollar Identifier
+	{
+		var i = (MmlToken) $2;
+		$$ = new MmlVariableReferenceExpr ((string) i.Value);
+	}
+
+StringConstant :
+	StringLiteral
+	{
+		var t = (MmlToken) $1;
+		$$ = new MmlConstantExpr (MmlDataType.String, (string) t.Value);
+	}
+
+StepConstant :
+	Percent NumberLiteral
+	{
+		var n = (MmlToken) $2;
+		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
+		$$ = new MmlConstantExpr (MmlDataType.Length, l);
+	}
+
+NumberOrLengthConstant :
+	PositiveNumberOrLengthConstant
+	| Minus PositiveNumberOrLengthConstant
+	{
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) $2);
+	}
+
+PositiveNumberOrLengthConstant :
+	NumberLiteral
+	{
+		var t = (MmlToken) $1;
+		$$ = new MmlConstantExpr (MmlDataType.Number, t.Value);
+	}
+	| NumberLiteral Dots
+	{
+		var t = (MmlToken) $1;
+		var d = (int) $2;
+		$$ = new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+	}
+
+Dots :
+	Dot
+	{
+		$$ = 1;
+	}
+	| Dots Dot
+	{
+		$$ = ((int) $1) + 1;
+	}
+
+%%
+
+	}
