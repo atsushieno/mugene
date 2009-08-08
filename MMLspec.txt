@@ -439,7 +439,11 @@
 
 	macro_args ::=
 		macro_arg |
-		macro_args ',' macro_arg
+		opt_macro_arg ',' macro_args
+
+	opt_macro_arg ::=
+		/* empty */ |	// This allows omitted arguments
+		macro_arg
 
 	macro_arg ::=
 		identifier |

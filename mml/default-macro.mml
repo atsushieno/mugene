@@ -1,6 +1,3 @@
-// FIXME: maybe it should be rewritten to strictly use local arguments {$$}
-// instead of ambiguous reference ($) to avoid accidental overrides.
-
 // The following variable is implicitly declared:
 // #variable __timeline_position:number
 
