@@ -187,6 +187,14 @@ OptArguments :
 		$$ = new List<MmlValueExpr> ();
 	}
 	| Arguments
+	| Commas Arguments
+	{
+		var l = (List<MmlValueExpr>) $2;
+		int commas = (int) $1;
+		for (int i = 0; i < commas; i++)
+			l.Insert (0, skipped_argument);
+		$$ = l;
+	}
 
 Arguments :
 	Argument
