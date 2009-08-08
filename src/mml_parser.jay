@@ -16,9 +16,13 @@ namespace Commons.Music.Midi.Mml.Parser
 			this.tokens = tokens;
 		}
 		
+		public MmlLineInfo Location {
+			get { return tokens.Count > 0 ? tokens [0].Location : null; }
+		}
+		
 		public bool advance ()
 		{
-			if (++idx > tokens.Count)
+			if (++idx >= tokens.Count)
 				return false;
 			return true;
 		}
@@ -32,8 +36,6 @@ namespace Commons.Music.Midi.Mml.Parser
 
 		public int token ()
 		{
-			if (idx >= tokens.Count)
-				return Token.EOF;
 			switch (tokens [idx].TokenType) {
 			case MmlTokenType.Identifier:
 				return Token.Identifier;
@@ -78,32 +80,41 @@ namespace Commons.Music.Midi.Mml.Parser
 
 	public class MmlParser
 	{
+		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (MmlDataType.String, "DEFAULT ARGUMENT");
 		MmlParserInput input;
+
+		// 1: NOW at ...
+		// 2+: jay output
 		int yacc_verbose_flag;
 
-		public static List<MmlOperationUse> Parse (IList<MmlToken> tokens)
-		{
-			return new MmlParser (tokens).Parse ();
-		}
-		
-		MmlParser (IList<MmlToken> tokens)
+		public MmlParser (IList<MmlToken> tokens)
 		{
 			try {
 				yacc_verbose_flag = int.Parse (Environment.GetEnvironmentVariable ("MUGENE_MML_DEBUG"));
-			} catch (FormatException) {
+			} catch (Exception) {
 			}
+			if (yacc_verbose_flag > 1)
+				debug = new yydebug.yyDebugSimple ();
 			input = new MmlParserInput (tokens);
 		}
 
-		public List<MmlOperationUse> Parse ()
+		public List<MmlOperationUse> ParseOperations ()
 		{
-			debug = new yydebug.yyDebugSimple ();
+			var o = yyparse (input) as List<MmlOperationUse>;
+			if (o == null)
+				throw new MmlException ("operations are expected, but got an expression.", input.Location);
+			return o;
+		}
 
-			return (List<MmlOperationUse>) yyparse (input);
+		public MmlValueExpr ParseExpression ()
+		{
+			var o = yyparse (input) as MmlValueExpr;
+			if (o == null)
+				throw new MmlException ("an expression is expected, but got operations.", input.Location);
+			return o;
 		}
 
 %}
-%token EOF
 %left Identifier
 %left StringLiteral
 %left NumberLiteral
@@ -125,19 +136,17 @@ namespace Commons.Music.Midi.Mml.Parser
 %left KeywordLength
 %left KeywordString
 
-%start OptOperationUses
+%start ExpressionOrOptOperationUses
 
 %%
 
-OptOperationUses :
-	EOF
+ExpressionOrOptOperationUses :
+	/* empty */
 	{
 		$$ = new List<MmlOperationUse> ();
 	}
-	| OperationUses EOF
-	{
-		$$ = $1;
-	}
+	| OperationUses
+	| Expression
 
 OperationUses :
 	OperationUse
@@ -154,13 +163,14 @@ OperationUses :
 	}
 
 OperationUse :
-	Identifier ArgumentsOptCurly
+	CanBeIdentifier ArgumentsOptCurly
 	{
 		var i = (MmlToken) $1;
-		Console.WriteLine ("NOW at : " + i.Location);
+		if (yacc_verbose_flag > 0)
+			Console.WriteLine ("NOW at : " + i.Location);
 		var o = new MmlOperationUse ((string) i.Value, i.Location);
 		foreach (MmlValueExpr a in (IEnumerable<MmlValueExpr>) $2)
-			o.Arguments.Add (a);
+			o.Arguments.Add (a == skipped_argument ? null : a);
 		$$ = o;
 	}
 
@@ -185,15 +195,28 @@ Arguments :
 		l.Add ((MmlValueExpr) $1);
 		$$ = l;
 	}
-	| Arguments Comma Argument
+	| Arguments Commas Argument
 	{
 		var l = (List<MmlValueExpr>) $1;
+		int commas = (int) $2;
+		for (int i = 1; i < commas; i++)
+			l.Add (skipped_argument);
 		l.Add ((MmlValueExpr) $3);
 		$$ = l;
 	}
 
+Commas :
+	Comma
+	{
+		$$ = 1;
+	}
+	| Commas Comma
+	{
+		$$ = (int) $1 + 1;
+	}
+
 Argument :
-	Expression
+	 Expression
 
 Expression :
 	ConditionalExpr
@@ -217,32 +240,39 @@ AddSubExpr :
 	}
 
 MulDivModExpr :
-	Value
-	| MulDivModExpr Asterisk Value
+	PrimaryExpr
+	| MulDivModExpr Asterisk PrimaryExpr
 	{
 		$$ = new MmlMultiplyExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
 	}
-	| MulDivModExpr Slash Value
+	| MulDivModExpr Slash PrimaryExpr
 	{
 		$$ = new MmlDivideExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
 	}
-	| MulDivModExpr Percent Value
+	| MulDivModExpr Percent PrimaryExpr
 	{
 		$$ = new MmlModuloExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
 	}
 
-Value :
+PrimaryExpr :
 	VariableReference
 	| StringConstant
-	| StepConstant
-	| NumberOrLengthConstant
 	| OpenCurly Expression CloseCurly
 	{
 		$$ = new MmlParenthesizedExpr ((MmlValueExpr) $2);
 	}
+	| StepConstant
+	| UnaryExpr
+
+UnaryExpr :
+	NumberOrLengthConstant
+	| Minus NumberOrLengthConstant
+	{
+		$$ = new MmlMultiplyExpr ((MmlValueExpr) $2, new MmlConstantExpr (MmlDataType.Number, -1));
+	}
 
 VariableReference :
-	Dollar Identifier
+	Dollar CanBeIdentifier
 	{
 		var i = (MmlToken) $2;
 		$$ = new MmlVariableReferenceExpr ((string) i.Value);
@@ -262,15 +292,14 @@ StepConstant :
 		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
 		$$ = new MmlConstantExpr (MmlDataType.Length, l);
 	}
-
-NumberOrLengthConstant :
-	PositiveNumberOrLengthConstant
-	| Minus PositiveNumberOrLengthConstant
+	| Percent Minus NumberLiteral
 	{
-		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) $2);
+		var n = (MmlToken) $3;
+		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
+		$$ = new MmlConstantExpr (MmlDataType.Length, l);
 	}
 
-PositiveNumberOrLengthConstant :
+NumberOrLengthConstant :
 	NumberLiteral
 	{
 		var t = (MmlToken) $1;
@@ -292,6 +321,12 @@ Dots :
 	{
 		$$ = ((int) $1) + 1;
 	}
+
+CanBeIdentifier :
+	Identifier
+	| Colon
+	| Slash
+	;
 
 %%
 
