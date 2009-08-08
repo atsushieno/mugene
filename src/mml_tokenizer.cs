@@ -283,6 +283,23 @@ namespace Commons.Music.Midi.Mml
 
 		bool in_comment_mode;
 
+		static string TrimComments (string s, int start)
+		{
+			int idx2 = s.IndexOf ("//", start, s.Length - start, StringComparison.Ordinal);
+			if (idx2 < 0)
+				return s;
+			int idx1 = s.IndexOf ('"', start);
+			if (idx1 < 0 || idx2 < idx1)
+				return s.Substring (0, idx2);
+			int idx3 = s.IndexOf ('"', idx1 + 1);
+			if (idx3 < 0) // it is invalid, but I don't care here
+				return s.Substring (0, idx2);
+			if (idx3 > idx2)
+				return TrimComments (s, idx3 + 1); // skip this "//" inside literal
+			else
+				return TrimComments (s, idx3 + 1); // skip this literal. There still may be another literal to care.
+		}
+
 		public void Process (List<MmlInputSource> inputs)
 		{
 			this.inputs = inputs;
@@ -304,8 +321,7 @@ namespace Commons.Music.Midi.Mml
 							throw MmlError (input, line, "Unexpected end of consecutive line by '\\' at the end of file");
 						break;
 					}
-					int idx = s.IndexOf ("//", StringComparison.Ordinal);
-					s = idx >= 0 ? s.Substring (0, idx) : s;
+					s = TrimComments (s, 0);
 					if (s.Length == 0) // comment line is allowed inside multi-line MML.
 						continue;
 
