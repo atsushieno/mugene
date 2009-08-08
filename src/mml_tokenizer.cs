@@ -8,7 +8,7 @@ namespace Commons.Music.Midi.Mml
 {
 	#region mml token sequence structure
 
-	public enum MmlToken
+	public enum MmlTokenType
 	{
 		Identifier,
 		StringLiteral,
@@ -61,9 +61,9 @@ namespace Commons.Music.Midi.Mml
 		}
 	}
 
-	public class MmlParsedToken
+	public class MmlToken
 	{
-		public MmlToken TokenType { get; set; }
+		public MmlTokenType TokenType { get; set; }
 		public object Value { get; set; }
 		public MmlLineInfo Location { get; set; }
 	}
@@ -86,12 +86,12 @@ namespace Commons.Music.Midi.Mml
 			Name = name;
 			TargetTracks = targetTracks;
 			Location = location;
-			Tokens = new List<MmlParsedToken> ();
+			Tokens = new List<MmlToken> ();
 		}
 
 		public IList<int> TargetTracks { get; private set; }
 		public MmlLineInfo Location { get; private set; }
-		public List<MmlParsedToken> Tokens { get; private set; }
+		public List<MmlToken> Tokens { get; private set; }
 	}
 	
 	public class MmlVariableDefinition
@@ -100,13 +100,13 @@ namespace Commons.Music.Midi.Mml
 		{
 			Name = name;
 			Location = location;
-			DefaultValueTokens = new List<MmlParsedToken> ();
+			DefaultValueTokens = new List<MmlToken> ();
 		}
 		
 		public string Name { get; set; }
 		public MmlLineInfo Location { get; private set; }
 		public MmlDataType Type { get; set; }
-		public List<MmlParsedToken> DefaultValueTokens { get; private set; }
+		public List<MmlToken> DefaultValueTokens { get; private set; }
 	}
 	
 	public class MmlTrack
@@ -114,11 +114,11 @@ namespace Commons.Music.Midi.Mml
 		public MmlTrack (int number)
 		{
 			Number = number;
-			Tokens = new List<MmlParsedToken> ();
+			Tokens = new List<MmlToken> ();
 		}
 
 		public int Number { get; private set; }
-		public List<MmlParsedToken> Tokens { get; private set; }
+		public List<MmlToken> Tokens { get; private set; }
 	}
 
 	#endregion
@@ -498,7 +498,7 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public MmlToken CurrentToken { get; set; }
+		public MmlTokenType CurrentToken { get; set; }
 		public object Value { get; set; }
 
 		public bool NewIdentifierMode { get; set; }
@@ -521,9 +521,9 @@ namespace Commons.Music.Midi.Mml
 			return new Exception (String.Format ("{0}. {1}", msg, Line.Location.ToString ()));
 		}
 
-		public MmlParsedToken CreateParsedToken ()
+		public MmlToken CreateParsedToken ()
 		{
-			return new MmlParsedToken () { TokenType = CurrentToken, Value = this.Value, Location = Line.Location.Clone () };
+			return new MmlToken () { TokenType = CurrentToken, Value = this.Value, Location = Line.Location.Clone () };
 		}
 		public virtual bool IsWhitespace (int ch)
 		{
@@ -703,14 +703,14 @@ namespace Commons.Music.Midi.Mml
 			return Line.Text.Substring (start, Line.Location.LinePosition - start);
 		}
 
-		public void ExpectNext (MmlToken tokenType)
+		public void ExpectNext (MmlTokenType tokenType)
 		{
 			if (!Advance ())
 				throw LexerError (String.Format ("Expected token {0}, but reached end of the input", CurrentToken));
 			ExpectCurrent (tokenType);
 		}
 		
-		public void ExpectCurrent (MmlToken tokenType)
+		public void ExpectCurrent (MmlTokenType tokenType)
 		{
 			if (CurrentToken != tokenType)
 				throw LexerError (String.Format ("Expected token {0} but found {1}", tokenType, CurrentToken));
@@ -732,62 +732,62 @@ namespace Commons.Music.Midi.Mml
 			char ch = (char) ch_;
 			switch (ch) {
 			case '.':
-				ConsumeAsToken (MmlToken.Period);
+				ConsumeAsToken (MmlTokenType.Period);
 				return true;
 			case ',':
-				ConsumeAsToken (MmlToken.Comma);
+				ConsumeAsToken (MmlTokenType.Comma);
 				return true;
 			case '%':
-				ConsumeAsToken (MmlToken.Percent);
+				ConsumeAsToken (MmlTokenType.Percent);
 				return true;
 			case '{':
-				ConsumeAsToken (MmlToken.OpenCurly);
+				ConsumeAsToken (MmlTokenType.OpenCurly);
 				return true;
 			case '}':
-				ConsumeAsToken (MmlToken.CloseCurly);
+				ConsumeAsToken (MmlTokenType.CloseCurly);
 				return true;
 			case '?':
-				ConsumeAsToken (MmlToken.Question);
+				ConsumeAsToken (MmlTokenType.Question);
 				return true;
 			case '+':
-				ConsumeAsToken (MmlToken.Plus);
+				ConsumeAsToken (MmlTokenType.Plus);
 				return true;
 			case '-':
-				ConsumeAsToken (MmlToken.Minus);
+				ConsumeAsToken (MmlTokenType.Minus);
 				return true;
 			case '*':
-				ConsumeAsToken (MmlToken.Asterisk);
+				ConsumeAsToken (MmlTokenType.Asterisk);
 				return true;
 			case ':':
-				ConsumeAsTokenOrIdentifier (MmlToken.Colon, ":");
+				ConsumeAsTokenOrIdentifier (MmlTokenType.Colon, ":");
 				return true;
 			case '/':
-				ConsumeAsTokenOrIdentifier (MmlToken.Slash, "/");
+				ConsumeAsTokenOrIdentifier (MmlTokenType.Slash, "/");
 				return true;
 			case '$':
-				ConsumeAsToken (MmlToken.Dollar);
+				ConsumeAsToken (MmlTokenType.Dollar);
 				return true;
 			case '"':
 				Value = ReadStringLiteral ();
-				CurrentToken = MmlToken.StringLiteral;
+				CurrentToken = MmlTokenType.StringLiteral;
 				return true;
 			}
 			if (ch == '#' || IsNumber (ch)) {
 				Value = ReadNumber ();
-				CurrentToken = MmlToken.NumberLiteral;
+				CurrentToken = MmlTokenType.NumberLiteral;
 				return true;
 			}
 			if (TryParseTypeName ())
 				return true;
 			if (NewIdentifierMode) {
 				Value = ReadNewIdentifier ();
-				CurrentToken = MmlToken.Identifier;
+				CurrentToken = MmlTokenType.Identifier;
 				return true;
 			}
 			var ident = GetIdentifier ();
 			if (ident != null) {
 				Value = ident;
-				CurrentToken = MmlToken.Identifier;
+				CurrentToken = MmlTokenType.Identifier;
 				return true;
 			}
 
@@ -798,27 +798,27 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (Line.TryMatch ("number")) {
 				Value = MmlDataType.Number;
-				CurrentToken = MmlToken.KeywordNumber;
+				CurrentToken = MmlTokenType.KeywordNumber;
 			} else if (Line.TryMatch ("length")) {
 				Value = MmlDataType.Length;
-				CurrentToken = MmlToken.KeywordLength;
+				CurrentToken = MmlTokenType.KeywordLength;
 			} else if (Line.TryMatch ("string")) {
 				Value = MmlDataType.String;
-				CurrentToken = MmlToken.KeywordString;
+				CurrentToken = MmlTokenType.KeywordString;
 			}
 			else
 				return false;
 			return true;
 		}
 
-		void ConsumeAsToken (MmlToken token)
+		void ConsumeAsToken (MmlTokenType token)
 		{
 			Line.ReadChar ();
 			CurrentToken = token;
 			Value = null;
 		}
 
-		void ConsumeAsTokenOrIdentifier (MmlToken token, string value)
+		void ConsumeAsTokenOrIdentifier (MmlTokenType token, string value)
 		{
 			ConsumeAsToken (token);
 			Value = value;
@@ -1038,7 +1038,7 @@ namespace Commons.Music.Midi.Mml
 			source.Lexer.NewIdentifierMode = false;
 			while (source.Lexer.Advance ())
 				m.Tokens.Add (source.Lexer.CreateParsedToken ());
-			if (m.Tokens.Count == 0 || m.Tokens [m.Tokens.Count - 1].TokenType != MmlToken.CloseCurly)
+			if (m.Tokens.Count == 0 || m.Tokens [m.Tokens.Count - 1].TokenType != MmlTokenType.CloseCurly)
 				source.Lexer.LexerError (String.Format ("'{{' is expected at the end of macro definition for '{0}'", identifier));
 			m.Tokens.RemoveAt (m.Tokens.Count - 1);
 			result.Macros.Add (m);
@@ -1049,14 +1049,14 @@ namespace Commons.Music.Midi.Mml
 		{
 			int count = 0;
 			while (true) {
-				if (source.Lexer.CurrentToken == MmlToken.OpenCurly)
+				if (source.Lexer.CurrentToken == MmlTokenType.OpenCurly)
 					break; // go to parse body
 				if (count > 0) {
-					source.Lexer.ExpectCurrent (MmlToken.Comma);
+					source.Lexer.ExpectCurrent (MmlTokenType.Comma);
 					source.Lexer.NewIdentifierMode = true;
 					source.Lexer.Advance ();
 				}
-				source.Lexer.ExpectCurrent (MmlToken.Identifier);
+				source.Lexer.ExpectCurrent (MmlTokenType.Identifier);
 				var arg = new MmlVariableDefinition ((string) source.Lexer.Value, source.Lexer.Line.Location);
 				vars.Add (arg);
 				count++;
@@ -1090,8 +1090,8 @@ namespace Commons.Music.Midi.Mml
 						throw source.Lexer.LexerError ("Incomplete argument default value definition");
 					}
 					switch (source.Lexer.CurrentToken) {
-					case MmlToken.Comma:
-					case MmlToken.OpenCurly:
+					case MmlTokenType.Comma:
+					case MmlTokenType.OpenCurly:
 						loop = false;
 						continue;
 					}
@@ -1103,7 +1103,7 @@ namespace Commons.Music.Midi.Mml
 
 		void ParseTrackLines (MmlTrackSource src)
 		{
-			var tokens = new List<MmlParsedToken> ();
+			var tokens = new List<MmlToken> ();
 			foreach (var line in src.Lines)
 				foreach (var entry in aliases)
 					line.Text = line.Text.Replace (entry.Key, entry.Value);
