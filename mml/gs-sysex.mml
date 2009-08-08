@@ -65,7 +65,7 @@
 #macro EFX_ON { GS_REG #40,#40 + $__channel,#22, 1 }
 #macro EFX_OFF { GS_REG #40,#40 + $__channel,#22, 0 }
 #macro EFX_TYPE vh:number,vl:number { GS_REGW #40,#03,#00, $vh,$vl }
-#macro EFX_PARA p:number,val:number { GS_REG #40,#03,$para, $val }
+#macro EFX_PARA p:number,val:number { GS_REG #40,#03,$p, $val }
 #macro EFX_SEND_REVERB val:number { GS_REG #40,#03,#17, $val }
 #macro EFX_SEND_CHORUS val:number { GS_REG #40,#03,#18, $val }
 #macro EFX_SEND_DELAY val:number { GS_REG #40,#03,#19, $val }
