@@ -431,7 +431,7 @@
 		"#include" string	// filename
 
 	macro_definition ::=
-		"#macro" identifier opt_macro_args '{' macro_body '}'
+		"#macro" identifier opt_macro_args '{' MML_operation+ '}'
 
 	opt_macro_args ::=
 		/* empty */ |
