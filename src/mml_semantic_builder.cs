@@ -339,8 +339,12 @@ namespace Commons.Music.Midi.Mml
 				return ret;
 
 			var stream = new TokenStream (src.DefaultValueTokens, src.Location);
-			ret.DefaultValue = stream.ReadAsValue ();
+#if USE_OLD_PARSER
+			ret.DefaultValue = stream.ReadDefiniteValue ();
 			stream.End ();
+#else
+			ret.DefaultValue = new Parser.MmlParser (stream.Source).ParseExpression ();
+#endif
 
 			return ret;
 		}
@@ -369,13 +373,16 @@ namespace Commons.Music.Midi.Mml
 
 		void CompileOperationTokens (List<MmlOperationUse> data, TokenStream stream)
 		{
+#if USE_OLD_PARSER
 			do {
 				var oper = stream.ReadOperationUse ();
 				if (oper == null)
 					break;
 				data.Add (oper);
 			} while (true);
-
+#else
+			data.AddRange (new Parser.MmlParser (stream.Source).ParseOperations ());
+#endif
 		}
 	}
 
@@ -393,6 +400,7 @@ namespace Commons.Music.Midi.Mml
 
 		public int Position { get; set; }
 
+#if USE_OLD_PARSER
 		public void End ()
 		{
 			if (Position < Source.Count)
@@ -566,6 +574,8 @@ namespace Commons.Music.Midi.Mml
 				if (dots > 0)
 					return new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = dots });
 				return new MmlConstantExpr (MmlDataType.Number, t.Value);
+			default:
+				throw new MmlException (String.Format ("Unexpected token for constant: {0}", t.TokenType), t.Location);
 			}
 		}
 
@@ -609,6 +619,7 @@ namespace Commons.Music.Midi.Mml
 				throw new MmlException (String.Format ("Identifier is expected, but got {0}", token.TokenType), token.Location);
 			}
 		}
+#endif
 	}
 
 	#endregion

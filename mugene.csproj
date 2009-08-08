@@ -30,18 +30,10 @@
   <ItemGroup>
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
-    <None Include="mml\default-macro.mml">
-      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </None>
-    <None Include="mml\drum-part.mml">
-      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </None>
-    <None Include="mml\gs-sysex.mml">
-      <DeployService-TargetDirectoryId>CommonApplicationData</DeployService-TargetDirectoryId>
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </None>
+    <None Include="mml\default-macro.mml" />
+    <None Include="mml\drum-part.mml" />
+    <None Include="mml\gs-sysex.mml" />
+    <None Include="src\mml_parser.jay" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\mml_compiler_main.cs" />
@@ -51,6 +43,7 @@
     <Compile Include="src\mml_tokenizer.cs" />
     <Compile Include="src\mml_variable_processor.cs" />
     <Compile Include="src\SMF.cs" />
+    <Compile Include="src\mml_parser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
