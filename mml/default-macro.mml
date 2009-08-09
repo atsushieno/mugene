@@ -91,8 +91,8 @@
 #macro PAN- val:number { P- $val }
 #macro H val:number { CC#40,$val } // dumper pedal
 #macro @ prg:number,bmsb:number=0,blsb:number=0 { CC0,$bmsb CC#20,$blsb PROGRAM$prg }
-#variable __bend:number
-#macro BEND val:number { __LET{"__bend", $val} PITCH$val }
+#variable __bend:number = 0
+#macro BEND val:number { __LET{"__bend", $val} PITCH $val+8192 }
 #macro B val:number { BEND$val }
 #macro B+ val:number { BEND $__bend + $val }
 #macro B- val:number { BEND $__bend - $val }
@@ -115,6 +115,8 @@
 #macro CUE val:string { __MIDI_META{7, $val} }
 #macro BEAT num:number,denom:number { __MIDI_META{58, $num, $denom} }
 // #macro KEY TBD {__MIDI_META{ 59h}}
+
+#macro PITCH_BEND_SENSITIVITY val:number { RPN 0,0 DTE $val,0 }
 
 // Gate time. This command is dependent on personal favor, so should be easily redefined.
 #macro GATE_DENOM val:number { __LET{"__gate_rel_denom", $val} }
@@ -220,7 +222,7 @@
 #macro E_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "E", "E+", SPECTRA_ONESHOT_ARG_USE }
 #macro t_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "t", "t+", SPECTRA_ONESHOT_ARG_USE }
 #macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
-#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "B", "B+", SPECTRA_ONESHOT_ARG_USE }
+#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BEND", "B+", SPECTRA_ONESHOT_ARG_USE } // FIXME: find out why it fails when "B" is used instead.
 
 #define SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
 #define SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
@@ -248,4 +250,4 @@
 #macro Et SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "E", "E+", "E-", SPECTRA_TRIANGLE_ARG_USE }
 #macro tt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "t", "t+", "t-", SPECTRA_TRIANGLE_ARG_USE }
 #macro Mt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "M", "M+", "M-", SPECTRA_TRIANGLE_ARG_USE }
-#macro Bt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "B", "B+", "B-", SPECTRA_TRIANGLE_ARG_USE }
+#macro Bt SPECTRA_TRIANGLE_ARG_DEF { SPECTRA_TRIANGLE "BEND", "B+", "B-", SPECTRA_TRIANGLE_ARG_USE }
