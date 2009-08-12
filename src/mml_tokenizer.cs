@@ -416,10 +416,8 @@ namespace Commons.Music.Midi.Mml
 			result.Lexer.SetCurrentInput (line);
 
 			string name = null;
-			if (result.Lexer.IsIdentifier (line.PeekChar (), true)) {
+			if (result.Lexer.IsIdentifier (line.PeekChar (), true))
 				name = result.Lexer.ReadNewIdentifier ();
-				result.Lexer.SkipWhitespaces (true);
-			}
 
 			int [] range;
 			if (result.Lexer.IsWhitespace (line.PeekChar ()))
