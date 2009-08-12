@@ -564,7 +564,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (Line == null)
 				return new Exception (msg);
-			return new Exception (String.Format ("{0}. {1}", msg, Line.Location.ToString ()));
+			return new MmlException (msg, Line.Location);
 		}
 
 		public MmlToken CreateParsedToken ()

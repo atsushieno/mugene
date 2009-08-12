@@ -49,7 +49,7 @@ namespace Commons.Music.Midi.Mml
 			try {
 				CompileCore (args);
 			} catch (MmlException ex) {
-				Console.Error.WriteLine (ex);
+				Console.Error.WriteLine (ex.Message);
 			} catch (Exception ex) {
 				if (verbose)
 					throw;
