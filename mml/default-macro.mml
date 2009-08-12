@@ -104,6 +104,7 @@
 #macro LEGATO val:number { CC#54,$val }
 #macro RSD val:number { CC#5B, $val } // generally reverb send depth
 #macro CSD val:number { CC#5D, $val } // generally chorus send depth
+#macro DSD val:number { CC#5E, $val } // generally chorus send depth
 #macro NRPN msb:number,lsb:number { CC#63, $msb CC#62,$lsb }
 #macro RPN msb:number,lsb:number { CC#65, $msb CC#64,$lsb }
 #macro TEXT val:string { __MIDI_META{1, $val} }
