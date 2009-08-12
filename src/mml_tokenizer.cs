@@ -36,6 +36,7 @@ namespace Commons.Music.Midi.Mml
 	{
 		public MmlTokenSet ()
 		{
+			Conditional = new MmlCompilationCondition ();
 			Macros = new List<MmlMacroDefinition> ();
 			Variables = new List<MmlVariableDefinition> ();
 			Tracks = new List<MmlTrack> ();
@@ -45,6 +46,7 @@ namespace Commons.Music.Midi.Mml
 			Variables.Add (new MmlVariableDefinition ("__timeline_position", null) { Type = MmlDataType.Number });
 		}
 
+		public MmlCompilationCondition Conditional { get; private set; }
 		public List<MmlMacroDefinition> Macros { get; private set; }
 		public List<MmlVariableDefinition> Variables { get; private set; }
 		public List<MmlTrack> Tracks { get; private set; }
@@ -58,6 +60,21 @@ namespace Commons.Music.Midi.Mml
 				Tracks.Add (t);
 			}
 			return t;
+		}
+	}
+
+	public class MmlCompilationCondition
+	{
+		public MmlCompilationCondition ()
+		{
+			Blocks = new List<string> ();
+		}
+
+		public IList<string> Blocks { get; private set; }
+		
+		public bool ShouldCompileBlock (string name)
+		{
+			return name == null || Blocks.Count == 0 || Blocks.Contains (name);
 		}
 	}
 
@@ -357,8 +374,6 @@ namespace Commons.Music.Midi.Mml
 			case "endcomment":
 				in_comment_mode = false;
 				return null;
-			case "include":
-				throw new NotImplementedException ();
 			case "define":
 			case "conditional":
 			case "variable":
@@ -393,6 +408,12 @@ namespace Commons.Music.Midi.Mml
 				return null;
 			result.Lexer.SetCurrentInput (line);
 
+			string name = null;
+			if (result.Lexer.IsIdentifier (line.PeekChar (), true)) {
+				name = result.Lexer.ReadNewIdentifier ();
+				result.Lexer.SkipWhitespaces (true);
+			}
+
 			int [] range;
 			if (result.Lexer.IsWhitespace (line.PeekChar ()))
 				range = previous_range;
@@ -402,7 +423,7 @@ namespace Commons.Music.Midi.Mml
 				throw new MmlException ("Current line indicates no track number, and there was no indicated tracks previously.", line.Location);
 			previous_range = range;
 			result.Lexer.SkipWhitespaces (true);
-			var ts = new MmlTrackSource (range);
+			var ts = new MmlTrackSource (name, range);
 			ts.Lines.Add (line);
 			result.Tracks.Add (ts);
 			return ts;
@@ -454,13 +475,15 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlTrackSource : MmlSourceLineSet
 	{
-		public MmlTrackSource (IEnumerable<int> tracks)
+		public MmlTrackSource (string blockName, IEnumerable<int> tracks)
 		{
+			BlockName = blockName;
 			Tracks = new List<int> ();
 			foreach (var i in tracks)
 				Tracks.Add (i);
 		}
 
+		public string BlockName { get; private set; }
 		public IList<int> Tracks { get; private set; }
 	}
 
@@ -991,6 +1014,26 @@ namespace Commons.Music.Midi.Mml
 			switch (src.Name) {
 			default:
 				throw new NotImplementedException ();
+			case "conditional":
+				var category = source.Lexer.ReadNewIdentifier ();
+				switch (category) {
+				case "block":
+					source.Lexer.SkipWhitespaces (true);
+					while (true) {
+						source.Lexer.NewIdentifierMode = true;
+						source.Lexer.ExpectNext (MmlTokenType.Identifier);
+						string s = (string) source.Lexer.Value;
+						result.Conditional.Blocks.Add (s);
+						source.Lexer.SkipWhitespaces ();
+						if (!source.Lexer.Advance () || source.Lexer.CurrentToken != MmlTokenType.Comma)
+							break;
+						source.Lexer.SkipWhitespaces ();
+					}
+					break;
+				default:
+					throw new MmlException (String.Format ("Unexpected compilation condition type '{0}'", category), source.Lexer.Line.Location);
+				}
+				break;
 			case "meta":
 				source.Lexer.NewIdentifierMode = true;
 				var identifier = source.Lexer.ReadNewIdentifier ();
@@ -1119,6 +1162,9 @@ namespace Commons.Music.Midi.Mml
 
 		void ParseTrackLines (MmlTrackSource src)
 		{
+			if (!result.Conditional.ShouldCompileBlock (src.BlockName))
+				return;
+
 			var tokens = new List<MmlToken> ();
 			foreach (var line in src.Lines)
 				foreach (var entry in aliases)
