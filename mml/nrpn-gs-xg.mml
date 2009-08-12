@@ -1,0 +1,16 @@
+#macro VIB_RATE val:number { NRPN #01,#08 DTE $val,0 }
+#macro VIB_DEPTH val:number { NRPN #01,#09 DTE $val,0 }
+#macro VIB_DELAY val:number { NRPN #01,#0A DTE $val,0 }
+#macro TVF_CUTOFF val:number { NRPN #01,#20 DTE $val,0 }
+#macro TVF_RESO val:number { NRPN #01,#21 DTE $val,0 }
+
+#macro ENV_ATTACK val:number { NRPN #01,#63 DTE $val,0 }
+#macro ENV_DECAY val:number { NRPN #01,#64 DTE $val,0 }
+#macro ENV_RELEASE val:number { NRPN #01,#66 DTE $val,0 }
+
+#macro DRUM_PITCH note:number,val:number { NRPN #18,$note DTE $val,0 }
+#macro DRUM_LEVEL note:number,val:number { NRPN #1A,$note DTE $val,0 }
+#macro DRUM_PAN note:number,val:number { NRPN #1C,$note DTE $val,0 }
+#macro DRUM_RSD note:number,val:number { NRPN #1D,$note DTE $val,0 }
+#macro DRUM_CSD note:number,val:number { NRPN #1E,$note DTE $val,0 }
+#macro DRUM_DSD note:number,val:number { NRPN #1F,$note DTE $val,0 }
