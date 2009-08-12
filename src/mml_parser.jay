@@ -1,3 +1,5 @@
+// Compile into jay as:
+//	jay -ct < skeleton.cs mml_parser.jay > mml_parser.cs
 %{
 using System;
 using System.Collections.Generic;
@@ -82,6 +84,7 @@ namespace Commons.Music.Midi.Mml.Parser
 	{
 		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (MmlDataType.String, "DEFAULT ARGUMENT");
 		MmlParserInput input;
+		MmlLineInfo current_location;
 
 		// 1: NOW at ...
 		// 2+: jay output
@@ -100,7 +103,7 @@ namespace Commons.Music.Midi.Mml.Parser
 
 		public List<MmlOperationUse> ParseOperations ()
 		{
-			var o = yyparse (input) as List<MmlOperationUse>;
+			var o = Parse () as List<MmlOperationUse>;
 			if (o == null)
 				throw new MmlException ("operations are expected, but got an expression.", input.Location);
 			return o;
@@ -108,10 +111,19 @@ namespace Commons.Music.Midi.Mml.Parser
 
 		public MmlValueExpr ParseExpression ()
 		{
-			var o = yyparse (input) as MmlValueExpr;
+			var o = Parse () as MmlValueExpr;
 			if (o == null)
 				throw new MmlException ("an expression is expected, but got operations.", input.Location);
 			return o;
+		}
+		
+		object Parse ()
+		{
+			try {
+				return yyparse (input);
+			} catch (yyParser.yyException ex) {
+				throw new MmlException ("MML parser error", current_location);
+			}
 		}
 
 %}
@@ -163,13 +175,17 @@ OperationUses :
 	}
 
 OperationUse :
-	CanBeIdentifier ArgumentsOptCurly
+	CanBeIdentifier
+	{
+		current_location = ((MmlToken) $1).Location;
+	}
+	ArgumentsOptCurly
 	{
 		var i = (MmlToken) $1;
 		if (yacc_verbose_flag > 0)
 			Console.WriteLine ("NOW at : " + i.Location);
 		var o = new MmlOperationUse ((string) i.Value, i.Location);
-		foreach (MmlValueExpr a in (IEnumerable<MmlValueExpr>) $2)
+		foreach (MmlValueExpr a in (IEnumerable<MmlValueExpr>) $3)
 			o.Arguments.Add (a == skipped_argument ? null : a);
 		$$ = o;
 	}
