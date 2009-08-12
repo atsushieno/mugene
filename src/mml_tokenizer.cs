@@ -68,13 +68,20 @@ namespace Commons.Music.Midi.Mml
 		public MmlCompilationCondition ()
 		{
 			Blocks = new List<string> ();
+			Tracks = new List<int> ();
 		}
 
+		public List<int> Tracks { get; private set; }
 		public IList<string> Blocks { get; private set; }
 		
 		public bool ShouldCompileBlock (string name)
 		{
 			return name == null || Blocks.Count == 0 || Blocks.Contains (name);
+		}
+		
+		public bool ShouldCompileTrack (int track)
+		{
+			return Tracks.Count == 0 || Tracks.Contains (track);
 		}
 	}
 
@@ -677,7 +684,7 @@ namespace Commons.Music.Midi.Mml
 				int j = ReadNumber ();
 				if (j < i)
 					throw LexerError ("Invalid range specification: larger number must appear later");
-				while (i < j)
+				while (i <= j)
 					yield return i++;
 				break;
 			case ',':
@@ -1029,6 +1036,16 @@ namespace Commons.Music.Midi.Mml
 							break;
 						source.Lexer.SkipWhitespaces ();
 					}
+					if (source.Lexer.Advance ())
+						throw new MmlException ("Extra conditional tokens", source.Lexer.Line.Location);
+					break;
+				case "track":
+					source.Lexer.SkipWhitespaces (true);
+					var tracks = source.Lexer.ReadRange ().ToArray ();
+					result.Conditional.Tracks.AddRange (tracks);
+					source.Lexer.SkipWhitespaces ();
+					if (source.Lexer.Advance ())
+						throw new MmlException ("Extra conditional tokens", source.Lexer.Line.Location);
 					break;
 				default:
 					throw new MmlException (String.Format ("Unexpected compilation condition type '{0}'", category), source.Lexer.Line.Location);
@@ -1162,9 +1179,6 @@ namespace Commons.Music.Midi.Mml
 
 		void ParseTrackLines (MmlTrackSource src)
 		{
-			if (!result.Conditional.ShouldCompileBlock (src.BlockName))
-				return;
-
 			var tokens = new List<MmlToken> ();
 			foreach (var line in src.Lines)
 				foreach (var entry in aliases)
@@ -1172,8 +1186,13 @@ namespace Commons.Music.Midi.Mml
 			source.Lexer.SetCurrentInput (src);
 			while (source.Lexer.Advance ())
 					tokens.Add (source.Lexer.CreateParsedToken ());
-			foreach (var t in src.Tracks)
-				result.GetTrack (t).Tokens.AddRange (tokens);
+			// Compilation conditionals are actually handled here.
+			if (!result.Conditional.ShouldCompileBlock (src.BlockName))
+				return;
+			foreach (var t in src.Tracks) {
+				if (result.Conditional.ShouldCompileTrack (t))
+					result.GetTrack (t).Tokens.AddRange (tokens);
+			}
 		}
 	}
 	#endregion
