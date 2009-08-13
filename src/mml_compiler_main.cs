@@ -110,6 +110,7 @@ namespace Commons.Music.Midi.Mml
 			var l = new List<MmlPrimitiveOperation> ();
 			l.Add (new MmlPrimitiveOperation () { Name = "__LOCATE"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__UNLOCATE"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__PRINT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LET"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__APPLY"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI"});

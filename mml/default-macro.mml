@@ -13,6 +13,7 @@
 #macro CH val:number { __LET {"__channel", $val - 1} } // CH1-CH16 are valid.
 // note that __ERROR is undefined and it indeed is an error (literally).
 #macro ASSERT_STEP val:length { __LET {"__dummy", {$__timeline_position - $val ? $__ERROR, $__dummy}} }
+#macro DEBUG val:string { __PRINT {$val} }
 
 // primitive variables used in primitive macro operations
 #variable __base_count:number = 192

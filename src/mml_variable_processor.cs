@@ -407,6 +407,7 @@ namespace Commons.Music.Midi.Mml
 		MmlResolveContext global_context;
 		MmlResolvedMusic result;
 		List<MmlResolvedEvent> current_output;
+		TextWriter DebugPrint = Console.Out;
 
 		void Generate ()
 		{
@@ -450,7 +451,16 @@ namespace Commons.Music.Midi.Mml
 				case "__UNLOCATE":
 					locations.Pop ();
 					continue;
-				case "__LET": 
+				case "__PRINT": {
+					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
+					string name = oper.Arguments [0].StringValue;
+					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
+					if (variable == null)
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+					DebugPrint.WriteLine (rctx.Values [variable]);
+					break;
+					}
+				case "__LET": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					string name = oper.Arguments [0].StringValue;
 					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
@@ -461,6 +471,7 @@ namespace Commons.Music.Midi.Mml
 					if (name == "__timeline_position")
 						rctx.TimelinePosition = oper.Arguments [1].IntValue;
 					break;
+					}
 				case "__MACRO_ARG_DEF":
 					oper.Arguments [0].Resolve (rctx, MmlDataType.Any);
 					var argdef = (MmlSemanticVariable) oper.Arguments [0].ResolvedValue;
