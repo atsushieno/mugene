@@ -257,6 +257,48 @@ namespace Commons.Music.Midi.Mml
 		}
 	}
 
+	public partial class MmlComparisonExpr : MmlValueExpr
+	{
+		public MmlComparisonExpr (MmlValueExpr left, MmlValueExpr right, ComparisonType type)
+		{
+			Left = left;
+			Right = right;
+			ComparisonType = type;
+		}
+
+		public MmlValueExpr Left { get; set; }
+		public MmlValueExpr Right { get; set; }
+		public ComparisonType ComparisonType { get; set; }
+
+		public override string ToString ()
+		{
+			return String.Format ("{0} {2} {1}", Left, Right, ToString (ComparisonType));
+		}
+		
+		string ToString (ComparisonType type)
+		{
+			switch (type) {
+			case ComparisonType.Lesser:
+				return "<";
+			case ComparisonType.LesserEqual:
+				return "<=";
+			case ComparisonType.Greater:
+				return ">";
+			case ComparisonType.GreaterEqual:
+				return ">";
+			}
+			throw new Exception ();
+		}
+	}
+
+	public enum ComparisonType
+	{
+		Lesser,
+		LesserEqual,
+		Greater,
+		GreaterEqual,
+	}
+	
 	// at this phase, we cannot determine if an invoked operation is a macro, or a primitive operation.
 	public partial class MmlOperationUse
 	{

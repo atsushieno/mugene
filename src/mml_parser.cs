@@ -69,6 +69,10 @@ namespace Commons.Music.Midi.Mml.Parser
 				return Token.Dollar;
 			case MmlTokenType.Colon:
 				return Token.Colon;
+			case MmlTokenType.BackSlashLesser:
+				return Token.BackSlashLesser;
+			case MmlTokenType.BackSlashGreater:
+				return Token.BackSlashGreater;
 			case MmlTokenType.KeywordNumber:
 				return Token.KeywordNumber;
 			case MmlTokenType.KeywordLength:
@@ -186,8 +190,14 @@ namespace Commons.Music.Midi.Mml.Parser
     "OptArgument : Argument",
     "Argument : Expression",
     "Expression : ConditionalExpr",
-    "ConditionalExpr : AddSubExpr",
-    "ConditionalExpr : AddSubExpr Question ConditionalExpr Comma ConditionalExpr",
+    "ConditionalExpr : ComparisonExpr",
+    "ConditionalExpr : ComparisonExpr Question ConditionalExpr Comma ConditionalExpr",
+    "ComparisonExpr : AddSubExpr",
+    "ComparisonExpr : AddSubExpr ComparisonOperator ComparisonExpr",
+    "ComparisonOperator : BackSlashLesser",
+    "ComparisonOperator : BackSlashLesserEqual",
+    "ComparisonOperator : BackSlashGreater",
+    "ComparisonOperator : BackSlashGreaterEqual",
     "AddSubExpr : MulDivModExpr",
     "AddSubExpr : AddSubExpr Plus MulDivModExpr",
     "AddSubExpr : AddSubExpr Minus MulDivModExpr",
@@ -240,8 +250,9 @@ namespace Commons.Music.Midi.Mml.Parser
     null,null,null,null,null,null,null,"Identifier","StringLiteral",
     "NumberLiteral","Comma","OpenParen","CloseParen","OpenCurly",
     "CloseCurly","Question","Plus","Minus","Asterisk","Slash","Percent",
-    "Dollar","Colon","Dot","KeywordNumber","KeywordLength",
-    "KeywordString",
+    "Dollar","Colon","Dot","BackSlashLesser","BackSlashLesserEqual",
+    "BackSlashGreater","BackSlashGreaterEqual","KeywordNumber",
+    "KeywordLength","KeywordString",
   };
 
   /** index-checked interface to yyNames[].
@@ -413,13 +424,13 @@ namespace Commons.Music.Midi.Mml.Parser
         yyVal = yyDefault(yyV > yyTop ? null : yyVals[yyV]);
         switch (yyN) {
 case 1:
-#line 157 "mml_parser.jay"
+#line 165 "mml_parser.jay"
   {
 		yyVal = new List<MmlOperationUse> ();
 	}
   break;
 case 4:
-#line 165 "mml_parser.jay"
+#line 173 "mml_parser.jay"
   {
 		var l = new List<MmlOperationUse> ();
 		l.Add ((MmlOperationUse) yyVals[0+yyTop]);
@@ -427,7 +438,7 @@ case 4:
 	}
   break;
 case 5:
-#line 171 "mml_parser.jay"
+#line 179 "mml_parser.jay"
   {
 		var l = (List<MmlOperationUse>) yyVals[-1+yyTop];
 		l.Add ((MmlOperationUse) yyVals[0+yyTop]);
@@ -435,13 +446,13 @@ case 5:
 	}
   break;
 case 6:
-#line 179 "mml_parser.jay"
+#line 187 "mml_parser.jay"
   {
 		current_location = ((MmlToken) yyVals[0+yyTop]).Location;
 	}
   break;
 case 7:
-#line 183 "mml_parser.jay"
+#line 191 "mml_parser.jay"
   {
 		var i = (MmlToken) yyVals[-2+yyTop];
 		if (yacc_verbose_flag > 0)
@@ -453,19 +464,19 @@ case 7:
 	}
   break;
 case 9:
-#line 196 "mml_parser.jay"
+#line 204 "mml_parser.jay"
   {
 		yyVal = yyVals[-1+yyTop];
 	}
   break;
 case 10:
-#line 202 "mml_parser.jay"
+#line 210 "mml_parser.jay"
   {
 		yyVal = new List<MmlValueExpr> ();
 	}
   break;
 case 12:
-#line 209 "mml_parser.jay"
+#line 217 "mml_parser.jay"
   {
 		var l = new List<MmlValueExpr> ();
 		l.Add ((MmlValueExpr) yyVals[0+yyTop]);
@@ -473,7 +484,7 @@ case 12:
 	}
   break;
 case 13:
-#line 215 "mml_parser.jay"
+#line 223 "mml_parser.jay"
   {
 		var a = (MmlValueExpr) yyVals[-2+yyTop];
 		var l = (List<MmlValueExpr>) yyVals[0+yyTop];
@@ -482,112 +493,142 @@ case 13:
 	}
   break;
 case 14:
-#line 224 "mml_parser.jay"
+#line 232 "mml_parser.jay"
   {
 		yyVal = skipped_argument;
 	}
   break;
 case 19:
-#line 238 "mml_parser.jay"
+#line 246 "mml_parser.jay"
   {
 		yyVal = new MmlConditionalExpr ((MmlValueExpr) yyVals[-4+yyTop], (MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 21:
-#line 245 "mml_parser.jay"
+#line 253 "mml_parser.jay"
+  {
+		yyVal = new MmlComparisonExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop], (ComparisonType) yyVals[-1+yyTop]);
+	}
+  break;
+case 22:
+#line 259 "mml_parser.jay"
+  {
+		yyVal = ComparisonType.Lesser;
+	}
+  break;
+case 23:
+#line 263 "mml_parser.jay"
+  {
+		yyVal = ComparisonType.LesserEqual;
+	}
+  break;
+case 24:
+#line 267 "mml_parser.jay"
+  {
+		yyVal = ComparisonType.Greater;
+	}
+  break;
+case 25:
+#line 271 "mml_parser.jay"
+  {
+		yyVal = ComparisonType.GreaterEqual;
+	}
+  break;
+case 27:
+#line 278 "mml_parser.jay"
   {
 		yyVal = new MmlAddExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
-case 22:
-#line 249 "mml_parser.jay"
+case 28:
+#line 282 "mml_parser.jay"
   {
 		yyVal = new MmlSubtractExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
-case 24:
-#line 256 "mml_parser.jay"
+case 30:
+#line 289 "mml_parser.jay"
   {
 		yyVal = new MmlMultiplyExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
-case 25:
-#line 260 "mml_parser.jay"
+case 31:
+#line 293 "mml_parser.jay"
   {
 		yyVal = new MmlDivideExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
-case 26:
-#line 264 "mml_parser.jay"
+case 32:
+#line 297 "mml_parser.jay"
   {
 		yyVal = new MmlModuloExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
-case 29:
-#line 272 "mml_parser.jay"
+case 35:
+#line 305 "mml_parser.jay"
   {
 		yyVal = new MmlParenthesizedExpr ((MmlValueExpr) yyVals[-1+yyTop]);
 	}
   break;
-case 33:
-#line 281 "mml_parser.jay"
+case 39:
+#line 314 "mml_parser.jay"
   {
 		yyVal = new MmlMultiplyExpr ((MmlValueExpr) yyVals[0+yyTop], new MmlConstantExpr (MmlDataType.Number, -1));
 	}
   break;
-case 34:
-#line 287 "mml_parser.jay"
+case 40:
+#line 320 "mml_parser.jay"
   {
 		var i = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlVariableReferenceExpr ((string) i.Value);
 	}
   break;
-case 35:
-#line 294 "mml_parser.jay"
+case 41:
+#line 327 "mml_parser.jay"
   {
 		var t = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlConstantExpr (MmlDataType.String, (string) t.Value);
 	}
   break;
-case 36:
-#line 301 "mml_parser.jay"
+case 42:
+#line 334 "mml_parser.jay"
   {
 		var n = (MmlToken) yyVals[0+yyTop];
 		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
 		yyVal = new MmlConstantExpr (MmlDataType.Length, l);
 	}
   break;
-case 37:
-#line 307 "mml_parser.jay"
+case 43:
+#line 340 "mml_parser.jay"
   {
 		var n = (MmlToken) yyVals[0+yyTop];
 		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
 		yyVal = new MmlConstantExpr (MmlDataType.Length, l);
 	}
   break;
-case 38:
-#line 315 "mml_parser.jay"
+case 44:
+#line 348 "mml_parser.jay"
   {
 		var t = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlConstantExpr (MmlDataType.Number, t.Value);
 	}
   break;
-case 39:
-#line 320 "mml_parser.jay"
+case 45:
+#line 353 "mml_parser.jay"
   {
 		var t = (MmlToken) yyVals[-1+yyTop];
 		var d = (int) yyVals[0+yyTop];
 		yyVal = new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
 	}
   break;
-case 40:
-#line 328 "mml_parser.jay"
+case 46:
+#line 361 "mml_parser.jay"
   {
 		yyVal = 1;
 	}
   break;
-case 41:
-#line 332 "mml_parser.jay"
+case 47:
+#line 365 "mml_parser.jay"
   {
 		yyVal = ((int) yyVals[-1+yyTop]) + 1;
 	}
@@ -627,60 +668,67 @@ case 41:
    static  short [] yyLhs  = {              -1,
     0,    0,    0,    1,    1,    6,    3,    5,    5,    7,
     7,    8,    8,   10,   10,    9,    2,   11,   11,   12,
-   12,   12,   13,   13,   13,   13,   14,   14,   14,   14,
-   14,   18,   18,   15,   16,   17,   17,   19,   19,   20,
-   20,    4,    4,    4,
+   12,   14,   14,   14,   14,   13,   13,   13,   15,   15,
+   15,   15,   16,   16,   16,   16,   16,   20,   20,   17,
+   18,   19,   19,   21,   21,   22,   22,    4,    4,    4,
   };
    static  short [] yyLen = {           2,
     0,    1,    1,    1,    2,    0,    3,    1,    3,    0,
     1,    1,    3,    0,    1,    1,    1,    1,    5,    1,
-    3,    3,    1,    3,    3,    3,    1,    1,    3,    1,
-    1,    1,    2,    2,    1,    2,    3,    1,    2,    1,
-    2,    1,    1,    1,
+    3,    1,    1,    1,    1,    1,    3,    3,    1,    3,
+    3,    3,    1,    1,    3,    1,    1,    1,    2,    2,
+    1,    2,    3,    1,    2,    1,    2,    1,    1,    1,
   };
    static  short [] yyDefRed = {            0,
-   42,   35,    0,    0,    0,   44,    0,    0,   43,    0,
-    0,    3,    4,    6,   17,    0,    0,   23,   27,   28,
-   30,   31,   32,   40,    0,    0,   33,   36,    0,   34,
-    5,    0,    0,    0,    0,    0,    0,    0,   41,   29,
-   37,    0,   16,    7,    8,   11,    0,    0,    0,    0,
-    0,   24,   25,   26,    0,    0,    0,    0,    9,   13,
-   19,
+   48,   41,    0,    0,    0,   50,    0,    0,   49,    0,
+    0,    3,    4,    6,   17,    0,    0,    0,   29,   33,
+   34,   36,   37,   38,   46,    0,    0,   39,   42,    0,
+   40,    5,    0,    0,    0,    0,   22,   23,   24,   25,
+    0,    0,    0,    0,   47,   35,   43,    0,   16,    7,
+    8,   11,    0,    0,    0,    0,    0,   21,   30,   31,
+   32,    0,    0,    0,    0,    9,   13,   19,
   };
   protected static  short [] yyDgoto  = {            10,
-   11,   43,   13,   14,   44,   32,   45,   46,   47,   48,
-   15,   16,   17,   18,   19,   20,   21,   22,   23,   25,
+   11,   49,   13,   14,   50,   33,   51,   52,   53,   54,
+   15,   16,   17,   41,   18,   19,   20,   21,   22,   23,
+   24,   26,
   };
-  protected static  short [] yySindex = {         -250,
-    0,    0, -270, -228, -254,    0, -255, -246,    0,    0,
- -246,    0,    0,    0,    0, -233, -216,    0,    0,    0,
-    0,    0,    0,    0, -263, -248,    0,    0, -245,    0,
-    0, -222, -228, -228, -228, -228, -228, -228,    0,    0,
-    0, -228,    0,    0,    0,    0,    0, -242, -210, -216,
- -216,    0,    0,    0, -248, -237, -228, -228,    0,    0,
-    0,
+  protected static  short [] yySindex = {         -254,
+    0,    0, -266, -234, -247,    0, -248, -249,    0,    0,
+ -249,    0,    0,    0,    0, -244, -220, -242,    0,    0,
+    0,    0,    0,    0,    0, -243, -232,    0,    0, -221,
+    0,    0, -218, -234, -234, -234,    0,    0,    0,    0,
+ -234, -234, -234, -234,    0,    0,    0, -234,    0,    0,
+    0,    0,    0, -212, -209, -242, -242,    0,    0,    0,
+    0, -232, -225, -234, -234,    0,    0,    0,
   };
-  protected static  short [] yyRindex = {           38,
+  protected static  short [] yyRindex = {           42,
     0,    0,    1,    0,    0,    0,    0,    0,    0,    0,
-   58,    0,    0,    0,    0,   62,   29,    0,    0,    0,
-    0,    0,    0,    0,   15,    0,    0,    0,    0,    0,
-    0,   70,    0,    0,    0,    0,    0,    0,    0,    0,
-    0, -236,    0,    0,    0,    0,   64,    0,    0,   40,
-   51,    0,    0,    0, -201,    0, -200,    0,    0,    0,
-    0,
+   61,    0,    0,    0,    0,  108,  106,   43,    0,    0,
+    0,    0,    0,    0,    0,   22,    0,    0,    0,    0,
+    0,    0,   44,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0, -250,    0,    0,
+    0,    0,  119,    0,    0,   64,   85,    0,    0,    0,
+    0, -198,    0, -197,    0,    0,    0,    0,
   };
   protected static  short [] yyGindex = {            0,
-    0,    2,   50,   55,    0,    0,   23,    9,    0,    0,
-  -33,    0,   12,   19,    0,    0,    0,    0,   63,    0,
+    0,    2,   54,   58,    0,    0,   19,    4,    0,    0,
+  -34,   28,    0,    0,   -1,   16,    0,    0,    0,    0,
+   65,    0,
   };
-  protected static  short [] yyTable = {            49,
-   38,   12,   24,   28,    3,   26,    1,    2,    3,   39,
-    1,   29,    4,   41,   39,   40,    5,   57,    6,    7,
-    8,    9,    6,   14,   61,    9,   59,   10,   20,    2,
-    3,   33,   34,   35,    4,    2,    3,    1,    5,   21,
-   42,    7,    8,   55,    5,   50,   51,    7,    8,   58,
-   22,   36,   37,   38,   52,   53,   54,    2,   16,   14,
-   31,   18,   30,   12,   56,   60,    0,   27,    0,   10,
+  protected static  short [] yyTable = {            55,
+   44,   12,    1,    2,    3,   27,   25,    1,    4,   14,
+   29,    3,    5,   10,    6,    7,    8,    9,   30,    6,
+   34,   45,    9,    2,    3,   42,   43,   44,    4,   45,
+   68,   46,    5,   56,   57,    7,    8,   47,   66,    2,
+    3,    1,   26,   10,   48,   35,   36,   64,    5,   62,
+   65,    7,    8,   37,   38,   39,   40,   59,   60,   61,
+    2,   16,   14,   27,   32,   31,   63,   67,   58,   28,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   28,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,   20,    0,   18,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,   12,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -694,35 +742,35 @@ case 41:
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,   38,    0,    0,
-   38,    0,    0,    0,   38,   38,   38,   38,   38,   38,
-   38,   39,   38,    0,   39,    0,    0,    0,   39,   39,
-   39,   39,   39,   39,   39,   20,   39,    0,   20,    0,
-    0,    0,   20,   20,   20,   20,   21,    0,    0,   21,
-   20,    0,    0,   21,   21,   21,   21,   22,    0,    0,
-   22,   21,    0,    0,   22,   22,   22,   22,   18,    0,
-   12,   18,   22,   15,    0,   18,   10,   12,    0,   14,
-   18,    0,   12,   18,    0,   12,    0,    0,   10,    0,
-    0,   10,
+    0,    0,    0,    0,    0,    0,    0,   44,    0,    0,
+   44,    0,    0,    0,   44,   44,   44,   44,   44,   44,
+   44,    0,   44,    0,   44,   44,   44,   44,   45,    0,
+    0,   45,    0,    0,    0,   45,   45,   45,   45,   45,
+   45,   45,    0,   45,    0,   45,   45,   45,   45,   26,
+   10,    0,   26,   14,    0,    0,   26,   26,   26,   26,
+    0,    0,   10,    0,   26,   10,   26,   26,   26,   26,
+   27,    0,    0,   27,    0,    0,    0,   27,   27,   27,
+   27,    0,    0,    0,    0,   27,    0,   27,   27,   27,
+   27,   28,    0,    0,   28,    0,    0,    0,   28,   28,
+   28,   28,    0,    0,    0,    0,   28,    0,   28,   28,
+   28,   28,   20,    0,   18,   20,    0,   18,    0,   20,
+   20,   18,    0,    0,   20,   12,   18,   20,   15,   18,
+    0,    0,   12,    0,    0,    0,    0,   12,    0,    0,
+   12,
   };
-  protected static  short [] yyCheck = {            33,
-    0,    0,  273,  259,  259,    4,  257,  258,  259,  273,
-  257,  267,  263,  259,    0,  264,  267,  260,  269,  270,
-  271,  272,  269,  260,   58,  272,  264,  264,    0,  258,
-  259,  265,  266,  267,  263,  258,  259,    0,  267,    0,
-  263,  270,  271,   42,  267,   34,   35,  270,  271,  260,
-    0,  268,  269,  270,   36,   37,   38,    0,  260,  260,
-   11,    0,    8,    0,   42,   57,   -1,    5,   -1,    0,
+  protected static  short [] yyCheck = {            34,
+    0,    0,  257,  258,  259,    4,  273,  257,  263,  260,
+  259,  259,  267,  264,  269,  270,  271,  272,  267,  269,
+  265,    0,  272,  258,  259,  268,  269,  270,  263,  273,
+   65,  264,  267,   35,   36,  270,  271,  259,  264,  258,
+  259,    0,    0,    0,  263,  266,  267,  260,  267,   48,
+  260,  270,  271,  274,  275,  276,  277,   42,   43,   44,
+    0,  260,  260,    0,   11,    8,   48,   64,   41,    5,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,    0,   -1,    0,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
@@ -738,17 +786,22 @@ case 41:
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,  257,   -1,   -1,
   260,   -1,   -1,   -1,  264,  265,  266,  267,  268,  269,
-  270,  257,  272,   -1,  260,   -1,   -1,   -1,  264,  265,
-  266,  267,  268,  269,  270,  257,  272,   -1,  260,   -1,
-   -1,   -1,  264,  265,  266,  267,  257,   -1,   -1,  260,
-  272,   -1,   -1,  264,  265,  266,  267,  257,   -1,   -1,
-  260,  272,   -1,   -1,  264,  265,  266,  267,  257,   -1,
-  257,  260,  272,  260,   -1,  264,  257,  264,   -1,  260,
-  269,   -1,  269,  272,   -1,  272,   -1,   -1,  269,   -1,
-   -1,  272,
+  270,   -1,  272,   -1,  274,  275,  276,  277,  257,   -1,
+   -1,  260,   -1,   -1,   -1,  264,  265,  266,  267,  268,
+  269,  270,   -1,  272,   -1,  274,  275,  276,  277,  257,
+  257,   -1,  260,  260,   -1,   -1,  264,  265,  266,  267,
+   -1,   -1,  269,   -1,  272,  272,  274,  275,  276,  277,
+  257,   -1,   -1,  260,   -1,   -1,   -1,  264,  265,  266,
+  267,   -1,   -1,   -1,   -1,  272,   -1,  274,  275,  276,
+  277,  257,   -1,   -1,  260,   -1,   -1,   -1,  264,  265,
+  266,  267,   -1,   -1,   -1,   -1,  272,   -1,  274,  275,
+  276,  277,  257,   -1,  257,  260,   -1,  260,   -1,  264,
+  265,  264,   -1,   -1,  269,  257,  269,  272,  260,  272,
+   -1,   -1,  264,   -1,   -1,   -1,   -1,  269,   -1,   -1,
+  272,
   };
 
-#line 343 "mml_parser.jay"
+#line 376 "mml_parser.jay"
 
 	}
 #line default
@@ -845,9 +898,13 @@ namespace yydebug {
   public const int Dollar = 271;
   public const int Colon = 272;
   public const int Dot = 273;
-  public const int KeywordNumber = 274;
-  public const int KeywordLength = 275;
-  public const int KeywordString = 276;
+  public const int BackSlashLesser = 274;
+  public const int BackSlashLesserEqual = 275;
+  public const int BackSlashGreater = 276;
+  public const int BackSlashGreaterEqual = 277;
+  public const int KeywordNumber = 278;
+  public const int KeywordLength = 279;
+  public const int KeywordString = 280;
   public const int yyErrorCode = 256;
  }
  namespace yyParser {

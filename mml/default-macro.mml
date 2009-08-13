@@ -135,6 +135,7 @@
 #macro n key:number, KEYARGDEF   { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
+	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
 	NON$key, $vel \
 	NOP$__current_note_gate \
 	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \

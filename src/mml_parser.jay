@@ -69,6 +69,10 @@ namespace Commons.Music.Midi.Mml.Parser
 				return Token.Dollar;
 			case MmlTokenType.Colon:
 				return Token.Colon;
+			case MmlTokenType.BackSlashLesser:
+				return Token.BackSlashLesser;
+			case MmlTokenType.BackSlashGreater:
+				return Token.BackSlashGreater;
 			case MmlTokenType.KeywordNumber:
 				return Token.KeywordNumber;
 			case MmlTokenType.KeywordLength:
@@ -144,6 +148,10 @@ namespace Commons.Music.Midi.Mml.Parser
 %left Dollar
 %left Colon
 %left Dot
+%left BackSlashLesser
+%left BackSlashLesserEqual
+%left BackSlashGreater
+%left BackSlashGreaterEqual
 %left KeywordNumber
 %left KeywordLength
 %left KeywordString
@@ -233,10 +241,35 @@ Expression :
 	ConditionalExpr
 
 ConditionalExpr :
-	AddSubExpr
-	| AddSubExpr Question ConditionalExpr Comma ConditionalExpr
+	ComparisonExpr
+	| ComparisonExpr Question ConditionalExpr Comma ConditionalExpr
 	{
 		$$ = new MmlConditionalExpr ((MmlValueExpr) $1, (MmlValueExpr) $3, (MmlValueExpr) $5);
+	}
+
+ComparisonExpr :
+	AddSubExpr
+	| AddSubExpr ComparisonOperator ComparisonExpr
+	{
+		$$ = new MmlComparisonExpr ((MmlValueExpr) $1, (MmlValueExpr) $3, (ComparisonType) $2);
+	}
+
+ComparisonOperator
+	: BackSlashLesser
+	{
+		$$ = ComparisonType.Lesser;
+	}
+	| BackSlashLesserEqual
+	{
+		$$ = ComparisonType.LesserEqual;
+	}
+	| BackSlashGreater
+	{
+		$$ = ComparisonType.Greater;
+	}
+	| BackSlashGreaterEqual
+	{
+		$$ = ComparisonType.GreaterEqual;
 	}
 
 AddSubExpr :

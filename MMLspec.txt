@@ -520,8 +520,19 @@
 		'{' number_expr '}'
 
 	cond_expr ::=
-		add_sub_expr |
+		comparison_expr |
 		add_sub_expr '?' cond_expr ',' cond_expr
+
+	comparison_expr ::=
+		add_sub_expr |
+		add_sub_expr comparison_operator comparison_expr
+
+	// it requires backslash due to conflict with octave shift
+	comparison_expr ::=
+		'\<' |
+		'\<=' |
+		'\>' |
+		'\>=' |
 
 	add_sub_expr ::=
 		mul_div_mod_expr |

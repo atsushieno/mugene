@@ -27,6 +27,10 @@ namespace Commons.Music.Midi.Mml
 		Slash,
 		Dollar,
 		Colon,
+		BackSlashLesser,
+		BackSlashLesserEqual,
+		BackSlashGreater,
+		BackSlashGreaterEqual,
 		KeywordNumber,
 		KeywordLength,
 		KeywordString,
@@ -729,6 +733,7 @@ namespace Commons.Music.Midi.Mml
 			case '"': // string quotation
 			case '{': // macro body start
 			case '}': // macro body end
+			case '\\': // escape sequence marker
 				return false;
 			}
 
@@ -808,6 +813,31 @@ namespace Commons.Music.Midi.Mml
 			case '/':
 				ConsumeAsTokenOrIdentifier (MmlTokenType.Slash, "/");
 				return true;
+			case '\\':
+				Line.ReadChar ();
+				ch_ = Line.PeekChar ();
+				switch (ch_) {
+				case '<':
+					Line.ReadChar ();
+					if (Line.PeekChar () == '=')
+						ConsumeAsToken (MmlTokenType.BackSlashLesserEqual);
+					else {
+						CurrentToken = MmlTokenType.BackSlashLesser;
+						Value = null;
+					}
+					return true;
+				case '>':
+					Line.ReadChar ();
+					if (Line.PeekChar () == '=')
+						ConsumeAsToken (MmlTokenType.BackSlashGreaterEqual);
+					else {
+						CurrentToken = MmlTokenType.BackSlashGreater;
+						Value = null;
+					}
+					return true;
+				default:
+					throw new MmlException (String.Format ("Unexpected escaped token: '\\{0}'", (char) ch_), Line.Location);
+				}
 			case '$':
 				ConsumeAsToken (MmlTokenType.Dollar);
 				return true;

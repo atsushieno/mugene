@@ -240,6 +240,29 @@ namespace Commons.Music.Midi.Mml
 		}
 	}
 
+	public partial class MmlComparisonExpr : MmlValueExpr
+	{
+		public override void Resolve (MmlResolveContext ctx, MmlDataType type)
+		{
+			Left.Resolve (ctx, type);
+			Right.Resolve (ctx, type);
+			switch (ComparisonType) {
+			case ComparisonType.Lesser:
+				ResolvedValue = ((IComparable) Left.ResolvedValue).CompareTo (Right.ResolvedValue) < 0 ? 1 : 0;
+				break;
+			case ComparisonType.LesserEqual:
+				ResolvedValue = ((IComparable) Left.ResolvedValue).CompareTo (Right.ResolvedValue) <= 0 ? 1 : 0;
+				break;
+			case ComparisonType.Greater:
+				ResolvedValue = ((IComparable) Left.ResolvedValue).CompareTo (Right.ResolvedValue) > 0 ? 1 : 0;
+				break;
+			case ComparisonType.GreaterEqual:
+				ResolvedValue = ((IComparable) Left.ResolvedValue).CompareTo (Right.ResolvedValue) >= 0 ? 1 : 0;
+				break;
+			}
+		}
+	}
+
 	#endregion
 
 	#region primitive event stream structures
