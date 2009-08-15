@@ -424,7 +424,7 @@ namespace Commons.Music.Midi
 				stream.WriteByte ((byte) (shifted ? 0x80 : 0));
 				return;
 			}
-			if (value > 0x80)
+			if (value >= 0x80)
 				Write7BitVariableInteger (value >> 7, true);
 			stream.WriteByte ((byte) ((value & 0x7F) + (shifted ? 0x80 : 0)));
 		}
