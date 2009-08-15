@@ -573,7 +573,7 @@ case 35:
 case 39:
 #line 314 "mml_parser.jay"
   {
-		yyVal = new MmlMultiplyExpr ((MmlValueExpr) yyVals[0+yyTop], new MmlConstantExpr (MmlDataType.Number, -1));
+		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 40:

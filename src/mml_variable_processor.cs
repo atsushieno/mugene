@@ -194,7 +194,7 @@ namespace Commons.Music.Midi.Mml
 			// but the number must not be converted to a length e.g. "1" must not be
 			// interpreted as %{$__base_count}. Actually Length * Length must be invalid.
 
-			Left.Resolve (ctx, type);
+			Left.Resolve (ctx, MmlDataType.Number);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
 				ResolvedValue = new MmlLength ((int) (Left.DoubleValue * Right.DoubleValue)) { IsValueByStep = true };

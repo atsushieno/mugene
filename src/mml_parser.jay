@@ -312,7 +312,7 @@ UnaryExpr :
 	NumberOrLengthConstant
 	| Minus NumberOrLengthConstant
 	{
-		$$ = new MmlMultiplyExpr ((MmlValueExpr) $2, new MmlConstantExpr (MmlDataType.Number, -1));
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) $2);
 	}
 
 VariableReference :
