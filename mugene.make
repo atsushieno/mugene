@@ -87,7 +87,6 @@ EXTRAS = \
 	mml/drum-part.mml \
 	mml/gs-sysex.mml \
 	src/mml_parser.jay \
-	mml \
 	mml/nrpn-gs-xg.mml \
 	mugene.in 
 
