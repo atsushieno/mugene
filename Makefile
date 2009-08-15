@@ -18,7 +18,7 @@ ifeq ($(CONFIG),RELEASE)
  SUBDIRS =  . 
 endif
 
-# Include project specific makefile
+# プロジェクト固有のmakefileを含める
 include mugene.make
 
 CONFIG_MAKE=$(top_srcdir)/config.make

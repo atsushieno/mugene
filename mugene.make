@@ -16,6 +16,10 @@ COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
 BUILD_DIR = bin/Debug
 
+DEFAULT_MACRO_MML_SOURCE=mml/default-macro.mml
+DRUM_PART_MML_SOURCE=mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
 MUGENE_EXE_MDB_SOURCE=bin/Debug/mugene.exe.mdb
 MUGENE_EXE_MDB=$(BUILD_DIR)/mugene.exe.mdb
 
@@ -30,12 +34,22 @@ COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
 BUILD_DIR = bin/Release
 
+DEFAULT_MACRO_MML_SOURCE=mml/default-macro.mml
+DRUM_PART_MML_SOURCE=mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
 MUGENE_EXE_MDB=
 
 endif
 
 AL=al2
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
+
+PROGRAMFILES_MML = \
+	$(DEFAULT_MACRO_MML) \
+	$(DRUM_PART_MML) \
+	$(GS_SYSEX_MML) \
+	$(NRPN_GS_XG_MML)  
 
 PROGRAMFILES = \
 	$(MUGENE_EXE_MDB)  
@@ -46,6 +60,10 @@ BINARIES = \
 
 RESGEN=resgen2
 
+DEFAULT_MACRO_MML = $(BUILD_DIR)/mml/default-macro.mml
+DRUM_PART_MML = $(BUILD_DIR)/mml/drum-part.mml
+GS_SYSEX_MML = $(BUILD_DIR)/mml/gs-sysex.mml
+NRPN_GS_XG_MML = $(BUILD_DIR)/mml/nrpn-gs-xg.mml
 MUGENE = $(BUILD_DIR)/mugene
 
 FILES = \
@@ -55,7 +73,8 @@ FILES = \
 	src/mml_smf_generator.cs \
 	src/mml_tokenizer.cs \
 	src/mml_variable_processor.cs \
-	src/SMF.cs 
+	src/SMF.cs \
+	src/mml_parser.cs 
 
 DATA_FILES = 
 
@@ -67,7 +86,9 @@ EXTRAS = \
 	mml/default-macro.mml \
 	mml/drum-part.mml \
 	mml/gs-sysex.mml \
+	src/mml_parser.jay \
 	mml \
+	mml/nrpn-gs-xg.mml \
 	mugene.in 
 
 REFERENCES =  \
@@ -76,13 +97,17 @@ REFERENCES =  \
 
 DLL_REFERENCES = 
 
-CLEANFILES = $(PROGRAMFILES) $(BINARIES) 
+CLEANFILES = $(PROGRAMFILES_MML) $(PROGRAMFILES) $(BINARIES) 
 
 #Targets
-all-local: $(ASSEMBLY) $(PROGRAMFILES) $(BINARIES)  $(top_srcdir)/config.make
+all-local: $(ASSEMBLY) $(PROGRAMFILES_MML) $(PROGRAMFILES) $(BINARIES)  $(top_srcdir)/config.make
 
 
 
+$(eval $(call emit-deploy-target,DEFAULT_MACRO_MML))
+$(eval $(call emit-deploy-target,DRUM_PART_MML))
+$(eval $(call emit-deploy-target,GS_SYSEX_MML))
+$(eval $(call emit-deploy-target,NRPN_GS_XG_MML))
 $(eval $(call emit-deploy-wrapper,MUGENE,mugene,x))
 
 
@@ -105,8 +130,12 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)'
 	$(call cp,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	mkdir -p '$(DESTDIR)$(libdir)\$(PACKAGE)'
-	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)\$(PACKAGE))
+	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)/mml'
+	$(call cp,$(DEFAULT_MACRO_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call cp,$(DRUM_PART_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call cp,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call cp,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(bindir)'
 	$(call cp,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-install-local-hook prefix=$(prefix)
@@ -116,6 +145,10 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	make uninstall-satellite-assemblies prefix=$(prefix)
 	$(call rm,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)\$(PACKAGE))
+	$(call rm,$(DEFAULT_MACRO_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call rm,$(DRUM_PART_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call rm,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call rm,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
+	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)

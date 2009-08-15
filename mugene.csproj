@@ -18,6 +18,7 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Commandlineparameters>default-macro.mml drum-part.mml gs-sysex.mml nrpn-gs-xg.mml</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -30,10 +31,19 @@
   <ItemGroup>
     <None Include="LICENSE" />
     <None Include="MMLspec.txt" />
-    <None Include="mml\default-macro.mml" />
-    <None Include="mml\drum-part.mml" />
-    <None Include="mml\gs-sysex.mml" />
+    <None Include="mml\default-macro.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mml\drum-part.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mml\gs-sysex.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="src\mml_parser.jay" />
+    <None Include="mml\nrpn-gs-xg.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\mml_compiler_main.cs" />
