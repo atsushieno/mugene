@@ -1,3 +1,4 @@
 #!/bin/sh
 
-exec mono "@expanded_libdir@/@PACKAGE@/mugene.exe" default-macro.mml drum-part.mml gs-sysex.mml nrpn-gs-xg.mml "$@"
+MMLDIR=@expanded_libdir@/mugene/mml
+exec mono "@expanded_libdir@/@PACKAGE@/mugene.exe" $MMLDIR/default-macro.mml $MMLDIR/drum-part.mml $MMLDIR/gs-sysex.mml $MMLDIR/nrpn-gs-xg.mml "$@"
