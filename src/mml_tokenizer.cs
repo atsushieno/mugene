@@ -27,6 +27,7 @@ namespace Commons.Music.Midi.Mml
 		Slash,
 		Dollar,
 		Colon,
+		Caret,
 		BackSlashLesser,
 		BackSlashLesserEqual,
 		BackSlashGreater,
@@ -719,6 +720,7 @@ namespace Commons.Music.Midi.Mml
 			case '?': // conditional
 			case '+': // addition
 			case '-': // subtraction
+			case '^': // length-addition
 			case '#': // hex number prefix / preprocessor directive at line head
 				return !isStartChar; // could be part of identifier
 			case ':': // variable argument-type separator / loop break
@@ -797,6 +799,9 @@ namespace Commons.Music.Midi.Mml
 				return true;
 			case '?':
 				ConsumeAsToken (MmlTokenType.Question);
+				return true;
+			case '^':
+				ConsumeAsToken (MmlTokenType.Caret);
 				return true;
 			case '+':
 				ConsumeAsToken (MmlTokenType.Plus);

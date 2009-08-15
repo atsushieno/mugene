@@ -69,6 +69,8 @@ namespace Commons.Music.Midi.Mml.Parser
 				return Token.Dollar;
 			case MmlTokenType.Colon:
 				return Token.Colon;
+			case MmlTokenType.Caret:
+				return Token.Caret;
 			case MmlTokenType.BackSlashLesser:
 				return Token.BackSlashLesser;
 			case MmlTokenType.BackSlashGreater:
@@ -278,6 +280,10 @@ AddSubExpr :
 	{
 		$$ = new MmlAddExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
 	}
+	| AddSubExpr Caret MulDivModExpr
+	{
+		$$ = new MmlAddExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
+	}
 	| AddSubExpr Minus MulDivModExpr
 	{
 		$$ = new MmlSubtractExpr ((MmlValueExpr) $1, (MmlValueExpr) $3);
@@ -313,6 +319,10 @@ UnaryExpr :
 	| Minus NumberOrLengthConstant
 	{
 		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) $2);
+	}
+	| Caret NumberOrLengthConstant
+	{
+		$$ = new MmlAddExpr (new MmlVariableReferenceExpr ("__length"), (MmlValueExpr) $2);
 	}
 
 VariableReference :

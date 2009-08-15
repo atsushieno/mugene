@@ -1,5 +1,7 @@
 // The following variable is implicitly declared:
 // #variable __timeline_position:number
+// The following variable is explicitly declared, but used by some expressions
+// #variable __length:length // used by '^' operator.
 
 // timeline operation:
 #macro NOP val:number { __LET {"__timeline_position", $__timeline_position + $val } }
@@ -182,11 +184,6 @@
 #macro b+ KEYARGDEF { b__= 1, KEYARGAPPLY } // should be used for some chord
 
 #macro r step:length=$__length { NOP{$step} }
-
-// Tie is equivalent to + for length.
-// FIXME: this could replace ^ in textual representation (such as song titles)
-// with + - it is problematic
-#define ^ +
 
 // general Loop syntax
 #macro [ { __LOOP_BEGIN{} }

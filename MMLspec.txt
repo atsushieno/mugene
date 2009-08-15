@@ -362,7 +362,8 @@
 	(2) not allowed at head part of an identifier
 	- - (minus), as it is the (unary) negative number indicator
 	- + (plus), as it is the (unary) positive number indicator
-	- ? (question), as it is used for conditional operator.
+	- ^ (caret), as it is the (unary) conbining length indicator
+	- ? (question), as it is used for conditional operator
 	- # (number-sign), as it is a hexadecimal number starter
 
 	(3) not allowed at non-heading part of an identifier
@@ -537,6 +538,7 @@
 	add_sub_expr ::=
 		mul_div_mod_expr |
 		mul_div_mod_expr '+' add_sub_expr |
+		mul_div_mod_expr '^' add_sub_expr | // same as '+'
 		mul_div_mod_expr '-' add_sub_expr
 
 	mul_div_mod_expr ::=
@@ -549,6 +551,8 @@
 		number_token |
 		variable_reference
 
+	// FIXME: add '-' token_DECIMAL_DIGITS and '^' token_DECIMAL_DIGITS.
+	// Also mention on length (as "number-or-length").
 	number_token ::=
 		'#' token_HEX_DIGITS |
 		token_DECIMAL_DIGITS
