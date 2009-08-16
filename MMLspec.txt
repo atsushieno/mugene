@@ -129,10 +129,25 @@
 
 *** Spectra
 
-	SPECTRA is a macro argument type that takes a sequence
+	SPECTRA is a certain macro pattern that takes a sequence
 	of numbers to be translated into a sequence of events.
 
-**** General syntax
+**** Simple syntax
+
+	In MML, it is defined as SPECTRA_ONESHOT[abs,rel,sv,ev,sd,len,deltaLen]
+	where:
+		abs: macro for abstract value specification
+		rel: macro for relative value change
+		sv: start value
+		ev: end value
+		sd: start delay
+		len: total length of spectra
+		deltaLen: each step length of spectra
+
+	For example, t_160,120,8,1,32 means: "change tempo from 160 to 120, within
+	full-note-length sliced in 32th-length delta length, after 8th-length delay"
+
+**** TODO: Complicated syntax
 
 	In MML, it is defined as LFO[abs, inc, dec, sv, ev, sd, ed, ts, es, rt]
 	where:
