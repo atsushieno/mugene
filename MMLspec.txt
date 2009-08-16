@@ -340,11 +340,14 @@
 	- length
 		A single length.
 		It is converted to the actual steps at parse time.
-		2..&32 1..^32
+		ex.) 2..&32 1..^32
 	- string
 		A string literal, always surrounded by a quotation mark (").
-		A character could be escaped by # (#hex) in the literal.
-		"literal"
+		A character could be escaped by UTF-16 codepoint in \decimal; or
+		\#hex; in the literal.
+		\ is also used for escape sequence:
+			\r (CR), \n (LF), \\ (\), \/ (/), \" (")
+		ex.) "literal"
 
 *** Identifier
 	An identifier is used for name of a macro, or a variable.

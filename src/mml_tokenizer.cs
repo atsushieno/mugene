@@ -667,8 +667,23 @@ namespace Commons.Music.Midi.Mml
 					case '\\':
 						sb.Append ('\\');
 						break;
+					case 'r':
+						sb.Append ('\r');
+						break;
+					case 'n':
+						sb.Append ('\n');
+						break;
 					default:
-						throw LexerError (String.Format ("Unexpected string escape sequence: \\{0}", (char) ch));
+						Line.Location.LinePosition--;
+						if (ch == '#' || '0' <= ch && ch <= '9') {
+							sb.Append ((char) ReadNumber ());
+							ch = Line.ReadChar ();
+							if (ch != ';')
+								throw LexerError ("Unexpected string escape sequence: ';' is expected after number escape sequence");
+						}
+						else
+							throw LexerError (String.Format ("Unexpected string escape sequence: \\{0}", (char) ch));
+						break;
 					}
 					break;
 				default:
