@@ -1,0 +1,313 @@
+// Macro definitions for VSQ output support
+
+// Usage:
+//	- at beginning:
+//		- set variables for DEFINE_SINGER operation.
+//		- call VSQ_INITIALIZE_TRACK. DEFINE_SINGER is indirectly called.
+//	- at finishing:
+//		- call OUTPUT_VSQ_TEXT
+//	- define vibrato using DEFINE_VIBRATO operation. Vibrato is referenced by definition index.
+//	- write lyrics in raw Japanese (hiragana), it does not proceed timeline. They must be described only
+//	  after vibrato definitions (to not confuse lyric consumption by note operations).
+//	- write notes. Every note operation consumes one lyric.
+//	- You can apply vibrato to the next note by @V operation. Reference it by definition index.
+//	- Or you can also apply vibrato to every following note by @VV operation. (Reference by index too.)
+//	- BPList  operations are:
+//		- P : PitchBend
+//		- D : Dynamics
+//		- BRE : Breathiness
+//		- BRI : Brightness
+//		- C : Clearness
+//		- H : Harmonics (valid only in Vocaloid1)
+//		- XD : VibTrimDepth
+//		- G : Gender factor
+//		- POR : Portamento Timing
+//		- O : Opening
+//	- NRPNs are supported as is; use NRPN and DTE operations.
+
+// Buffer definitions
+#variable EntireText:buffer
+#variable Common:buffer
+#variable Master:buffer
+#variable Mixer:buffer
+#variable Events:buffer
+#variable Handles:buffer
+#variable PitchBendList:buffer
+#variable PitchBendSensBPList:buffer
+#variable DynamicsBPList:buffer
+#variable EpRResidualBPList:buffer
+#variable EpRESlopeBPList:buffer
+#variable EpRESlopeDepthBPList:buffer
+#variable EpRSineBPList:buffer
+// They are renamed from 1-4 to A-D as numbers are invalid as an identifier character.
+#variable ResoAFreqBPList:buffer
+#variable ResoBFreqBPList:buffer
+#variable ResoCFreqBPList:buffer
+#variable ResoDFreqBPList:buffer
+#variable ResoABWBPList:buffer
+#variable ResoBBWBPList:buffer
+#variable ResoCBWBPList:buffer
+#variable ResoDBWBPList:buffer
+#variable ResoAAmpBPList:buffer
+#variable ResoBAmpBPList:buffer
+#variable ResoCAmpBPList:buffer
+#variable ResoDAmpBPList:buffer
+#variable VibTremDepthBPList:buffer
+#variable GenderFactorBPList:buffer
+#variable PortamentTimingBPList:buffer
+#variable OpeningBPList:buffer
+
+#macro OUTPUT_VSQ_TEXT { \
+	__STORE { "EntireText", $Common, $Master, $Mixer, "[EventList]\n", $Events, $Handles \
+		,$PitchBendList \
+		,$PitchBendSensBPList \
+		,$DynamicsBPList \
+		,$EpRResidualBPList \
+		,$EpRESlopeBPList \
+		,$EpRESlopeDepthBPList \
+		,$EpRSineBPList \
+		,$ResoAFreqBPList \
+		,$ResoBFreqBPList \
+		,$ResoCFreqBPList \
+		,$ResoDFreqBPList \
+		,$ResoABWBPList \
+		,$ResoBBWBPList \
+		,$ResoCBWBPList \
+		,$ResoDBWBPList \
+		,$ResoAAmpBPList \
+		,$ResoBAmpBPList \
+		,$ResoCAmpBPList \
+		,$ResoDAmpBPList \
+		,$VibTremDepthBPList \
+		,$GenderFactorBPList \
+		,$PortamentTimingBPList \
+		,$OpeningBPList \
+		} \
+	TEXT $EntireText \
+	}
+
+#variable IconID:string = "$07010000"
+#variable IDS:string = "Miku"
+#variable Original:number = 0
+#variable Caption:string
+#variable Length:number = 1
+#variable Language:number = 0
+#variable Program:number = 0
+
+#variable __handle_defs:number = 0
+
+// Singer definition ----
+// relevant variables: $IconID, $IDS, $Original, $Caption, $Length, $Language, $Program
+#macro DEFINE_SINGER { \
+	__STORE { \
+		"Handles", "[h#0000]\nIconID=", $IconID, "\nIDS=", $IDS, \
+		"\nOriginal=", $Original, "\nCaption=", $Caption, "\nLength=", $Length, \
+		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
+	__STORE {"Events", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
+	__LET { "__handle_defs", $__handle_defs + 1 } \
+	}
+
+#macro VSQ_INITIALIZE_TRACK { \
+	__STORE {"Common", "[Common]\n"} \
+	__STORE {"Master", "[Master]\n"} \
+	__STORE {"Mixer", "[Mixer]\n"} \
+	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
+	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
+	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
+	__STORE {"EpRResidualBPList", "[EpRResidualBPList]\n"} \
+	__STORE {"EpRESlopeBPList", "[EpRESlopeBPList]\n"} \
+	__STORE {"EpRESlopeDepthBPList", "[EpRESlopeDepthBPList]\n"} \
+	__STORE {"EpRSineBPList", "[EpRSineBPList]\n"} \
+	__STORE {"ResoAFreqBPList", "[Reso1FreqBPList]\n"} \
+	__STORE {"ResoBFreqBPList", "[Reso2FreqBPList]\n"} \
+	__STORE {"ResoCFreqBPList", "[Reso3FreqBPList]\n"} \
+	__STORE {"ResoDFreqBPList", "[Reso4FreqBPList]\n"} \
+	__STORE {"ResoABWBPList", "[Reso1BWBPList]\n"} \
+	__STORE {"ResoBBWBPList", "[Reso2BWBPList]\n"} \
+	__STORE {"ResoCBWBPList", "[Reso3BWBPList]\n"} \
+	__STORE {"ResoDBWBPList", "[Reso4BWBPList]\n"} \
+	__STORE {"ResoAAmpBPList", "[Reso1AmpBPList]\n"} \
+	__STORE {"ResoBAmpBPList", "[Reso2AmpBPList]\n"} \
+	__STORE {"ResoCAmpBPList", "[Reso3AmpBPList]\n"} \
+	__STORE {"ResoDAmpBPList", "[Reso4AmpBPList]\n"} \
+	__STORE {"VibTremDepthBPList", "[VibTremDepthBPList]\n"} \
+	__STORE {"GenderFactorBPList", "[GenderFactorBPList]\n"} \
+	__STORE {"PortamentTimingBPList", "[PortamentTimingBPList]\n"} \
+	__STORE {"OpeningBPList", "[OpeningBPList]\n"} \
+	DEFINE_SINGER \
+	}
+
+#macro LYRIC label:string, en:string, params:string { \
+	__STORE_FORMAT {"Handles", "[h#{0:D04}]\n", $__handle_defs } \
+	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
+	__LET{"__handle_defs", $__handle_defs + 1}
+// lyric macros are defined later (they are bunch).
+
+// Vibrato operations ----
+#macro DEFINE_VIBRATO \
+	ids:string="normal", caption:string, original:number=1, startRate:number, \
+	startDepth:number, len:number, depthBPNum:number=0, RateBPNum:number=0 { \
+	__STORE_FORMAT {"Handles", "[h#{0:D04}]\n", $__handle_defs } \
+	__STORE {"Handles", "IconID=$04040001", "\nIDS=", $ids, "\nOriginal=", $original, \
+		"\nCaption=", $caption, "\nLength=", $len, "\nStartDepth=", $startDepth, \
+		"\nDepthBPNum=", $depthBPNum, "\nStartRate=", $startRate, \
+		"\nRateBPNum=", $rateBPNum, "\n" } \
+	__LET {"__handle_defs", $__handle_defs + 1 } \
+	__LET {"__handle_uses", $__handle_defs } \
+	}
+
+#macro @V id:number { __LET { "vibrato", $id } } // ID is the defined order.
+#macro @VV id:number { __LET {"vibrato_constant", $id } @V $id }
+
+// Note operations ----
+#variable dynamics:number = 0
+#variable pm_bend_depth:number = 0
+#variable pm_bend_length:number = 0
+#variable pmb_portament_use:number = 0
+#variable handle_uses:number = 0
+#macro n key:number, len:length, gate:length { \
+	__STORE { "Events", "Type=Anote\nLength=", $len, "\nNote=", $key, \
+	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
+	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
+	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
+	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, \
+	$vibrato ? {"\nVibratoHandle=" + $vibrato }, "", "\n" } \
+	__LET {"vibrato", $vibrato_constant } \
+	__LET {"__handle_uses", $__handle_uses + 1 } } // One note operation consumes one lyric handle
+
+// BPLists ----
+#variable __pitch_bend_bp:number
+#macro P val:number { __LET { "__pitch_bend_bp", $val } __STORE { "PitchBendBPList", $__timeline_position, "=", $val, "\n" } }
+#macro P+ val:number { P $__pitch_bend_bp + $val }
+#macro P_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+#variable __dynamics
+#macro D val:number { __LET { "__dynamics", $val } __STORE { "DynamicsBPList", $__timeline_position, "=", $val, "\n" } }
+#macro D+ val:number { D $__dynamics + $val }
+#macro D_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "D", "D+", SPECTRA_ONESHOT_ARG_USE }
+#variable __breathiness
+#macro BRE val:number { __LET { "__breathiness", $val } __STORE { "EpRResidualBPList", $__timeline_position, "=", $val, "\n" } }
+#macro BRE+ val:number { BRE $__breathiness + $val }
+#macro BRE_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "BRE", "BRE+", SPECTRA_ONESHOT_ARG_USE }
+#variable __brightness
+#macro BRI val:number { __LET { "__brightness", $val } __STORE { "EpRESlopeBPList", $__timeline_position, "=", $val, "\n" } }
+#macro BRI+ val:number { BRE $__brightness + $val }
+#macro BRI_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "BRI", "BRI+", SPECTRA_ONESHOT_ARG_USE }
+#variable __clearness
+#macro C val:number { __LET { "__clearness", $val } __STORE { "EpRESlopeDepthBPList", $__timeline_position, "=", $val, "\n" } }
+#macro C+ val:number { BRE $__clearness + $val }
+#macro C_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "C", "C+", SPECTRA_ONESHOT_ARG_USE }
+#variable __harmonics
+#macro H val:number { __LET { "__harmonics", $val } __STORE { "EpRSineBPList", $__timeline_position, "=", $val, "\n" } }
+#macro H+ val:number { BRE $__harmonics + $val }
+#macro H_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "H", "H+", SPECTRA_ONESHOT_ARG_USE }
+#variable __vib_trem_depth
+#macro XD val:number { __LET { "__vib_trem_depth", $val } __STORE { "VibTremDepthBPList", $__timeline_position, "=", $val, "\n" } }
+#macro XD+ val:number { BRE $__vib_trem_depth + $val }
+#macro XD_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "XD", "XD+", SPECTRA_ONESHOT_ARG_USE }
+#variable __gender_factor
+#macro G val:number { __LET { "__gender_factor", $val } __STORE { "GenderFactorBPList", $__timeline_position, "=", $val, "\n" } }
+#macro G+ val:number { BRE $__gender_factor + $val }
+#macro G_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "G", "G+", SPECTRA_ONESHOT_ARG_USE }
+#variable __portamento_timing
+#macro POR val:number { __LET { "__portamento_timing", $val } __STORE { "PortamentoTimingBPList", $__timeline_position, "=", $val, "\n" } }
+#macro POR+ val:number { BRE $__portamento_timing + $val }
+#macro POR_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "POR", "POR+", SPECTRA_ONESHOT_ARG_USE }
+#variable __opening
+#macro O val:number { __LET { "__opening", $val } __STORE { "OpeningBPList", $__timeline_position, "=", $val, "\n" } }
+#macro O+ val:number { BRE $__opening + $val }
+#macro O_ SPECTRA_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
+
+
+// Lyrics macro ----
+#macro あ en:string="a",params:string="0" { LYRIC "あ",$en,$params }
+#macro い en:string="i",params:string="0" { LYRIC "い",$en,$params }
+#macro う en:string="M",params:string="0" { LYRIC "う",$en,$params }
+#macro え en:string="e",params:string="0" { LYRIC "え",$en,$params }
+#macro お en:string="o",params:string="0" { LYRIC "お",$en,$params }
+#macro か en:string="k a",params:string="64,0" { LYRIC "か",$en,$params }
+#macro き en:string="k' i",params:string="64,0" { LYRIC "き",$en,$params }
+#macro く en:string="k M",params:string="64,0" { LYRIC "く",$en,$params }
+#macro け en:string="k e",params:string="64,0" { LYRIC "け",$en,$params }
+#macro こ en:string="k o",params:string="64,0" { LYRIC "こ",$en,$params }
+#macro が en:string="g a",params:string="64,0" { LYRIC "が",$en,$params }
+#macro ぎ en:string="g' i",params:string="64,0" { LYRIC "ぎ",$en,$params }
+#macro ぐ en:string="g M",params:string="64,0" { LYRIC "ぐ",$en,$params }
+#macro げ en:string="g e",params:string="64,0" { LYRIC "げ",$en,$params }
+#macro ご en:string="g o",params:string="64,0" { LYRIC "ご",$en,$params }
+#macro んが en:string="N a",params:string="64,0" { LYRIC "んが",$en,$params }
+#macro んぎ en:string="N' i",params:string="64,0" { LYRIC "んぎ",$en,$params }
+#macro んぐ en:string="N M",params:string="64,0" { LYRIC "んぐ",$en,$params }
+#macro んげ en:string="N e",params:string="64,0" { LYRIC "んげ",$en,$params }
+#macro んご en:string="N o",params:string="64,0" { LYRIC "んご",$en,$params }
+#macro さ en:string="s a",params:string="64,0" { LYRIC "さ",$en,$params }
+#macro し en:string="S i",params:string="64,0" { LYRIC "し",$en,$params }
+#macro す en:string="s M",params:string="64,0" { LYRIC "す",$en,$params }
+#macro せ en:string="s e",params:string="64,0" { LYRIC "せ",$en,$params }
+#macro そ en:string="s o",params:string="64,0" { LYRIC "そ",$en,$params }
+#macro ざ en:string="z a",params:string="64,0" { LYRIC "ざ",$en,$params }
+#macro じ en:string="Z i",params:string="64,0" { LYRIC "じ",$en,$params }
+#macro ず en:string="z M",params:string="64,0" { LYRIC "ず",$en,$params }
+#macro ぜ en:string="z e",params:string="64,0" { LYRIC "ぜ",$en,$params }
+#macro ぞ en:string="z o",params:string="64,0" { LYRIC "ぞ",$en,$params }
+#macro _ざ en:string="dz a",params:string="64,0" { LYRIC "ざ",$en,$params }	// 単語の始め
+#macro _じ en:string="dZ i",params:string="64,0" { LYRIC "じ",$en,$params }
+#macro _ず en:string="dz M",params:string="64,0" { LYRIC "ず",$en,$params }
+#macro _ぜ en:string="dz e",params:string="64,0" { LYRIC "ぜ",$en,$params }
+#macro _ぞ en:string="dz o",params:string="64,0" { LYRIC "ぞ",$en,$params }
+#macro た en:string="t a",params:string="64,0" { LYRIC "た",$en,$params }
+#macro てぃ en:string="t i",params:string="64,0" { LYRIC "てぃ",$en,$params }
+#macro ち en:string="tS i",params:string="64,0" { LYRIC "ち",$en,$params }
+#macro つ en:string="ts M",params:string="64,0" { LYRIC "つ",$en,$params }
+#macro て en:string="t e",params:string="64,0" { LYRIC "て",$en,$params }
+#macro と en:string="t o",params:string="64,0" { LYRIC "と",$en,$params }
+#macro だ en:string="d a",params:string="64,0" { LYRIC "だ",$en,$params }
+#macro ぢ en:string="Z i",params:string="64,0" { LYRIC "ぢ",$en,$params }
+#macro づ en:string="z M",params:string="64,0" { LYRIC "づ",$en,$params }
+#macro でぃ en:string="d' i",params:string="64,0" { LYRIC "でぃ",$en,$params }
+#macro どぅ en:string="d M",params:string="64,0" { LYRIC "どぅ",$en,$params }
+#macro で en:string="d e",params:string="64,0" { LYRIC "で",$en,$params }
+#macro ど en:string="d o",params:string="64,0" { LYRIC "ど",$en,$params }
+#macro な en:string="n a",params:string="64,0" { LYRIC "な",$en,$params }
+#macro に en:string="J i",params:string="64,0" { LYRIC "に",$en,$params }
+#macro ぬ en:string="n M",params:string="64,0" { LYRIC "ぬ",$en,$params }
+#macro ね en:string="n e",params:string="64,0" { LYRIC "ね",$en,$params }
+#macro の en:string="n o",params:string="64,0" { LYRIC "の",$en,$params }
+#macro は en:string="h\\ a",params:string="64,0" { LYRIC "は",$en,$params }	// 単語の途中
+#macro ひ en:string="C i",params:string="64,0" { LYRIC "ひ",$en,$params }
+#macro ふぃ en:string="p\\' i",params:string="64,0" { LYRIC "ふぃ",$en,$params }
+#macro ふ en:string="p\\ M",params:string="64,0" { LYRIC "ふ",$en,$params }
+#macro へ en:string="h\\ e",params:string="64,0" { LYRIC "へ",$en,$params }
+#macro ほ en:string="h\\ o",params:string="64,0" { LYRIC "ほ",$en,$params }
+#macro _は en:string="h a",params:string="64,0" { LYRIC "は",$en,$params }	// (単語の始め)
+#macro _ひ en:string="C i",params:string="64,0" { LYRIC "ひ",$en,$params }
+#macro _ふぃ en:string="p\\' i",params:string="64,0" { LYRIC "ふぃ",$en,$params }
+#macro _ふ en:string="p\\ M",params:string="64,0" { LYRIC "ふ",$en,$params }
+#macro _へ en:string="h e",params:string="64,0" { LYRIC "へ",$en,$params }
+#macro _ほ en:string="h o",params:string="64,0" { LYRIC "ほ",$en,$params }
+#macro ば en:string="b a",params:string="64,0" { LYRIC "ば",$en,$params }
+#macro び en:string="b' i",params:string="64,0" { LYRIC "び",$en,$params }
+#macro ぶ en:string="b M",params:string="64,0" { LYRIC "ぶ",$en,$params }
+#macro べ en:string="b e",params:string="64,0" { LYRIC "べ",$en,$params }
+#macro ぼ en:string="b o",params:string="64,0" { LYRIC "ぼ",$en,$params }
+#macro ぱ en:string="p a",params:string="64,0" { LYRIC "ぱ",$en,$params }
+#macro ぴ en:string="p' i",params:string="64,0" { LYRIC "ぴ",$en,$params }
+#macro ぷ en:string="p M",params:string="64,0" { LYRIC "ぷ",$en,$params }
+#macro ぺ en:string="p e",params:string="64,0" { LYRIC "ぺ",$en,$params }
+#macro ぽ en:string="p o",params:string="64,0" { LYRIC "ぽ",$en,$params }
+#macro ま en:string="m a",params:string="64,0" { LYRIC "ま",$en,$params }
+#macro み en:string="m' i",params:string="64,0" { LYRIC "み",$en,$params }
+#macro む en:string="m M",params:string="64,0" { LYRIC "む",$en,$params }
+#macro め en:string="m e",params:string="64,0" { LYRIC "め",$en,$params }
+#macro も en:string="m o",params:string="64,0" { LYRIC "も",$en,$params }
+#macro や en:string="j a",params:string="64,0" { LYRIC "や",$en,$params }
+#macro ゆ en:string="j u",params:string="64,0" { LYRIC "ゆ",$en,$params }
+#macro よ en:string="j o",params:string="64,0" { LYRIC "よ",$en,$params }
+#macro ら en:string="4 a",params:string="64,0" { LYRIC "ら",$en,$params }
+#macro り en:string="4' i",params:string="64,0" { LYRIC "り",$en,$params }
+#macro る en:string="4 M",params:string="64,0" { LYRIC "る",$en,$params }
+#macro れ en:string="4 e",params:string="64,0" { LYRIC "れ",$en,$params }
+#macro ろ en:string="4 o",params:string="64,0" { LYRIC "ろ",$en,$params }
+#macro わ en:string="w a",params:string="64,0" { LYRIC "わ",$en,$params }
+#macro を en:string="o",params:string="0" { LYRIC "を",$en,$params }
+// FIXME: define ん
+
