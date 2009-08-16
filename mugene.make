@@ -88,6 +88,7 @@ EXTRAS = \
 	mml/gs-sysex.mml \
 	src/mml_parser.jay \
 	mml/nrpn-gs-xg.mml \
+	mml/vsq-support.mml \
 	mugene.in 
 
 REFERENCES =  \
