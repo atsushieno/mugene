@@ -344,21 +344,29 @@ namespace Commons.Music.Midi
 
 			foreach (SmfEvent e in track.Events) {
 				Write7BitVariableInteger (e.DeltaTime);
-				if (DisableRunningStatus || running_status >= 0xF0 || e.Message.StatusByte != running_status)
-					stream.WriteByte (e.Message.StatusByte);
-				running_status = e.Message.StatusByte;
 				switch (e.Message.MessageType) {
 				case SmfMessage.Meta:
-					stream.WriteByte (e.Message.MetaType);
-					Write7BitVariableInteger (e.Message.Data.Length);
-					stream.Write (e.Message.Data, 0, e.Message.Data.Length);
+					int written = 0;
+					int total = e.Message.Data.Length;
+					do {
+						stream.WriteByte (0xFF);
+						stream.WriteByte (e.Message.MetaType);
+						int size = Math.Min (0x7F, total - written);
+						stream.WriteByte ((byte) size);
+						stream.Write (e.Message.Data, written, size);
+						written += size;
+					} while (written < total);
 					break;
 				case SmfMessage.SysEx1:
 				case SmfMessage.SysEx2:
+					stream.WriteByte (e.Message.MessageType);
 					Write7BitVariableInteger (e.Message.Data.Length);
 					stream.Write (e.Message.Data, 0, e.Message.Data.Length);
 					break;
 				default:
+					if (DisableRunningStatus || e.Message.StatusByte != running_status)
+						stream.WriteByte (e.Message.StatusByte);
+					running_status = e.Message.StatusByte;
 					int len = SmfMessage.FixedDataSize (e.Message.MessageType);
 					stream.WriteByte (e.Message.Msb);
 					if (len > 1)
