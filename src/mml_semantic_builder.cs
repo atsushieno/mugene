@@ -364,7 +364,8 @@ namespace Commons.Music.Midi.Mml
 				use.Arguments.Add (new MmlConstantExpr (MmlDataType.String, p.Value));
 				metaTrack.Data.Add (use);
 			}
-			result.Tracks.Add (metaTrack);
+			if (metaTrack.Data.Count > 0)
+				result.Tracks.Add (metaTrack);
 			// compile variable reference tokens into expr
 			foreach (var variable in token_set.Variables)
 				result.Variables.Add (BuildVariableDeclaration (variable));
