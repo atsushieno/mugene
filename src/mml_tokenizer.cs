@@ -35,6 +35,7 @@ namespace Commons.Music.Midi.Mml
 		KeywordNumber,
 		KeywordLength,
 		KeywordString,
+		KeywordBuffer,
 	}
 
 	public class MmlTokenSet
@@ -899,6 +900,9 @@ namespace Commons.Music.Midi.Mml
 			} else if (Line.TryMatch ("string")) {
 				Value = MmlDataType.String;
 				CurrentToken = MmlTokenType.KeywordString;
+			} else if (Line.TryMatch ("buffer")) {
+				Value = MmlDataType.Buffer;
+				CurrentToken = MmlTokenType.KeywordBuffer;
 			}
 			else
 				return false;

@@ -112,6 +112,8 @@ namespace Commons.Music.Midi.Mml
 			l.Add (new MmlPrimitiveOperation () { Name = "__UNLOCATE"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__PRINT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LET"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__STORE"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__STORE_FORMAT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__APPLY"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__ON_MIDI_NOTE_OFF"});
@@ -133,6 +135,7 @@ namespace Commons.Music.Midi.Mml
 		Number,
 		Length,
 		String,
+		Buffer,
 	}
 
 	public struct MmlLength

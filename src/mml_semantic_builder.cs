@@ -72,6 +72,11 @@ namespace Commons.Music.Midi.Mml
 			case MmlDataType.String:
 				DefaultValue = new MmlConstantExpr (Type, "");
 				break;
+			case MmlDataType.Buffer:
+				// Note that it never fills a specific StringBuilder object
+				// It should be instantiated in each Resolve() evaluation instead.
+				DefaultValue = new MmlConstantExpr (Type, null);
+				break;
 			case MmlDataType.Any:
 				// it happens only for macro arg definition.
 				break;
@@ -79,7 +84,7 @@ namespace Commons.Music.Midi.Mml
 				throw new NotImplementedException ("type " + Type);
 			}
 		}
-		
+
 		public override string ToString ()
 		{
 			if (DefaultValue != null)

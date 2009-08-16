@@ -81,6 +81,8 @@ namespace Commons.Music.Midi.Mml.Parser
 				return Token.KeywordLength;
 			case MmlTokenType.KeywordString:
 				return Token.KeywordString;
+			case MmlTokenType.KeywordBuffer:
+				return Token.KeywordBuffer;
 			}
 			throw new Exception ("Internal error: unexpected MmlTokenType: " + tokens [idx].TokenType);
 		}
@@ -157,6 +159,7 @@ namespace Commons.Music.Midi.Mml.Parser
 %left KeywordNumber
 %left KeywordLength
 %left KeywordString
+%left KeywordBuffer
 
 %start ExpressionOrOptOperationUses
 

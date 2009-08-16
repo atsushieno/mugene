@@ -105,6 +105,9 @@
 
 	variable binding:
 		__LET{"name", value} // give variable name as a string variable
+		__STORE{"name", values} // stores values appended to a buffer variable
+		__STORE_FORMAT{"name, value} // stores the value formatted *as an integer*,
+			// to a buffer variable.
 
 *** Operations over steps
 
@@ -348,6 +351,10 @@
 		\ is also used for escape sequence:
 			\r (CR), \n (LF), \\ (\), \/ (/), \" (")
 		ex.) "literal"
+	- buffer
+		A string buffer that can be used with __STORE and __STORE_FORMAT
+		operations. They are to save string buffer for some high-level
+		meta text processing.
 
 *** Identifier
 	An identifier is used for name of a macro, or a variable.
@@ -489,6 +496,8 @@
 
 	primitive_track_control ::=
 		"__LET" string ',' number_expr |
+		"__STORE" string ',' arguments |
+		"__STORE_FORMAT" string ',' string ',' argument |
 		"__LOOP_BEGIN" |
 		"__LOOP_BREAK number_token_list | /* explicit numbers only */
 		"__LOOP_END" number_token |       /* explicit number only */

@@ -44,7 +44,7 @@ namespace Commons.Music.Midi.Mml
 
 		public byte [] ByteArrayValue {
 			get {
-				if (ResolvedValue is string)
+				if (ResolvedValue is string || ResolvedValue is StringBuilder)
 					return StringToBytes (StringValue);
 				return new byte [] { ByteValue };
 			}
@@ -60,7 +60,7 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		public string StringValue {
-			get { return (string) ResolvedValue; }
+			get { return ResolvedValue.ToString (); }
 		}
 
 		public static object GetTypedValue (object value, MmlDataType type)
@@ -70,9 +70,7 @@ namespace Commons.Music.Midi.Mml
 			case MmlDataType.Any:
 				return value;
 			case MmlDataType.String:
-				if (value is string)
-					return value;
-				break; // error
+				return value.ToString ();
 			case MmlDataType.Number:
 				if (value is double)
 					return value;
@@ -106,7 +104,12 @@ namespace Commons.Music.Midi.Mml
 	{
 		public override void Resolve (MmlResolveContext ctx, MmlDataType type)
 		{
-			ResolvedValue = GetTypedValue (Value, type);
+			if (ResolvedValue == null) {
+				if (type == MmlDataType.Buffer)
+					ResolvedValue = new StringBuilder ();
+				else
+					ResolvedValue = GetTypedValue (Value, type);
+			}
 		}
 	}
 
@@ -141,12 +144,8 @@ namespace Commons.Music.Midi.Mml
 			if (variable == null)
 				// FIXME: supply location
 				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), null);
-			object val;
-			if (ctx.Values.TryGetValue (variable, out val))
-				ResolvedValue = val;
-			else
-				ResolvedValue = variable.DefaultValue.ResolvedValue;
-			ResolvedValue = GetTypedValue (ResolvedValue, type);
+			var val = ctx.EnsureDefaultResolvedVariable (variable);
+			ResolvedValue = GetTypedValue (val, type);
 //Util.DebugWriter.WriteLine ("**** resolved value for {0} is {1}, of type {2}", this, ResolvedValue, type);
 		}
 	}
@@ -386,6 +385,17 @@ namespace Commons.Music.Midi.Mml
 		public Loop CurrentLoop {
 			get { return Loops.Count > 0 ? Loops.Peek () : null; }
 		}
+		
+		public object EnsureDefaultResolvedVariable (MmlSemanticVariable variable)
+		{
+			object val;
+			if (!Values.TryGetValue (variable, out val)) {
+				variable.DefaultValue.Resolve (this, variable.Type);
+				val = variable.DefaultValue.ResolvedValue;
+				Values [variable] = val;
+			}
+			return val;
+		}
 	}
 
 	public class MmlEventStreamGenerator
@@ -437,8 +447,8 @@ namespace Commons.Music.Midi.Mml
 		{
 //Util.DebugWriter.WriteLine ("Resolve variables in track {0}", track.Number);
 
-			for (int i = start; i < start + count; i++) {
-				var oper = list [i];
+			for (int listIndex = start; listIndex < start + count; listIndex++) {
+				var oper = list [listIndex];
 
 				var pop = MmlPrimitiveOperation.All.FirstOrDefault (o => o.Name == oper.Name);
 				if (pop == null)
@@ -470,6 +480,35 @@ namespace Commons.Music.Midi.Mml
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
 					if (name == "__timeline_position")
 						rctx.TimelinePosition = oper.Arguments [1].IntValue;
+					break;
+					}
+				case "__STORE": {
+					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
+					oper.ValidateArguments (rctx, oper.Arguments.Count);
+					string name = oper.Arguments [0].StringValue;
+					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
+					if (variable == null)
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+					if (variable.Type != MmlDataType.Buffer)
+						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
+					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
+					for (int i = 1; i < oper.Arguments.Count; i++)
+						sb.Append (oper.Arguments [i].StringValue);
+					break;
+					}
+				case "__STORE_FORMAT": {
+					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
+					oper.Arguments [1].Resolve (rctx, MmlDataType.String);
+					oper.ValidateArguments (rctx, oper.Arguments.Count);
+					string name = oper.Arguments [0].StringValue;
+					string format = oper.Arguments [1].StringValue;
+					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
+					if (variable == null)
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+					if (variable.Type != MmlDataType.Buffer)
+						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
+					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
+					sb.AppendFormat (format, oper.Arguments [2].IntValue);
 					break;
 					}
 				case "__MACRO_ARG_DEF":
@@ -540,7 +579,7 @@ namespace Commons.Music.Midi.Mml
 					break;
 				case "__LOOP_BEGIN":
 					oper.ValidateArguments (rctx, 0);
-					var loop = new Loop (rctx) { BeginAt= new LoopLocation (i, current_output.Count, rctx.TimelinePosition) };
+					var loop = new Loop (rctx) { BeginAt= new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition) };
 					rctx.Values = new Dictionary<MmlSemanticVariable,object> (loop.SavedValues.Count);
 					foreach (var p in loop.SavedValues)
 						rctx.Values.Add (p.Key, p.Value);
@@ -553,16 +592,16 @@ namespace Commons.Music.Midi.Mml
 					if (loop == null)
 						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", location);
 					if (loop.FirstBreakAt == null)
-						loop.FirstBreakAt = new LoopLocation (i, current_output.Count, rctx.TimelinePosition);
+						loop.FirstBreakAt = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					foreach (var cl in loop.CurrentBreaks)
-						loop.EndLocations [cl] = new LoopLocation (i, current_output.Count, rctx.TimelinePosition);
+						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					loop.CurrentBreaks.Clear ();
 
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
 						if (loop.Breaks.ContainsKey (-1))
 							throw new MmlException ("Default loop break is already defined in current loop", location);
-						loop.Breaks.Add (-1, new LoopLocation (i, current_output.Count, rctx.TimelinePosition));
+						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
 					} else {
 						for (int x = 0; x < oper.Arguments.Count; x++) {
@@ -574,7 +613,7 @@ namespace Commons.Music.Midi.Mml
 							if (loop.Breaks.ContainsKey (num))
 								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), location);
 							// specified loop count is for human users. Here the number is for program, hence -1.
-							loop.Breaks.Add (num, new LoopLocation (i, current_output.Count, rctx.TimelinePosition));
+							loop.Breaks.Add (num, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						}
 					}
 					break;
@@ -584,7 +623,7 @@ namespace Commons.Music.Midi.Mml
 					if (loop == null)
 						throw new MmlException ("Loop has not started", location);
 					foreach (var cl in loop.CurrentBreaks)
-						loop.EndLocations [cl] = new LoopLocation (i, current_output.Count, rctx.TimelinePosition);
+						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					int loopCount;
 					switch (oper.Arguments.Count) {
 					case 0:
@@ -630,7 +669,7 @@ namespace Commons.Music.Midi.Mml
 
 						// This range of commands actually adds extra argument definitions for loop operation, but it won't hurt.
 						for (int l = 0; l < loopCount; l++)
-							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, i  - loop.BeginAt.Source - 2);
+							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, listIndex  - loop.BeginAt.Source - 2);
 #endif
 					} else { // w/ breaks
 						baseTicks = loop.FirstBreakAt.Tick - loop.BeginAt.Tick;
