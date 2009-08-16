@@ -653,3 +653,14 @@
 ** The compiler design
 
 	The compiler is written in C#.
+
+	Meaningful compiler options are:
+
+		--encoding:name : specify text encoding name for string values.
+		--output:filename : give a specific output filename. By default
+			the output file name is a renamed to ".mid" file of the *final*
+			compiler file argument.
+		--verbose : gives some debugging output
+
+	The unix shell "mugene" takes mml filenames in lib/mugene/mml
+	directory as arguments.

@@ -61,16 +61,29 @@ namespace Commons.Music.Midi.Mml
 		{
 			// file names -> input sources
 			var inputs = new List<MmlInputSource> ();
-			string outfilename = null;
+			string outfilename = null, explicitfilename = null;
 			foreach (string arg in args) {
 				switch (arg) {
 				case "--verbose":
 					verbose = true;
 					continue;
+				default:
+					if (arg.StartsWith ("--encoding:", StringComparison.Ordinal)) {
+						var enc = Encoding.GetEncoding (arg.Substring (11));
+						MmlValueExpr.StringToBytes = s => enc.GetBytes (s);
+						continue;
+					}
+					if (arg.StartsWith ("--output:", StringComparison.Ordinal)) {
+						explicitfilename = arg.Substring (9);
+						continue;
+					}
+					break;
 				}
 				outfilename = Path.ChangeExtension (arg, ".mid");
 				inputs.Add (new MmlInputSource (arg, Resolver.Resolve (arg)));
 			}
+			if (explicitfilename != null)
+				outfilename = explicitfilename;
 
 			// input sources -> tokenizer sources
 			var tokenizerSources = MmlInputSourceReader.Parse (inputs);
@@ -91,10 +104,6 @@ namespace Commons.Music.Midi.Mml
 			var smf = MmlSmfGenerator.Generate (resolved);
 
 			// output
-			if (outfilename == null) {
-				Console.WriteLine ("Give me input file other than default macro");
-				return;
-			}
 			using (var outfile = File.Create (outfilename))
 				new SmfWriter (outfile).WriteMusic (smf);
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
