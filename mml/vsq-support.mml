@@ -28,8 +28,7 @@
 // Buffer definitions
 #variable EntireText:buffer
 #variable Common:buffer
-#variable Master:buffer
-#variable Mixer:buffer
+#variable MasterTrackSetup:buffer
 #variable Events:buffer
 #variable Defs:buffer
 #variable Handles:buffer
@@ -58,8 +57,22 @@
 #variable PortamentTimingBPList:buffer
 #variable OpeningBPList:buffer
 
+#macro VSQ_INITIALIZE_MASTER { TRACKNAME "Master Track" }
+
+#macro SETUP_COMMON { __STORE {"Common", "[Common]", \
+	"\nVersion=", $CommonVersion, "\nName=", $CommonName, \
+	"\nColor=", $CommonColorRed, ",", $CommonColorGreen, ",", $CommonColorBlue, \
+	"\nDynamicsMode=", $CommonDynamicsMode, "\nPlayMode=", $CommonPlayMode, "\n" } }
+
+#variable MasterFeder, MasterPanpot, MasterMute, MasterOutputMode, MasterTracks:number=1
+#macro VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
+	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
+	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
+	"\nTracks=", $MasterTracks } }
+
 #macro OUTPUT_VSQ_TEXT { \
-	__STORE { "EntireText", $Common, $Master, $Mixer, "[EventList]\n", $Events, $Defs, $Handles \
+	SETUP_COMMON \
+	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
 		,$PitchBendBPList \
 		,$PitchBendSensBPList \
 		,$DynamicsBPList \
@@ -87,6 +100,11 @@
 	TEXT $EntireText \
 	}
 
+#variable __handle_defs
+#variable __handle_uses
+#variable __events
+
+// Singer definition ----
 #variable IconID:string = "$07010000"
 #variable IDS:string = "Miku"
 #variable Original:number = 0
@@ -94,17 +112,19 @@
 #variable Length:number = 1
 #variable Language:number = 0
 #variable Program:number = 0
+#variable CommonVersion:string = "DSB301"
+#variable CommonName:string = "Voice1"
+#variable CommonColorRed:number = 157
+#variable CommonColorGreen:number = 181
+#variable CommonColorBlue:number = 123
+#variable CommonDynamicsMode:number = 0
+#variable CommonPlayMode:number = 1
 
 #macro SINGER_MIKU { \
 	__LET {"IconID", "$07010000" } __LET {"IDS", "Miku" } __LET {"Original", 0} \
-	__LET {"Language", 0 } __LET {"Program", 0 } }
+	__LET {"Language", 0 } __LET {"Program", 0 } __LET {"CommonVersion", "DSB301" } }
 // FIXME: define SINGER_RIN, SINGER_LEN, SINGER_LUKA, SINGER_GAK, SINGER_MEG etc.
 
-#variable __handle_defs
-#variable __handle_uses
-#variable __events
-
-// Singer definition ----
 // relevant variables: $IconID, $IDS, $Original, $Caption, $Length, $Language, $Program
 #macro DEFINE_SINGER { \
 	__STORE { \
@@ -118,9 +138,6 @@
 	}
 
 #macro VSQ_INITIALIZE_TRACK { \
-	__STORE {"Common", "[Common]\n"} \
-	__STORE {"Master", "[Master]\n"} \
-	__STORE {"Mixer", "[Mixer]\n"} \
 	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
 	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
 	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
@@ -148,7 +165,7 @@
 	}
 
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
-#macro LYRIC label:string, en:string, params:string { \
+#macro L label:string, en:string, params:string { \
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
 	__LET{"__handle_defs", $__handle_defs + 1} }
@@ -245,95 +262,95 @@
 
 
 // Lyrics macro ----
-#macro あ en:string="a",params:string="0" { LYRIC "あ",$en,$params }
-#macro い en:string="i",params:string="0" { LYRIC "い",$en,$params }
-#macro う en:string="M",params:string="0" { LYRIC "う",$en,$params }
-#macro え en:string="e",params:string="0" { LYRIC "え",$en,$params }
-#macro お en:string="o",params:string="0" { LYRIC "お",$en,$params }
-#macro か en:string="k a",params:string="64,0" { LYRIC "か",$en,$params }
-#macro き en:string="k' i",params:string="64,0" { LYRIC "き",$en,$params }
-#macro く en:string="k M",params:string="64,0" { LYRIC "く",$en,$params }
-#macro け en:string="k e",params:string="64,0" { LYRIC "け",$en,$params }
-#macro こ en:string="k o",params:string="64,0" { LYRIC "こ",$en,$params }
-#macro が en:string="g a",params:string="64,0" { LYRIC "が",$en,$params }
-#macro ぎ en:string="g' i",params:string="64,0" { LYRIC "ぎ",$en,$params }
-#macro ぐ en:string="g M",params:string="64,0" { LYRIC "ぐ",$en,$params }
-#macro げ en:string="g e",params:string="64,0" { LYRIC "げ",$en,$params }
-#macro ご en:string="g o",params:string="64,0" { LYRIC "ご",$en,$params }
-#macro んが en:string="N a",params:string="64,0" { LYRIC "んが",$en,$params }
-#macro んぎ en:string="N' i",params:string="64,0" { LYRIC "んぎ",$en,$params }
-#macro んぐ en:string="N M",params:string="64,0" { LYRIC "んぐ",$en,$params }
-#macro んげ en:string="N e",params:string="64,0" { LYRIC "んげ",$en,$params }
-#macro んご en:string="N o",params:string="64,0" { LYRIC "んご",$en,$params }
-#macro さ en:string="s a",params:string="64,0" { LYRIC "さ",$en,$params }
-#macro し en:string="S i",params:string="64,0" { LYRIC "し",$en,$params }
-#macro す en:string="s M",params:string="64,0" { LYRIC "す",$en,$params }
-#macro せ en:string="s e",params:string="64,0" { LYRIC "せ",$en,$params }
-#macro そ en:string="s o",params:string="64,0" { LYRIC "そ",$en,$params }
-#macro ざ en:string="z a",params:string="64,0" { LYRIC "ざ",$en,$params }
-#macro じ en:string="Z i",params:string="64,0" { LYRIC "じ",$en,$params }
-#macro ず en:string="z M",params:string="64,0" { LYRIC "ず",$en,$params }
-#macro ぜ en:string="z e",params:string="64,0" { LYRIC "ぜ",$en,$params }
-#macro ぞ en:string="z o",params:string="64,0" { LYRIC "ぞ",$en,$params }
-#macro _ざ en:string="dz a",params:string="64,0" { LYRIC "ざ",$en,$params }	// 単語の始め
-#macro _じ en:string="dZ i",params:string="64,0" { LYRIC "じ",$en,$params }
-#macro _ず en:string="dz M",params:string="64,0" { LYRIC "ず",$en,$params }
-#macro _ぜ en:string="dz e",params:string="64,0" { LYRIC "ぜ",$en,$params }
-#macro _ぞ en:string="dz o",params:string="64,0" { LYRIC "ぞ",$en,$params }
-#macro た en:string="t a",params:string="64,0" { LYRIC "た",$en,$params }
-#macro てぃ en:string="t i",params:string="64,0" { LYRIC "てぃ",$en,$params }
-#macro ち en:string="tS i",params:string="64,0" { LYRIC "ち",$en,$params }
-#macro つ en:string="ts M",params:string="64,0" { LYRIC "つ",$en,$params }
-#macro て en:string="t e",params:string="64,0" { LYRIC "て",$en,$params }
-#macro と en:string="t o",params:string="64,0" { LYRIC "と",$en,$params }
-#macro だ en:string="d a",params:string="64,0" { LYRIC "だ",$en,$params }
-#macro ぢ en:string="Z i",params:string="64,0" { LYRIC "ぢ",$en,$params }
-#macro づ en:string="z M",params:string="64,0" { LYRIC "づ",$en,$params }
-#macro でぃ en:string="d' i",params:string="64,0" { LYRIC "でぃ",$en,$params }
-#macro どぅ en:string="d M",params:string="64,0" { LYRIC "どぅ",$en,$params }
-#macro で en:string="d e",params:string="64,0" { LYRIC "で",$en,$params }
-#macro ど en:string="d o",params:string="64,0" { LYRIC "ど",$en,$params }
-#macro な en:string="n a",params:string="64,0" { LYRIC "な",$en,$params }
-#macro に en:string="J i",params:string="64,0" { LYRIC "に",$en,$params }
-#macro ぬ en:string="n M",params:string="64,0" { LYRIC "ぬ",$en,$params }
-#macro ね en:string="n e",params:string="64,0" { LYRIC "ね",$en,$params }
-#macro の en:string="n o",params:string="64,0" { LYRIC "の",$en,$params }
-#macro は en:string="h\\ a",params:string="64,0" { LYRIC "は",$en,$params }	// 単語の途中
-#macro ひ en:string="C i",params:string="64,0" { LYRIC "ひ",$en,$params }
-#macro ふぃ en:string="p\\' i",params:string="64,0" { LYRIC "ふぃ",$en,$params }
-#macro ふ en:string="p\\ M",params:string="64,0" { LYRIC "ふ",$en,$params }
-#macro へ en:string="h\\ e",params:string="64,0" { LYRIC "へ",$en,$params }
-#macro ほ en:string="h\\ o",params:string="64,0" { LYRIC "ほ",$en,$params }
-#macro _は en:string="h a",params:string="64,0" { LYRIC "は",$en,$params }	// (単語の始め)
-#macro _ひ en:string="C i",params:string="64,0" { LYRIC "ひ",$en,$params }
-#macro _ふぃ en:string="p\\' i",params:string="64,0" { LYRIC "ふぃ",$en,$params }
-#macro _ふ en:string="p\\ M",params:string="64,0" { LYRIC "ふ",$en,$params }
-#macro _へ en:string="h e",params:string="64,0" { LYRIC "へ",$en,$params }
-#macro _ほ en:string="h o",params:string="64,0" { LYRIC "ほ",$en,$params }
-#macro ば en:string="b a",params:string="64,0" { LYRIC "ば",$en,$params }
-#macro び en:string="b' i",params:string="64,0" { LYRIC "び",$en,$params }
-#macro ぶ en:string="b M",params:string="64,0" { LYRIC "ぶ",$en,$params }
-#macro べ en:string="b e",params:string="64,0" { LYRIC "べ",$en,$params }
-#macro ぼ en:string="b o",params:string="64,0" { LYRIC "ぼ",$en,$params }
-#macro ぱ en:string="p a",params:string="64,0" { LYRIC "ぱ",$en,$params }
-#macro ぴ en:string="p' i",params:string="64,0" { LYRIC "ぴ",$en,$params }
-#macro ぷ en:string="p M",params:string="64,0" { LYRIC "ぷ",$en,$params }
-#macro ぺ en:string="p e",params:string="64,0" { LYRIC "ぺ",$en,$params }
-#macro ぽ en:string="p o",params:string="64,0" { LYRIC "ぽ",$en,$params }
-#macro ま en:string="m a",params:string="64,0" { LYRIC "ま",$en,$params }
-#macro み en:string="m' i",params:string="64,0" { LYRIC "み",$en,$params }
-#macro む en:string="m M",params:string="64,0" { LYRIC "む",$en,$params }
-#macro め en:string="m e",params:string="64,0" { LYRIC "め",$en,$params }
-#macro も en:string="m o",params:string="64,0" { LYRIC "も",$en,$params }
-#macro や en:string="j a",params:string="64,0" { LYRIC "や",$en,$params }
-#macro ゆ en:string="j u",params:string="64,0" { LYRIC "ゆ",$en,$params }
-#macro よ en:string="j o",params:string="64,0" { LYRIC "よ",$en,$params }
-#macro ら en:string="4 a",params:string="64,0" { LYRIC "ら",$en,$params }
-#macro り en:string="4' i",params:string="64,0" { LYRIC "り",$en,$params }
-#macro る en:string="4 M",params:string="64,0" { LYRIC "る",$en,$params }
-#macro れ en:string="4 e",params:string="64,0" { LYRIC "れ",$en,$params }
-#macro ろ en:string="4 o",params:string="64,0" { LYRIC "ろ",$en,$params }
-#macro わ en:string="w a",params:string="64,0" { LYRIC "わ",$en,$params }
-#macro を en:string="o",params:string="0" { LYRIC "を",$en,$params }
+#macro あ en:string="a",params:string="0" { L "あ",$en,$params }
+#macro い en:string="i",params:string="0" { L "い",$en,$params }
+#macro う en:string="M",params:string="0" { L "う",$en,$params }
+#macro え en:string="e",params:string="0" { L "え",$en,$params }
+#macro お en:string="o",params:string="0" { L "お",$en,$params }
+#macro か en:string="k a",params:string="64,0" { L "か",$en,$params }
+#macro き en:string="k' i",params:string="64,0" { L "き",$en,$params }
+#macro く en:string="k M",params:string="64,0" { L "く",$en,$params }
+#macro け en:string="k e",params:string="64,0" { L "け",$en,$params }
+#macro こ en:string="k o",params:string="64,0" { L "こ",$en,$params }
+#macro が en:string="g a",params:string="64,0" { L "が",$en,$params }
+#macro ぎ en:string="g' i",params:string="64,0" { L "ぎ",$en,$params }
+#macro ぐ en:string="g M",params:string="64,0" { L "ぐ",$en,$params }
+#macro げ en:string="g e",params:string="64,0" { L "げ",$en,$params }
+#macro ご en:string="g o",params:string="64,0" { L "ご",$en,$params }
+#macro んが en:string="N a",params:string="64,0" { L "んが",$en,$params }
+#macro んぎ en:string="N' i",params:string="64,0" { L "んぎ",$en,$params }
+#macro んぐ en:string="N M",params:string="64,0" { L "んぐ",$en,$params }
+#macro んげ en:string="N e",params:string="64,0" { L "んげ",$en,$params }
+#macro んご en:string="N o",params:string="64,0" { L "んご",$en,$params }
+#macro さ en:string="s a",params:string="64,0" { L "さ",$en,$params }
+#macro し en:string="S i",params:string="64,0" { L "し",$en,$params }
+#macro す en:string="s M",params:string="64,0" { L "す",$en,$params }
+#macro せ en:string="s e",params:string="64,0" { L "せ",$en,$params }
+#macro そ en:string="s o",params:string="64,0" { L "そ",$en,$params }
+#macro ざ en:string="z a",params:string="64,0" { L "ざ",$en,$params }
+#macro じ en:string="Z i",params:string="64,0" { L "じ",$en,$params }
+#macro ず en:string="z M",params:string="64,0" { L "ず",$en,$params }
+#macro ぜ en:string="z e",params:string="64,0" { L "ぜ",$en,$params }
+#macro ぞ en:string="z o",params:string="64,0" { L "ぞ",$en,$params }
+#macro _ざ en:string="dz a",params:string="64,0" { L "ざ",$en,$params }	// 単語の始め
+#macro _じ en:string="dZ i",params:string="64,0" { L "じ",$en,$params }
+#macro _ず en:string="dz M",params:string="64,0" { L "ず",$en,$params }
+#macro _ぜ en:string="dz e",params:string="64,0" { L "ぜ",$en,$params }
+#macro _ぞ en:string="dz o",params:string="64,0" { L "ぞ",$en,$params }
+#macro た en:string="t a",params:string="64,0" { L "た",$en,$params }
+#macro てぃ en:string="t i",params:string="64,0" { L "てぃ",$en,$params }
+#macro ち en:string="tS i",params:string="64,0" { L "ち",$en,$params }
+#macro つ en:string="ts M",params:string="64,0" { L "つ",$en,$params }
+#macro て en:string="t e",params:string="64,0" { L "て",$en,$params }
+#macro と en:string="t o",params:string="64,0" { L "と",$en,$params }
+#macro だ en:string="d a",params:string="64,0" { L "だ",$en,$params }
+#macro ぢ en:string="Z i",params:string="64,0" { L "ぢ",$en,$params }
+#macro づ en:string="z M",params:string="64,0" { L "づ",$en,$params }
+#macro でぃ en:string="d' i",params:string="64,0" { L "でぃ",$en,$params }
+#macro どぅ en:string="d M",params:string="64,0" { L "どぅ",$en,$params }
+#macro で en:string="d e",params:string="64,0" { L "で",$en,$params }
+#macro ど en:string="d o",params:string="64,0" { L "ど",$en,$params }
+#macro な en:string="n a",params:string="64,0" { L "な",$en,$params }
+#macro に en:string="J i",params:string="64,0" { L "に",$en,$params }
+#macro ぬ en:string="n M",params:string="64,0" { L "ぬ",$en,$params }
+#macro ね en:string="n e",params:string="64,0" { L "ね",$en,$params }
+#macro の en:string="n o",params:string="64,0" { L "の",$en,$params }
+#macro は en:string="h\\ a",params:string="64,0" { L "は",$en,$params }	// 単語の途中
+#macro ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
+#macro ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
+#macro ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
+#macro へ en:string="h\\ e",params:string="64,0" { L "へ",$en,$params }
+#macro ほ en:string="h\\ o",params:string="64,0" { L "ほ",$en,$params }
+#macro _は en:string="h a",params:string="64,0" { L "は",$en,$params }	// (単語の始め)
+#macro _ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
+#macro _ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
+#macro _ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
+#macro _へ en:string="h e",params:string="64,0" { L "へ",$en,$params }
+#macro _ほ en:string="h o",params:string="64,0" { L "ほ",$en,$params }
+#macro ば en:string="b a",params:string="64,0" { L "ば",$en,$params }
+#macro び en:string="b' i",params:string="64,0" { L "び",$en,$params }
+#macro ぶ en:string="b M",params:string="64,0" { L "ぶ",$en,$params }
+#macro べ en:string="b e",params:string="64,0" { L "べ",$en,$params }
+#macro ぼ en:string="b o",params:string="64,0" { L "ぼ",$en,$params }
+#macro ぱ en:string="p a",params:string="64,0" { L "ぱ",$en,$params }
+#macro ぴ en:string="p' i",params:string="64,0" { L "ぴ",$en,$params }
+#macro ぷ en:string="p M",params:string="64,0" { L "ぷ",$en,$params }
+#macro ぺ en:string="p e",params:string="64,0" { L "ぺ",$en,$params }
+#macro ぽ en:string="p o",params:string="64,0" { L "ぽ",$en,$params }
+#macro ま en:string="m a",params:string="64,0" { L "ま",$en,$params }
+#macro み en:string="m' i",params:string="64,0" { L "み",$en,$params }
+#macro む en:string="m M",params:string="64,0" { L "む",$en,$params }
+#macro め en:string="m e",params:string="64,0" { L "め",$en,$params }
+#macro も en:string="m o",params:string="64,0" { L "も",$en,$params }
+#macro や en:string="j a",params:string="64,0" { L "や",$en,$params }
+#macro ゆ en:string="j u",params:string="64,0" { L "ゆ",$en,$params }
+#macro よ en:string="j o",params:string="64,0" { L "よ",$en,$params }
+#macro ら en:string="4 a",params:string="64,0" { L "ら",$en,$params }
+#macro り en:string="4' i",params:string="64,0" { L "り",$en,$params }
+#macro る en:string="4 M",params:string="64,0" { L "る",$en,$params }
+#macro れ en:string="4 e",params:string="64,0" { L "れ",$en,$params }
+#macro ろ en:string="4 o",params:string="64,0" { L "ろ",$en,$params }
+#macro わ en:string="w a",params:string="64,0" { L "わ",$en,$params }
+#macro を en:string="o",params:string="0" { L "を",$en,$params }
 // FIXME: define ん
 
