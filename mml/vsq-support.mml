@@ -32,7 +32,7 @@
 #variable Mixer:buffer
 #variable Events:buffer
 #variable Handles:buffer
-#variable PitchBendList:buffer
+#variable PitchBendBPList:buffer
 #variable PitchBendSensBPList:buffer
 #variable DynamicsBPList:buffer
 #variable EpRResidualBPList:buffer
@@ -59,7 +59,7 @@
 
 #macro OUTPUT_VSQ_TEXT { \
 	__STORE { "EntireText", $Common, $Master, $Mixer, "[EventList]\n", $Events, $Handles \
-		,$PitchBendList \
+		,$PitchBendBPList \
 		,$PitchBendSensBPList \
 		,$DynamicsBPList \
 		,$EpRResidualBPList \
