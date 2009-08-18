@@ -508,7 +508,11 @@ namespace Commons.Music.Midi.Mml
 					if (variable.Type != MmlDataType.Buffer)
 						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
 					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
-					sb.AppendFormat (format, oper.Arguments [2].IntValue);
+					try {
+						sb.AppendFormat (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.IntValue).ToArray ());
+					} catch (FormatException ex) {
+						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), location);
+					}
 					break;
 					}
 				case "__MACRO_ARG_DEF":

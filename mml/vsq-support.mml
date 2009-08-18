@@ -31,6 +31,7 @@
 #variable Master:buffer
 #variable Mixer:buffer
 #variable Events:buffer
+#variable Defs:buffer
 #variable Handles:buffer
 #variable PitchBendBPList:buffer
 #variable PitchBendSensBPList:buffer
@@ -58,7 +59,7 @@
 #variable OpeningBPList:buffer
 
 #macro OUTPUT_VSQ_TEXT { \
-	__STORE { "EntireText", $Common, $Master, $Mixer, "[EventList]\n", $Events, $Handles \
+	__STORE { "EntireText", $Common, $Master, $Mixer, "[EventList]\n", $Events, $Defs, $Handles \
 		,$PitchBendBPList \
 		,$PitchBendSensBPList \
 		,$DynamicsBPList \
@@ -95,6 +96,8 @@
 #variable Program:number = 0
 
 #variable __handle_defs:number = 0
+#variable __handle_uses:number
+#variable __events
 
 // Singer definition ----
 // relevant variables: $IconID, $IDS, $Original, $Caption, $Length, $Language, $Program
@@ -103,8 +106,10 @@
 		"Handles", "[h#0000]\nIconID=", $IconID, "\nIDS=", $IDS, \
 		"\nOriginal=", $Original, "\nCaption=", $Caption, "\nLength=", $Length, \
 		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
-	__STORE {"Events", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
+	__STORE {"Events", "0=ID#0000\n"} \
+	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
+	__LET { "__events", $__events + 1 } \
 	}
 
 #macro VSQ_INITIALIZE_TRACK { \
@@ -170,15 +175,23 @@
 #variable dem_dec_gain_rate:number = 0
 #variable dem_accent:number = 0
 #variable handle_uses:number = 0
+#variable __len_in_number:number
+#variable __gate_in_number:number
+#macro AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
 #macro n key:number, len:length, gate:length { \
-	__STORE { "Events", "Type=Anote\nLength=", $len, "\nNote=", $key, \
+	__LET { "__len_in_number", $len } __LET {"__gate_in_number", $gate } \
+	__STORE_FORMAT {"Defs", "[ID#{0:D04}]\n", $__events } \
+	__STORE { "Defs", "Type=Anote\nLength=", $__gate_in_number, "\nNote=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
 	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
 	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
-	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, \
-	$vibrato ? {"\nVibratoHandle=" + $vibrato }, "", "\n" } \
+	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, "\n" } \
+	__APPLY {$vibrato ? "AddVibratoHandle", "NOP", $vibrato} \
 	__LET {"vibrato", $vibrato_constant } \
-	__LET {"__handle_uses", $__handle_uses + 1 } } // One note operation consumes one lyric handle
+	__LET {"__handle_uses", $__handle_uses + 1 } \
+	__STORE_FORMAT {"Events", "{0}=ID#{1:D04}\n", $__timeline_position, $__events } \
+	__LET { "__events", $__events + 1 } \
+	NOP $__len_in_number } // One note operation consumes one lyric handle
 
 // BPLists ----
 #variable __pitch_bend_bp:number

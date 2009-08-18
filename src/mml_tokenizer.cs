@@ -1248,6 +1248,15 @@ namespace Commons.Music.Midi.Mml
 				source.Lexer.NewIdentifierMode = false;
 				if (!source.Lexer.Advance ())
 					throw source.Lexer.LexerError ("type name is expected after ':' in macro argument definition");
+				switch (source.Lexer.CurrentToken) {
+				case MmlTokenType.KeywordNumber:
+				case MmlTokenType.KeywordString:
+				case MmlTokenType.KeywordLength:
+				case MmlTokenType.KeywordBuffer:
+					break;
+				default:
+					throw new MmlException (String.Format ("Data type name is expected, but got {0}", source.Lexer.CurrentToken), source.Lexer.Line.Location);
+				}
 				arg.Type = (MmlDataType) source.Lexer.Value;
 				source.Lexer.SkipWhitespaces ();
 				if (source.Lexer.Line.PeekChar () != '=') {
