@@ -142,8 +142,9 @@
 	DEFINE_SINGER \
 	}
 
+#define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
 #macro LYRIC label:string, en:string, params:string { \
-	__STORE_FORMAT {"Handles", "[h#{0:D04}]\n", $__handle_defs } \
+	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
 	__LET{"__handle_defs", $__handle_defs + 1} }
 // lyric macros are defined later (they are bunch).
@@ -155,7 +156,7 @@
 #macro DEFINE_VIBRATO \
 	ids:string="normal", caption:string, original:number=1, startRate:number, \
 	startDepth:number, len:number, depthBPNum:number=0, rateBPNum:number=0 { \
-	__STORE_FORMAT {"Handles", "[h#{0:D04}]\n", $__handle_defs } \
+	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "IconID=$04040001", "\nIDS=", $ids, "\nOriginal=", $original, \
 		"\nCaption=", $caption, "\nLength=", $len, "\nStartDepth=", $startDepth, \
 		"\nDepthBPNum=", $depthBPNum, "\nStartRate=", $startRate, \
@@ -178,9 +179,11 @@
 #variable __len_in_number:number
 #variable __gate_in_number:number
 #macro AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
+#define EVENTS_COND { $__events \> 10000 ? "[ID#{0:D08}]\n", "[ID#{0:D04}]\n" }
+#define EVENTS_APPLY_COND $__events \> 10000 ? "{0}=ID#{1:D08}\n", "{0}=ID#{1:D04}\n"
 #macro n key:number, len:length, gate:length { \
 	__LET { "__len_in_number", $len } __LET {"__gate_in_number", $gate } \
-	__STORE_FORMAT {"Defs", "[ID#{0:D04}]\n", $__events } \
+	__STORE_FORMAT {"Defs", EVENTS_COND, $__events } \
 	__STORE { "Defs", "Type=Anote\nLength=", $__gate_in_number, "\nNote=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
 	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
@@ -189,7 +192,7 @@
 	__APPLY {$vibrato ? "AddVibratoHandle", "NOP", $vibrato} \
 	__LET {"vibrato", $vibrato_constant } \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
-	__STORE_FORMAT {"Events", "{0}=ID#{1:D04}\n", $__timeline_position, $__events } \
+	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
 	__LET { "__events", $__events + 1 } \
 	NOP $__len_in_number } // One note operation consumes one lyric handle
 
