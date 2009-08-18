@@ -274,8 +274,10 @@ namespace Commons.Music.Midi.Mml
 
 		// It does not differentiate tracks, but contains all of the mml track lines.
 		public List<MmlTrackSource> Tracks { get; private set; }
-		// It does not differentiate macro or variable, but contains all of the definition lines.
+		// contains macros.
 		public List<MmlMacroSource> Macros { get; private set; }
+		// contains variables.
+		public List<MmlVariableSource> Variables { get; private set; }
 		// contains any other pragma directives.
 		public List<MmlPragmaSource> Pragmas { get; private set; }
 
@@ -288,6 +290,7 @@ namespace Commons.Music.Midi.Mml
 			Tracks = new List<MmlTrackSource> ();
 			Macros = new List<MmlMacroSource> ();
 			Pragmas = new List<MmlPragmaSource> ();
+			Variables = new List<MmlVariableSource> ();
 
 			PrimitiveOperations = new List<string> ();
 			foreach (var primitive in MmlPrimitiveOperation.All)
@@ -378,6 +381,9 @@ namespace Commons.Music.Midi.Mml
 			// get identifier
 			var identifier = result.Lexer.ReadNewIdentifier ();
 			switch (identifier) {
+			case "variable":
+				result.Lexer.SkipWhitespaces (true);
+				return ProcessVariableLine (line);
 			case "macro":
 				result.Lexer.SkipWhitespaces (true);
 				return ProcessMacroLine (line);
@@ -389,7 +395,6 @@ namespace Commons.Music.Midi.Mml
 				return null;
 			case "define":
 			case "conditional":
-			case "variable":
 			case "meta":
 				break;
 			default:
@@ -411,6 +416,16 @@ namespace Commons.Music.Midi.Mml
 			mms.Lines.Add (line);
 			result.Macros.Add (mms);
 			return mms;
+		}
+
+		MmlSourceLineSet ProcessVariableLine (MmlLine line)
+		{
+			if (in_comment_mode)
+				return null;
+			var vs = new MmlVariableSource ();
+			vs.Lines.Add (line);
+			result.Variables.Add (vs);
+			return vs;
 		}
 
 		int [] previous_range;
@@ -505,6 +520,16 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		public string ParsedName { get; set; }
+	}
+
+	public class MmlVariableSource : MmlSourceLineSet
+	{
+		public MmlVariableSource ()
+		{
+			ParsedNames = new List<string> ();
+		}
+
+		public List<string> ParsedNames { get; private set; }
 	}
 
 	public class MmlPragmaSource : MmlSourceLineSet
@@ -929,6 +954,9 @@ namespace Commons.Music.Midi.Mml
 			if (TokenizerSource.CurrentMacroDefinition != null)
 				foreach (var a in TokenizerSource.CurrentMacroDefinition.Arguments)
 					yield return a.Name;
+			foreach (var v in TokenizerSource.Variables)
+				foreach (var s in v.ParsedNames)
+					yield return s;
 			foreach (var m in TokenizerSource.Macros)
 				if (m.ParsedName != null)
 					yield return m.ParsedName;
@@ -1058,6 +1086,10 @@ namespace Commons.Music.Midi.Mml
 			foreach (var ps in source.Pragmas)
 				ParsePragmaLines (ps);
 
+			// process variables
+			foreach (var vs in source.Variables)
+				ParseVariableLines (vs);
+
 			// process macros, recursively
 			foreach (var ms in source.Macros)
 				ParseMacroLines (ms);
@@ -1090,6 +1122,7 @@ namespace Commons.Music.Midi.Mml
 					}
 					if (source.Lexer.Advance ())
 						throw new MmlException ("Extra conditional tokens", source.Lexer.Line.Location);
+					source.Lexer.NewIdentifierMode = false;
 					break;
 				case "track":
 					source.Lexer.SkipWhitespaces (true);
@@ -1117,6 +1150,7 @@ namespace Commons.Music.Midi.Mml
 					throw new MmlException (String.Format ("Invalid #meta directive argument: {0}", identifier), source.Lexer.Line.Location);
 				}
 				result.MetaTexts.Add (new KeyValuePair<byte,string> (meta_map [identifier], text));
+				source.Lexer.NewIdentifierMode = false;
 				break;
 			case "define":
 				source.Lexer.NewIdentifierMode = true;
@@ -1125,13 +1159,25 @@ namespace Commons.Music.Midi.Mml
 				if (aliases.ContainsKey (identifier))
 					Console.WriteLine ("Warning: overwriting definition {0}, redefined at {1}", identifier, source.Lexer.Line.Location);
 				aliases [identifier] = source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition);
+				source.Lexer.NewIdentifierMode = false;
 				break;
-			case "variable":
-				source.Lexer.NewIdentifierMode = true;
-				source.Lexer.Advance ();
-				ParseVariableList (result.Variables, true);
-				return;
 			}
+		}
+
+		void ParseVariableLines (MmlVariableSource src)
+		{
+			foreach (var line in src.Lines)
+				foreach (var entry in aliases)
+					line.Text = line.Text.Replace (entry.Key, entry.Value);
+			source.Lexer.SetCurrentInput (src);
+
+			source.Lexer.NewIdentifierMode = true;
+			source.Lexer.Advance ();
+			int idx = result.Variables.Count;
+			ParseVariableList (result.Variables, true);
+			for (int i = idx; i < result.Variables.Count; i++)
+				src.ParsedNames.Add (result.Variables [i].Name);
+			source.Lexer.NewIdentifierMode = false;
 		}
 
 		void ParseMacroLines (MmlMacroSource src)
@@ -1192,6 +1238,7 @@ namespace Commons.Music.Midi.Mml
 				// FIXME: possibly use MmlToken.Colon?
 				source.Lexer.SkipWhitespaces ();
 				if (source.Lexer.Line.PeekChar () != ':') {
+					arg.Type = MmlDataType.Number;
 					if (!source.Lexer.Advance () && isVariable)
 						return;
 					continue;

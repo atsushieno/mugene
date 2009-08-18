@@ -45,6 +45,8 @@ namespace Commons.Music.Midi.Mml
 			foreach (var variable in source.Variables) {
 				if (variable.DefaultValue == null)
 					variable.FillDefaultValue ();
+				if (variable.DefaultValue == null)
+					throw new Exception ("INTERNAL ERROR: no default value for " + variable.Name);
 				variable.DefaultValue.Resolve (ctx, variable.Type);
 			}
 
