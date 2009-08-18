@@ -1,5 +1,6 @@
 // The following variable is implicitly declared:
 // #variable __timeline_position:number
+// #variable __base_count:number=192 // it is read-only.
 // The following variable is explicitly declared, but used by some expressions
 // #variable __length:length // used by '^' operator.
 
@@ -18,7 +19,6 @@
 #macro DEBUG val:string { __PRINT {$val} }
 
 // primitive variables used in primitive macro operations
-#variable __base_count:number = 192
 #variable __octave:number = 4
 #variable __trans:number
 #variable __trans_c:number

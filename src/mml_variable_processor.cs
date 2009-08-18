@@ -65,7 +65,6 @@ namespace Commons.Music.Midi.Mml
 
 		public static object GetTypedValue (object value, MmlDataType type)
 		{
-			// FIXME: use constant for "192" everywhere.
 			switch (type) {
 			case MmlDataType.Any:
 				return value;
@@ -79,7 +78,7 @@ namespace Commons.Music.Midi.Mml
 				if (value is byte)
 					return (double) (byte) value;
 				if (value is MmlLength)
-					return (double) ((MmlLength) value).GetSteps (192); // FIXME: use correct number for 192
+					return (double) ((MmlLength) value).GetSteps (MmlTokenSet.BaseCount);
 				break; // error
 			case MmlDataType.Length:
 				if (value is MmlLength)

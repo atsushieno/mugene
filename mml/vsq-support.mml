@@ -25,6 +25,8 @@
 //		- O : Opening
 //	- NRPNs are supported as is; use NRPN and DTE operations.
 
+#basecount 480
+
 // Buffer definitions
 #variable EntireText:buffer
 #variable Common:buffer

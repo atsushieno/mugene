@@ -40,6 +40,8 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlTokenSet
 	{
+		public static int BaseCount = 192;
+
 		public MmlTokenSet ()
 		{
 			Conditional = new MmlCompilationCondition ();
@@ -47,9 +49,6 @@ namespace Commons.Music.Midi.Mml
 			Variables = new List<MmlVariableDefinition> ();
 			Tracks = new List<MmlTrack> ();
 			MetaTexts = new List<KeyValuePair<byte, string>> ();
-
-			// built-in variable
-			Variables.Add (new MmlVariableDefinition ("__timeline_position", null) { Type = MmlDataType.Number });
 		}
 
 		public MmlCompilationCondition Conditional { get; private set; }
@@ -396,6 +395,7 @@ namespace Commons.Music.Midi.Mml
 			case "define":
 			case "conditional":
 			case "meta":
+			case "basecount":
 				break;
 			default:
 				throw MmlError (line.Location, String.Format ("Unexpected preprocessor directive: {0}", identifier));
@@ -1086,6 +1086,12 @@ namespace Commons.Music.Midi.Mml
 			foreach (var ps in source.Pragmas)
 				ParsePragmaLines (ps);
 
+			// add built-in variables
+			result.Variables.Add (new MmlVariableDefinition ("__timeline_position", null) { Type = MmlDataType.Number });
+			var bc = new MmlVariableDefinition ("__base_count", null) { Type = MmlDataType.Number };
+			bc.DefaultValueTokens.Add (new MmlToken () { TokenType = MmlTokenType.NumberLiteral, Value = MmlTokenSet.BaseCount });
+			result.Variables.Add (bc);
+
 			// process variables
 			foreach (var vs in source.Variables)
 				ParseVariableLines (vs);
@@ -1105,6 +1111,10 @@ namespace Commons.Music.Midi.Mml
 			switch (src.Name) {
 			default:
 				throw new NotImplementedException ();
+			case "basecount":
+				source.Lexer.ExpectNext (MmlTokenType.NumberLiteral);
+				MmlTokenSet.BaseCount = (int) source.Lexer.Value;
+				break;
 			case "conditional":
 				var category = source.Lexer.ReadNewIdentifier ();
 				switch (category) {

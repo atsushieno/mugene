@@ -78,12 +78,16 @@
 	$ resolution priority: track variables, <del>global variables, </del>arguments
 	to take higher priority, use $$ for arguments<del> and $$$ for global</del>.
 
-**** Implicitly-declared variable: __timeline_position
+**** Implicitly-declared variable: __timeline_position and __base_count
 
-	It is to hold absolute step from the beginning. It is totally
-	calculated as an usual variable inside macros but also referenced
-	from the compiler. It is the only variable that the compiler
+	__timeline_position is to hold absolute step from the beginning.
+	It is totally calculated as an usual variable inside macros but also
+	referenced from the compiler. It is the only variable that the compiler
 	recognizes as pre-existing.
+
+	__base_count is to hold total count of a full note. It can be defined
+	only by #basecount directive and cannot be stably set by users.
+	Setting this variable will just result in bogus processing.
 
 *** Numbers
 
@@ -101,7 +105,7 @@
 	- __length:length = 4
 	- __velocity:number
 	- __velocity_sense:number
-	- __base_count:number = 192
+	- __base_count:number = 192 // it is read-only, managed by system and set by #basecount
 
 	variable binding:
 		__LET{"name", value} // give variable name as a string variable
@@ -430,13 +434,17 @@
 		conditional_compilation_directive |
 		macro_definition |
 		variable_declaration |
-		meta_directive
+		meta_directive |
+		basecount_directive
 
 	meta_directive ::=
 		"#meta" meta_type string_constant
 
 	meta_type ::=
 		"title" | "copyright" | "text"
+
+	basecount_directive ::=
+		"#basecount" number_token
 
 	comment_directive ::=
 		"#comment"
