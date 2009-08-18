@@ -95,8 +95,13 @@
 #variable Language:number = 0
 #variable Program:number = 0
 
-#variable __handle_defs:number = 0
-#variable __handle_uses:number
+#macro SINGER_MIKU { \
+	__LET {"IconID", "$07010000" } __LET {"IDS", "Miku" } __LET {"Original", 0} \
+	__LET {"Language", 0 } __LET {"Program", 0 } }
+// FIXME: define SINGER_RIN, SINGER_LEN, SINGER_LUKA, SINGER_GAK, SINGER_MEG etc.
+
+#variable __handle_defs
+#variable __handle_uses
 #variable __events
 
 // Singer definition ----
@@ -176,15 +181,15 @@
 #variable dem_dec_gain_rate:number = 0
 #variable dem_accent:number = 0
 #variable handle_uses:number = 0
-#variable __len_in_number:number
-#variable __gate_in_number:number
 #macro AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
 #define EVENTS_COND { $__events \> 10000 ? "[ID#{0:D08}]\n", "[ID#{0:D04}]\n" }
 #define EVENTS_APPLY_COND $__events \> 10000 ? "{0}=ID#{1:D08}\n", "{0}=ID#{1:D04}\n"
-#macro n key:number, len:length, gate:length { \
-	__LET { "__len_in_number", $len } __LET {"__gate_in_number", $gate } \
+#macro n key:number, step:length, gate:length { \
+	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
+	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
+	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
 	__STORE_FORMAT {"Defs", EVENTS_COND, $__events } \
-	__STORE { "Defs", "Type=Anote\nLength=", $__gate_in_number, "\nNote=", $key, \
+	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
 	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
 	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
@@ -194,7 +199,7 @@
 	__LET {"__handle_uses", $__handle_uses + 1 } \
 	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
 	__LET { "__events", $__events + 1 } \
-	NOP $__len_in_number } // One note operation consumes one lyric handle
+	NOP $__current_note_step } // One note operation consumes one lyric handle
 
 // BPLists ----
 #variable __pitch_bend_bp:number
