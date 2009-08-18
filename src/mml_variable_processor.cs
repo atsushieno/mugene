@@ -463,11 +463,7 @@ namespace Commons.Music.Midi.Mml
 					continue;
 				case "__PRINT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
-					string name = oper.Arguments [0].StringValue;
-					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
-					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
-					DebugPrint.WriteLine (rctx.Values [variable]);
+					DebugPrint.WriteLine (oper.Arguments [0].StringValue);
 					break;
 					}
 				case "__LET": {
