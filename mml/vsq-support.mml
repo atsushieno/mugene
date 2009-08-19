@@ -24,6 +24,21 @@
 //		- POR : Portamento Timing
 //		- O : Opening
 //	- NRPNs are supported as is; use NRPN and DTE operations.
+//
+// Implementation notes:
+//
+//	- The primary operations are "L" and "n".
+//	  L defines a lyric handle, and n consumes a lyric to give a note.
+//	  output. Both outputs a couple of meta texts and NRPN operations.
+//	- Since both NRPNs from "L" and "n" should be actually unified to
+//	  generate one note operation by the time NRPN(50,7F)=(7F,-) appears,
+//	  this macro adds 1 step shifted (which should be almost harmess in
+//	  480 base count) to make them consistent.
+//
+
+// NRPNs
+#macro @ prog:number, lang:number=0, ver:number=0, dev:number=0 { NRPN #60,0 DTE $ver, $dev NRPN #60,2 DTE $lang,0 NRPN #53,2 DTE $prog,0 }
+
 
 // Buffer definitions
 #variable EntireText:buffer
@@ -70,7 +85,10 @@
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
 	"\nTracks=", $MasterTracks } }
 
+#variable __tmp_position
 #macro OUTPUT_VSQ_TEXT { \
+	__LET {"__tmp_position", $__timeline_position } \
+	__LET {"__timeline_position", 0 } \
 	SETUP_COMMON \
 	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
 		,$PitchBendBPList \
@@ -98,6 +116,7 @@
 		,$OpeningBPList \
 		} \
 	TEXT $EntireText \
+	__LET {"__timeline_position", $__tmp_position } \
 	}
 
 #variable __handle_defs
@@ -133,11 +152,13 @@
 		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
 	__STORE {"Events", "0=ID#0000\n"} \
 	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
+	@ $Program, $Language \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
 	__LET { "__events", $__events + 1 } \
 	}
 
 #macro VSQ_INITIALIZE_TRACK { \
+	r%1 \
 	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
 	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
 	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
@@ -166,8 +187,10 @@
 
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
 #macro L label:string, en:string, params:string { \
+	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
+	\// NRPNs
 	__LET{"__handle_defs", $__handle_defs + 1} }
 // lyric macros are defined later (they are bunch).
 
