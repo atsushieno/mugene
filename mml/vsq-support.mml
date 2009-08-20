@@ -13,17 +13,24 @@
 //	- You can apply vibrato to the next note by @V operation. Reference it by definition index.
 //	- Or you can also apply vibrato to every following note by @VV operation. (Reference by index too.)
 //	- BPList  operations are:
-//		- P : PitchBend
+//		- B : PitchBend
 //		- D : Dynamics
 //		- BRE : Breathiness
 //		- BRI : Brightness
 //		- C : Clearness
 //		- H : Harmonics (valid only in Vocaloid1)
-//		- XD : VibTrimDepth
+//		- XD : VibTrimDepth (valid only in Vocaloid1)
 //		- G : Gender factor
 //		- POR : Portamento Timing
 //		- O : Opening
-//	- NRPNs are supported as is; use NRPN and DTE operations.
+//	- NRPNs are supported as is; use NRPN and DTE operations. Or use some shorthand ones:
+//		- BANK : language selection
+//		- P : panpot
+//		- V : volume
+//		- VIB_RATE : vibrato rate
+//		- VIB_DEPTH : vibrato depth
+//		- PITCH_BEND_SENSITIVITY : pitch bend sensitivity
+//		- @ : program change
 //
 // Implementation notes:
 //
@@ -333,12 +340,13 @@
 
 
 // Lyrics macro ----
-#macro あ en:string="a",params:string="0" { L "あ",$en,$params }
-#macro い en:string="i",params:string="0" { L "い",$en,$params }
-#macro う en:string="M",params:string="0" { L "う",$en,$params }
-#macro え en:string="e",params:string="0" { L "え",$en,$params }
-#macro お en:string="o",params:string="0" { L "お",$en,$params }
-#macro か en:string="k a",params:string="64,0" { L "か",$en,$params }
+#macro あ { L "あ", "a", "0", 1, #61 }
+#macro い { L "い", "i", "0", 1, #69 }
+#macro う { L "う", "M", "0", 1, #4D }
+#macro え { L "え", "e", "0", 1, #65 }
+#macro お { L "お", "o", "0", 1, #6F }
+#macro か { L "か", "k a", "64,0", 2, #6B, #61 }
+// FIXME: fix following ones too.
 #macro き en:string="k' i",params:string="64,0" { L "き",$en,$params }
 #macro く en:string="k M",params:string="64,0" { L "く",$en,$params }
 #macro け en:string="k e",params:string="64,0" { L "け",$en,$params }
