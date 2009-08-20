@@ -62,10 +62,14 @@ namespace Commons.Music.Midi.Mml
 			// file names -> input sources
 			var inputs = new List<MmlInputSource> ();
 			string outfilename = null, explicitfilename = null;
+			bool disableRunningStatus = false;
 			foreach (string arg in args) {
 				switch (arg) {
 				case "--verbose":
 					verbose = true;
+					continue;
+				case "--disable-running-status":
+					disableRunningStatus = true;
 					continue;
 				default:
 					if (arg.StartsWith ("--encoding:", StringComparison.Ordinal)) {
@@ -105,7 +109,7 @@ namespace Commons.Music.Midi.Mml
 
 			// output
 			using (var outfile = File.Create (outfilename))
-				new SmfWriter (outfile).WriteMusic (smf);
+				new SmfWriter (outfile) { DisableRunningStatus = disableRunningStatus }.WriteMusic (smf);
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 	}
