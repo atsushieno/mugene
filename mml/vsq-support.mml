@@ -36,6 +36,9 @@
 //	  480 base count) to make them consistent.
 //
 
+#basecount 480
+
+
 // NRPNs
 #variable __version:number = 0
 #variable __device:number = 0
@@ -52,8 +55,6 @@
 #macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val,0 }
 #macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val,0 }
 #macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
-
-#basecount 480
 
 // Buffer definitions
 #variable EntireText:buffer
@@ -200,12 +201,20 @@
 	DEFINE_SINGER \
 	}
 
+#macro NRPNM val:number { CC #63,$val }
+#macro NRPNL val:number { CC #62,$val }
+#macro DTEM val:number { CC #06,$val }
+#macro DTEL val:number { CC #26,$val }
+#macro NRPNMP key,val { NRPNM $key DTEM $val }
+#macro NRPNLP key,val { NRPNL $key DTEL $val }
+
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
-#macro L label:string, en:string, params:string { \
+#macro L label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
-	\// NRPNs
+	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
+	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #4F,#7F \
 	__LET{"__handle_defs", $__handle_defs + 1} }
 // lyric macros are defined later (they are bunch).
 
@@ -239,7 +248,7 @@
 #macro AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
 #define EVENTS_COND { $__events \> 10000 ? "[ID#{0:D08}]\n", "[ID#{0:D04}]\n" }
 #define EVENTS_APPLY_COND $__events \> 10000 ? "{0}=ID#{1:D08}\n", "{0}=ID#{1:D04}\n"
-#macro n key:number, step:length, gate:length { \
+#macro n key:number, step:length, gate:length, vel:number=$__velocity { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
@@ -254,6 +263,8 @@
 	__LET {"__handle_uses", $__handle_uses + 1 } \
 	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
 	__LET { "__events", $__events + 1 } \
+	\// NRPNs. FIXME: how to calculate "note location"?
+	VER_DEV_DELAY_VAL#50,$key NRPNLP 3,$vel NRPNLP 4,$__current_note_gate NRPNLP 5,3 NRPNLP #7F,#7F \
 	NOP $__current_note_step } // One note operation consumes one lyric handle
 
 // BPLists ----
