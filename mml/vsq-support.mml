@@ -423,5 +423,5 @@
 #macro ろ en:string="4 o",params:string="64,0" { L "ろ",$en,$params }
 #macro わ en:string="w a",params:string="64,0" { L "わ",$en,$params }
 #macro を en:string="o",params:string="0" { L "を",$en,$params }
-// FIXME: define ん
-
+#macro ん en:string="n",params:string="64" { L "ん",$en,$params }
+// FIXME: are んま-んも defined differently? Or are they different in Luka?
