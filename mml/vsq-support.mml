@@ -37,8 +37,21 @@
 //
 
 // NRPNs
-#macro @ prog:number, lang:number=0, ver:number=0, dev:number=0 { NRPN #60,0 DTE $ver, $dev NRPN #60,2 DTE $lang,0 NRPN #53,2 DTE $prog,0 }
-
+#variable __version:number = 0
+#variable __device:number = 0
+#variable __delay:number = 0
+#macro VER_DEV_DELAY_VAL msb,vmsb,vlsb { \
+	NRPN $msb,0 DTE $__version, $__device \
+	NRPN $msb,1 DTE $__delay % #80, $__delay / #80 \
+	NRPN $msb,2 DTE $vmsb,$vlsb }
+#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val,0 }
+#macro V val:number { VER_DEV_DELAY_VAL #61,$val,0 }
+#macro P val:number { VER_DEV_DELAY_VAL #62,$val,0 }
+#macro E val:number { VER_DEV_DELAY_VAL #63,$val,0 }
+#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val,0 }
+#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val,0 }
+#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val,0 }
+#macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
 
 #basecount 480
 
