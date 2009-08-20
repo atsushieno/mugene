@@ -50,9 +50,9 @@
 #macro BANK val:number { VER_DEV_DELAY_VAL #60,$val,0 }
 #macro V val:number { VER_DEV_DELAY_VAL #61,$val,0 }
 #macro P val:number { VER_DEV_DELAY_VAL #62,$val,0 }
-#macro E val:number { VER_DEV_DELAY_VAL #63,$val,0 }
 #macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val,0 }
 #macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val,0 }
+// FIXME: what is Effect2, which occupies #66?
 #macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val,0 }
 #macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
 
@@ -268,45 +268,67 @@
 	NOP $__current_note_step } // One note operation consumes one lyric handle
 
 // BPLists ----
+#macro BP_NRPN paraID,val { VER_DEV_DELAY #55,$paraID,0 NRPNLP 3,$val }
+
 #variable __pitch_bend_bp:number
-#macro P val:number { __LET { "__pitch_bend_bp", $val } __STORE { "PitchBendBPList", $__timeline_position, "=", $val, "\n" } }
-#macro P+ val:number { P $__pitch_bend_bp + $val }
-#macro P_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+#macro B val:number { __LET { "__pitch_bend_bp", $val } __STORE { "PitchBendBPList", $__timeline_position, "=", $val, "\n" } \
+	VER_DEV_DELAY #54, $val % #80, $val / #80 }
+#macro B+ val:number { P $__pitch_bend_bp + $val }
+#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __dynamics
-#macro D val:number { __LET { "__dynamics", $val } __STORE { "DynamicsBPList", $__timeline_position, "=", $val, "\n" } }
+#macro D val:number { __LET { "__dynamics", $val } \
+	__STORE { "DynamicsBPList", $__timeline_position, "=", $val, "\n" } VER_DEV_DELAY #63,$val,0 }
 #macro D+ val:number { D $__dynamics + $val }
 #macro D_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "D", "D+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __breathiness
-#macro BRE val:number { __LET { "__breathiness", $val } __STORE { "EpRResidualBPList", $__timeline_position, "=", $val, "\n" } }
+#macro BRE val:number { __LET { "__breathiness", $val } \
+	__STORE { "EpRResidualBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN31,$val }
 #macro BRE+ val:number { BRE $__breathiness + $val }
 #macro BRE_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRE", "BRE+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __brightness
-#macro BRI val:number { __LET { "__brightness", $val } __STORE { "EpRESlopeBPList", $__timeline_position, "=", $val, "\n" } }
-#macro BRI+ val:number { BRE $__brightness + $val }
+#macro BRI val:number { __LET { "__brightness", $val } \
+	__STORE { "EpRESlopeBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN32,$val }
+#macro BRI+ val:number { BRI $__brightness + $val }
 #macro BRI_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRI", "BRI+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __clearness
-#macro C val:number { __LET { "__clearness", $val } __STORE { "EpRESlopeDepthBPList", $__timeline_position, "=", $val, "\n" } }
-#macro C+ val:number { BRE $__clearness + $val }
+#macro C val:number { __LET { "__clearness", $val } \
+	__STORE { "EpRESlopeDepthBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN33,$val }
+#macro C+ val:number { C $__clearness + $val }
 #macro C_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "C", "C+", SPECTRA_ONESHOT_ARG_USE }
+
+// only in V1
 #variable __harmonics
-#macro H val:number { __LET { "__harmonics", $val } __STORE { "EpRSineBPList", $__timeline_position, "=", $val, "\n" } }
-#macro H+ val:number { BRE $__harmonics + $val }
+#macro H val:number { __LET { "__harmonics", $val } \
+	__STORE { "EpRSineBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN30,$val }
+#macro H+ val:number { H $__harmonics + $val }
 #macro H_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "H", "H+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __vib_trem_depth
+// FIXME: no NRPNs to write?
 #macro XD val:number { __LET { "__vib_trem_depth", $val } __STORE { "VibTremDepthBPList", $__timeline_position, "=", $val, "\n" } }
-#macro XD+ val:number { BRE $__vib_trem_depth + $val }
+#macro XD+ val:number { XD $__vib_trem_depth + $val }
 #macro XD_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "XD", "XD+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __gender_factor
-#macro G val:number { __LET { "__gender_factor", $val } __STORE { "GenderFactorBPList", $__timeline_position, "=", $val, "\n" } }
-#macro G+ val:number { BRE $__gender_factor + $val }
+#macro G val:number { __LET { "__gender_factor", $val } \
+	__STORE { "GenderFactorBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN70,$val }
+#macro G+ val:number { G $__gender_factor + $val }
 #macro G_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "G", "G+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __portamento_timing
-#macro POR val:number { __LET { "__portamento_timing", $val } __STORE { "PortamentoTimingBPList", $__timeline_position, "=", $val, "\n" } }
-#macro POR+ val:number { BRE $__portamento_timing + $val }
+#macro POR val:number { __LET { "__portamento_timing", $val } \
+	__STORE { "PortamentoTimingBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN34,$val }
+#macro POR+ val:number { POR $__portamento_timing + $val }
 #macro POR_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "POR", "POR+", SPECTRA_ONESHOT_ARG_USE }
+
 #variable __opening
-#macro O val:number { __LET { "__opening", $val } __STORE { "OpeningBPList", $__timeline_position, "=", $val, "\n" } }
-#macro O+ val:number { BRE $__opening + $val }
+#macro O val:number { __LET { "__opening", $val } \
+	__STORE { "OpeningBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN35,$val }
+#macro O+ val:number { O $__opening + $val }
 #macro O_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
 
 
