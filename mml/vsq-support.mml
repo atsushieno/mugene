@@ -177,6 +177,7 @@
 	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
 	@ $Program, $Language \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
+	__LET { "__handle_uses", $__handle_uses + 1 } \
 	__LET { "__events", $__events + 1 } \
 	}
 
@@ -216,12 +217,15 @@
 #macro NRPNLP key,val { NRPNL $key DTEL $val }
 
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
+#variable tmp_phonLen, phonA, phonB, phonC
 #macro L label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
 	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
+	__SAVE_OPER_BEGIN \
 	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #4F,#7F \
+	__SAVE_OPER_END $__handle_defs \
 	__LET{"__handle_defs", $__handle_defs + 1} }
 // lyric macros are defined later (they are bunch).
 
@@ -238,7 +242,7 @@
 		"\nDepthBPNum=", $depthBPNum, "\nStartRate=", $startRate, \
 		"\nRateBPNum=", $rateBPNum, "\n"} \
 	__LET {"__handle_defs", $__handle_defs + 1 } \
-	__LET {"__handle_uses", $__handle_defs } \
+	__LET {"__handle_uses", $__handle_uses + 1 } \
 	}
 
 #macro @V id:number { __LET { "vibrato", $id } } // ID is the defined order.
@@ -267,12 +271,15 @@
 	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, "\n" } \
 	__APPLY {$vibrato ? "AddVibratoHandle", "NOP", $vibrato} \
 	__LET {"vibrato", $vibrato_constant } \
-	__LET {"__handle_uses", $__handle_uses + 1 } \
 	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
 	__LET { "__events", $__events + 1 } \
 	\// NRPNs. FIXME: how to calculate "note location"?
-	VER_DEV_DELAY_VAL#50,$key NRPNLP 3,$vel NRPNLP 4,$__current_note_gate NRPNLP 5,3 NRPNLP #7F,#7F \
-	NOP $__current_note_step } // One note operation consumes one lyric handle
+	VER_DEV_DELAY_VAL#50,$key NRPNLP 3,$vel NRPNLP 4,$__current_note_gate NRPNLP 5,3 \
+	DEBUG $handle_uses \
+	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
+	NOP $__current_note_step \
+	__LET {"__handle_uses", $__handle_uses + 1 } \
+	} // One note operation consumes one lyric handle
 
 // BPLists ----
 #macro BP_NRPN paraID,val { VER_DEV_DELAY #55,$paraID,0 NRPNLP 3,$val }

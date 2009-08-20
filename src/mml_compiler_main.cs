@@ -127,6 +127,9 @@ namespace Commons.Music.Midi.Mml
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__ON_MIDI_NOTE_OFF"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI_META"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__SAVE_OPER_BEGIN"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__SAVE_OPER_END"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__RESTORE_OPER"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_BEGIN"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_BREAK"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_END"});

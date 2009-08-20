@@ -377,7 +377,7 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlSemanticTreeSet SourceTree { get; set; }
 
-		public List<KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; private set; }
+		public List<KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; internal set; }
 		public Dictionary<MmlSemanticVariable,object> Values { get; internal set; }
 		public Stack<Loop> Loops { get; private set; }
 
@@ -437,6 +437,18 @@ namespace Commons.Music.Midi.Mml
 
 		List<MmlResolvedEvent> chord = new List<MmlResolvedEvent> ();
 		bool recordNextAsChord;
+		Dictionary<int,StoredOperations> stored_operations = new Dictionary<int,StoredOperations> ();
+
+		class StoredOperations
+		{
+			public StoredOperations ()
+			{
+			}
+			
+			public List<MmlOperationUse> Operations { get; set; }
+			public Dictionary<MmlSemanticVariable,object> Values { get; set; }
+			public List<KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; set; }
+		}
 
 		Stack<MmlLineInfo> locations = new Stack<MmlLineInfo> ();
 
@@ -445,6 +457,10 @@ namespace Commons.Music.Midi.Mml
 		void ProcessOperations (MmlResolvedTrack track, MmlResolveContext rctx, List<MmlOperationUse> list, int start, int count)
 		{
 //Util.DebugWriter.WriteLine ("Resolve variables in track {0}", track.Number);
+
+			int storeIndex = -1;
+			List<MmlResolvedEvent> storeCurrentOutput = null, storeDummy = new List<MmlResolvedEvent> ();
+			StoredOperations currentStoredOperations = null;
 
 			for (int listIndex = start; listIndex < start + count; listIndex++) {
 				var oper = list [listIndex];
@@ -576,6 +592,46 @@ namespace Commons.Music.Midi.Mml
 						mmop.Arguments.AddRange (arg.ByteArrayValue);
 					current_output.Add (mmop);
 					break;
+				case "__SAVE_OPER_BEGIN":
+					oper.ValidateArguments (rctx, 0);
+					if (storeIndex >= 0)
+						throw new MmlException ("__SAVE_OPER_BEGIN works only within a simple list", oper.Location);
+					storeIndex = listIndex + 1;
+					storeCurrentOutput = current_output;
+					current_output = storeDummy;
+					currentStoredOperations = new StoredOperations ();
+					currentStoredOperations.Values = new Dictionary<MmlSemanticVariable, object> (rctx.Values);
+					currentStoredOperations.MacroArguments = new List<KeyValuePair<MmlSemanticVariable, object>> (rctx.MacroArguments);
+					break;
+				case "__SAVE_OPER_END": {
+					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
+					int bufIdx = oper.Arguments [0].IntValue;
+					stored_operations [bufIdx] = currentStoredOperations;
+					currentStoredOperations.Operations =
+						new List<MmlOperationUse> (list.Skip (storeIndex).Take (listIndex - storeIndex - 1));
+					current_output = storeCurrentOutput;
+					storeDummy.Clear ();
+					storeIndex = -1;
+					currentStoredOperations = null;
+					// FIXME: might be better to restore variables
+					break;
+					}
+				case "__RESTORE_OPER": {
+					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
+					int bufIdx = oper.Arguments [0].IntValue;
+					var ss = stored_operations [bufIdx];
+					var valuesBak = rctx.Values;
+					var macroArgsBak = rctx.MacroArguments;
+					rctx.Values = ss.Values;
+					rctx.MacroArguments = ss.MacroArguments;
+					// adjust timeline_position (no need to update rctx.TimelinePosition here).
+					rctx.Values [rctx.Values.Keys.First (v => v.Name == "__timeline_position")] = rctx.TimelinePosition;
+					Console.WriteLine ("Process operations from " + rctx.TimelinePosition);
+					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count);
+					rctx.Values = valuesBak;
+					rctx.MacroArguments = macroArgsBak;
+					break;
+					}
 				case "__LOOP_BEGIN":
 					oper.ValidateArguments (rctx, 0);
 					var loop = new Loop (rctx) { BeginAt= new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition) };
