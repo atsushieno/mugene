@@ -338,9 +338,9 @@ namespace Commons.Music.Midi
 			WriteShort (deltaTimeSpec);
 		}
 
-		Action<SmfEvent,Stream> meta_event_writer;
+		Func<bool,SmfEvent,Stream,int> meta_event_writer;
 
-		public Action<SmfEvent,Stream> MetaEventWriter {
+		public Func<bool,SmfEvent,Stream,int> MetaEventWriter {
 			get { return meta_event_writer; }
 			set {
 				if (value == null)
@@ -360,7 +360,7 @@ namespace Commons.Music.Midi
 				Write7BitVariableInteger (e.DeltaTime);
 				switch (e.Message.MessageType) {
 				case SmfMessage.Meta:
-					meta_event_writer (e, stream);
+					meta_event_writer (false, e, stream);
 					break;
 				case SmfMessage.SysEx1:
 				case SmfMessage.SysEx2:
@@ -404,21 +404,22 @@ namespace Commons.Music.Midi
 				size += GetVariantLength (e.DeltaTime);
 
 				// message type & channel
-				if (DisableRunningStatus || running_status >= 0xF0 || running_status != e.Message.StatusByte)
-					size++;
 				running_status = e.Message.StatusByte;
 
 				// arguments
 				switch (e.Message.MessageType) {
 				case SmfMessage.Meta:
-					size++; // MetaType
-					goto case SmfMessage.SysEx1;
+					size += meta_event_writer (true, e, null);
+					break;
 				case SmfMessage.SysEx1:
 				case SmfMessage.SysEx2:
+					size++;
 					size += GetVariantLength (e.Message.Data.Length);
 					size += e.Message.Data.Length;
 					break;
 				default:
+					if (DisableRunningStatus || running_status != e.Message.StatusByte)
+						size++;
 					size += SmfMessage.FixedDataSize (e.Message.MessageType);
 					break;
 				}
@@ -446,11 +447,20 @@ namespace Commons.Music.Midi
 	public static class SmfWriterExtension
 	{
 
-		static readonly Action<SmfEvent, Stream> default_meta_writer, vsq_meta_text_splitter;
+		static readonly Func<bool, SmfEvent, Stream, int> default_meta_writer, vsq_meta_text_splitter;
 
 		static SmfWriterExtension ()
 		{
-			default_meta_writer = delegate (SmfEvent e, Stream stream) {
+			default_meta_writer = delegate (bool lengthMode, SmfEvent e, Stream stream) {
+				if (lengthMode) {
+					if (e.Message.Data.Length == 0)
+						return 3; // 0xFF, metaType, 0
+
+					int repeatCount = e.Message.Data.Length / 0x7F;
+					int mod = e.Message.Data.Length % 0x7F;
+					return repeatCount * (2 + 0x7F) + (mod > 0 ? 2 + mod : 0);
+				}
+
 				int written = 0;
 				int total = e.Message.Data.Length;
 				do {
@@ -461,13 +471,25 @@ namespace Commons.Music.Midi
 					stream.Write (e.Message.Data, written, size);
 					written += size;
 				} while (written < total);
+				return 0;
 			};
 
-			vsq_meta_text_splitter = delegate (SmfEvent e, Stream stream) {
+			vsq_meta_text_splitter = delegate (bool lengthMode, SmfEvent e, Stream stream) {
+				// The split should not be applied to "Master Track"
 				if (e.Message.Data.Length < 0x80) {
-					default_meta_writer (e, stream);
-					return;
+					return default_meta_writer (lengthMode, e, stream);
 				}
+
+				if (lengthMode) {
+					if (e.Message.Data.Length == 0)
+						return 11; // 0xFF, metaType, 8, "DM:0000:"
+
+					// { 0xFF metaType DM:xxxx:... } * repeat + 0xFF metaType DM:xxxx:mod...
+					int repeatCount = e.Message.Data.Length / 0x77;
+					int mod = e.Message.Data.Length % 0x77;
+					return repeatCount * (11 + 0x77) + (mod > 0 ? 11 + mod : 0);
+				}
+
 
 				int written = 0;
 				int total = e.Message.Data.Length;
@@ -481,14 +503,15 @@ namespace Commons.Music.Midi
 					stream.Write (e.Message.Data, written, size);
 					written += size;
 				} while (written < total);
+				return 0;
 			};
 		}
 
-		public static Action<SmfEvent, Stream> DefaultMetaEventWriter {
+		public static Func<bool, SmfEvent, Stream, int> DefaultMetaEventWriter {
 			get { return default_meta_writer; }
 		}
 
-		public static Action<SmfEvent, Stream> VsqMetaTextSplitter {
+		public static Func<bool, SmfEvent, Stream, int> VsqMetaTextSplitter {
 			get { return vsq_meta_text_splitter; }
 		}
 	}
