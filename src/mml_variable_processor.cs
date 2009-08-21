@@ -27,7 +27,7 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract partial class MmlValueExpr
 	{
-		internal static int BaseCount;
+		internal static int BaseCount = 192;
 
 		static MmlValueExpr ()
 		{
