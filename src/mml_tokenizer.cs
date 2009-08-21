@@ -40,16 +40,17 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlTokenSet
 	{
-		public static int BaseCount = 192;
-
 		public MmlTokenSet ()
 		{
+			BaseCount = 192;
 			Conditional = new MmlCompilationCondition ();
 			Macros = new List<MmlMacroDefinition> ();
 			Variables = new List<MmlVariableDefinition> ();
 			Tracks = new List<MmlTrack> ();
 			MetaTexts = new List<KeyValuePair<byte, string>> ();
 		}
+
+		public int BaseCount { get; set; }
 
 		public MmlCompilationCondition Conditional { get; private set; }
 		public List<MmlMacroDefinition> Macros { get; private set; }
@@ -1089,7 +1090,7 @@ namespace Commons.Music.Midi.Mml
 			// add built-in variables
 			result.Variables.Add (new MmlVariableDefinition ("__timeline_position", null) { Type = MmlDataType.Number });
 			var bc = new MmlVariableDefinition ("__base_count", null) { Type = MmlDataType.Number };
-			bc.DefaultValueTokens.Add (new MmlToken () { TokenType = MmlTokenType.NumberLiteral, Value = MmlTokenSet.BaseCount });
+			bc.DefaultValueTokens.Add (new MmlToken () { TokenType = MmlTokenType.NumberLiteral, Value = result.BaseCount });
 			result.Variables.Add (bc);
 
 			// process variables
@@ -1113,7 +1114,8 @@ namespace Commons.Music.Midi.Mml
 				throw new NotImplementedException ();
 			case "basecount":
 				source.Lexer.ExpectNext (MmlTokenType.NumberLiteral);
-				MmlTokenSet.BaseCount = (int) source.Lexer.Value;
+				result.BaseCount = (int) source.Lexer.Value;
+				MmlValueExpr.BaseCount = result.BaseCount;
 				break;
 			case "conditional":
 				var category = source.Lexer.ReadNewIdentifier ();

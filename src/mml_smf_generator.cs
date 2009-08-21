@@ -19,7 +19,7 @@ namespace Commons.Music.Midi.Mml
 		MmlSmfGenerator (MmlResolvedMusic source)
 		{
 			this.source = source;
-			result = new SmfMusic () { DeltaTimeSpec = 48 }; // FIXME: get it from source
+			result = new SmfMusic () { DeltaTimeSpec = (short) (source.BaseCount / 4) };
 		}
 
 		MmlResolvedMusic source;

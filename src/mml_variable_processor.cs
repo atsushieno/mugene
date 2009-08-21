@@ -27,6 +27,8 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract partial class MmlValueExpr
 	{
+		internal static int BaseCount;
+
 		static MmlValueExpr ()
 		{
 			StringToBytes = (s => Encoding.UTF8.GetBytes (s));
@@ -78,7 +80,7 @@ namespace Commons.Music.Midi.Mml
 				if (value is byte)
 					return (double) (byte) value;
 				if (value is MmlLength)
-					return (double) ((MmlLength) value).GetSteps (MmlTokenSet.BaseCount);
+					return (double) ((MmlLength) value).GetSteps (MmlValueExpr.BaseCount);
 				break; // error
 			case MmlDataType.Length:
 				if (value is MmlLength)
@@ -269,9 +271,11 @@ namespace Commons.Music.Midi.Mml
 	{
 		public MmlResolvedMusic ()
 		{
+			BaseCount = 192;
 			Tracks = new List<MmlResolvedTrack> ();
 		}
 
+		public int BaseCount { get; set; }
 		public List<MmlResolvedTrack> Tracks { get; private set; }
 	}
 
@@ -409,7 +413,7 @@ namespace Commons.Music.Midi.Mml
 		MmlEventStreamGenerator (MmlSemanticTreeSet source)
 		{
 			this.source = source;
-			result = new MmlResolvedMusic ();
+			result = new MmlResolvedMusic () { BaseCount = source.BaseCount };
 		}
 
 		MmlSemanticTreeSet source;
