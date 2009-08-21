@@ -116,12 +116,13 @@
 #macro VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
 	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
-	"\nTracks=", $MasterTracks } }
+	"\nTracks=", $MasterTracks, "\n" } }
 
 #variable __tmp_position
 #macro OUTPUT_VSQ_TEXT { \
 	__LET {"__tmp_position", $__timeline_position } \
 	__LET {"__timeline_position", 0 } \
+	TRACKNAME $CommonName \
 	SETUP_COMMON \
 	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
 		\// FIXME: move back commented BPLists here.
@@ -175,7 +176,7 @@
 #variable CommonColorRed:number = 157
 #variable CommonColorGreen:number = 181
 #variable CommonColorBlue:number = 123
-#variable CommonDynamicsMode:number = 0
+#variable CommonDynamicsMode:number = 1
 #variable CommonPlayMode:number = 1
 
 #macro SINGER_MIKU { \
