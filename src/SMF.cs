@@ -300,6 +300,9 @@ namespace Commons.Music.Midi
 			if (stream == null)
 				throw new ArgumentNullException ("stream");
 			this.stream = stream;
+
+			// default meta event writer.
+			meta_event_writer = SmfWriterExtension.DefaultMetaEventWriter;
 		}
 
 		public bool DisableRunningStatus { get; set; }
@@ -335,6 +338,17 @@ namespace Commons.Music.Midi
 			WriteShort (deltaTimeSpec);
 		}
 
+		Action<SmfEvent,Stream> meta_event_writer;
+
+		public Action<SmfEvent,Stream> MetaEventWriter {
+			get { return meta_event_writer; }
+			set {
+				if (value == null)
+					throw new ArgumentNullException ("value");
+				meta_event_writer = value;
+			}
+		}
+
 		public void WriteTrack (SmfTrack track)
 		{
 			stream.Write (Encoding.UTF8.GetBytes ("MTrk"), 0, 4);
@@ -346,16 +360,7 @@ namespace Commons.Music.Midi
 				Write7BitVariableInteger (e.DeltaTime);
 				switch (e.Message.MessageType) {
 				case SmfMessage.Meta:
-					int written = 0;
-					int total = e.Message.Data.Length;
-					do {
-						stream.WriteByte (0xFF);
-						stream.WriteByte (e.Message.MetaType);
-						int size = Math.Min (0x7F, total - written);
-						stream.WriteByte ((byte) size);
-						stream.Write (e.Message.Data, written, size);
-						written += size;
-					} while (written < total);
+					meta_event_writer (e, stream);
 					break;
 				case SmfMessage.SysEx1:
 				case SmfMessage.SysEx2:
@@ -435,6 +440,56 @@ namespace Commons.Music.Midi
 			if (value >= 0x80)
 				Write7BitVariableInteger (value >> 7, true);
 			stream.WriteByte ((byte) ((value & 0x7F) + (shifted ? 0x80 : 0)));
+		}
+	}
+
+	public static class SmfWriterExtension
+	{
+
+		static readonly Action<SmfEvent, Stream> default_meta_writer, vsq_meta_text_splitter;
+
+		static SmfWriterExtension ()
+		{
+			default_meta_writer = delegate (SmfEvent e, Stream stream) {
+				int written = 0;
+				int total = e.Message.Data.Length;
+				do {
+					stream.WriteByte (0xFF);
+					stream.WriteByte (e.Message.MetaType);
+					int size = Math.Min (0x7F, total - written);
+					stream.WriteByte ((byte) size);
+					stream.Write (e.Message.Data, written, size);
+					written += size;
+				} while (written < total);
+			};
+
+			vsq_meta_text_splitter = delegate (SmfEvent e, Stream stream) {
+				if (e.Message.Data.Length < 0x80) {
+					default_meta_writer (e, stream);
+					return;
+				}
+
+				int written = 0;
+				int total = e.Message.Data.Length;
+				int idx = 0;
+				do {
+					stream.WriteByte (0xFF);
+					stream.WriteByte (e.Message.MetaType);
+					int size = Math.Min (0x77, total - written);
+					stream.WriteByte ((byte) (size + 8));
+					stream.Write (Encoding.ASCII.GetBytes (String.Format ("DM:{0:D04}:", idx++)), 0, 8);
+					stream.Write (e.Message.Data, written, size);
+					written += size;
+				} while (written < total);
+			};
+		}
+
+		public static Action<SmfEvent, Stream> DefaultMetaEventWriter {
+			get { return default_meta_writer; }
+		}
+
+		public static Action<SmfEvent, Stream> VsqMetaTextSplitter {
+			get { return vsq_meta_text_splitter; }
 		}
 	}
 
