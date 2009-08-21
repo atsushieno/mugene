@@ -129,39 +129,34 @@
 	TRACKNAME $CommonName \
 	SETUP_COMMON \
 	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
-		\// FIXME: move back commented BPLists here.
+		,$PitchBendBPList \
+		,$PitchBendSensBPList \
+		,$DynamicsBPList \
+		,$EpRResidualBPList \
+		,$EpRESlopeBPList \
+		,$EpRESlopeDepthBPList \
+		,$EpRSineBPList \
+		,$ResoAFreqBPList \
+		,$ResoBFreqBPList \
+		,$ResoCFreqBPList \
+		,$ResoDFreqBPList \
+		,$ResoABWBPList \
+		,$ResoBBWBPList \
+		,$ResoCBWBPList \
+		,$ResoDBWBPList \
+		,$ResoAAmpBPList \
+		,$ResoBAmpBPList \
+		,$ResoCAmpBPList \
+		,$ResoDAmpBPList \
+		,$VibTremDepthBPList \
+		,$GenderFactorBPList \
+		,$PortamentTimingBPList \
+		,$OpeningBPList \
 		} \
 	TEXT $EntireText \
 	__LET {"__timeline_position", $__tmp_position } \
 	}
 
-#comment
-
-//		,$PitchBendBPList \
-//		,$PitchBendSensBPList \
-//		,$DynamicsBPList \
-//		,$EpRResidualBPList \
-//		,$EpRESlopeBPList \
-//		,$EpRESlopeDepthBPList \
-//		,$EpRSineBPList \
-//		,$ResoAFreqBPList \
-//		,$ResoBFreqBPList \
-//		,$ResoCFreqBPList \
-//		,$ResoDFreqBPList \
-//		,$ResoABWBPList \
-//		,$ResoBBWBPList \
-//		,$ResoCBWBPList \
-//		,$ResoDBWBPList \
-//		,$ResoAAmpBPList \
-//		,$ResoBAmpBPList \
-//		,$ResoCAmpBPList \
-//		,$ResoDAmpBPList \
-//		,$VibTremDepthBPList \
-//		,$GenderFactorBPList \
-//		,$PortamentTimingBPList \
-//		,$OpeningBPList \
-
-#endcomment
 
 #variable __handle_defs
 #variable __handle_uses
