@@ -456,14 +456,17 @@ namespace Commons.Music.Midi
 					if (e.Message.Data.Length == 0)
 						return 3; // 0xFF, metaType, 0
 
+					// [0x00] 0xFF metaType ... (note that for more than one meta event it requires step count of 0).
 					int repeatCount = e.Message.Data.Length / 0x7F;
 					int mod = e.Message.Data.Length % 0x7F;
-					return repeatCount * (2 + 0x7F) + (mod > 0 ? 2 + mod : 0);
+					return repeatCount * (3 + 0x7F) - 1 + (mod > 0 ? 3 + mod : 0);
 				}
 
 				int written = 0;
 				int total = e.Message.Data.Length;
 				do {
+					if (written > 0)
+						stream.WriteByte (0); // step
 					stream.WriteByte (0xFF);
 					stream.WriteByte (e.Message.MetaType);
 					int size = Math.Min (0x7F, total - written);
@@ -484,10 +487,11 @@ namespace Commons.Music.Midi
 					if (e.Message.Data.Length == 0)
 						return 11; // 0xFF, metaType, 8, "DM:0000:"
 
-					// { 0xFF metaType DM:xxxx:... } * repeat + 0xFF metaType DM:xxxx:mod...
+					// { [0x00] 0xFF metaType DM:xxxx:... } * repeat + 0x00 0xFF metaType DM:xxxx:mod... 
+					// (note that for more than one meta event it requires step count of 0).
 					int repeatCount = e.Message.Data.Length / 0x77;
 					int mod = e.Message.Data.Length % 0x77;
-					return repeatCount * (11 + 0x77) + (mod > 0 ? 11 + mod : 0);
+					return repeatCount * (12 + 0x77) - 1 + (mod > 0 ? 12 + mod : 0);
 				}
 
 
@@ -495,6 +499,8 @@ namespace Commons.Music.Midi
 				int total = e.Message.Data.Length;
 				int idx = 0;
 				do {
+					if (written > 0)
+						stream.WriteByte (0); // step
 					stream.WriteByte (0xFF);
 					stream.WriteByte (e.Message.MetaType);
 					int size = Math.Min (0x77, total - written);
