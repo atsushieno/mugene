@@ -64,8 +64,15 @@ namespace Commons.Music.Midi.Mml
 			string outfilename = null, explicitfilename = null;
 			bool disableRunningStatus = false;
 			bool useVsqMetadata = false;
+			string extension = ".mid";
 			foreach (string arg in args) {
 				switch (arg) {
+				case "--vsq": // for convenience
+					useVsqMetadata = true;
+					disableRunningStatus = true;
+					MmlValueExpr.StringToBytes = s => Encoding.GetEncoding (932).GetBytes (s);
+					extension = ".vsq";
+					continue;
 				case "--verbose":
 					verbose = true;
 					continue;
@@ -87,7 +94,7 @@ namespace Commons.Music.Midi.Mml
 					}
 					break;
 				}
-				outfilename = Path.ChangeExtension (arg, ".mid");
+				outfilename = Path.ChangeExtension (arg, extension);
 				inputs.Add (new MmlInputSource (arg, Resolver.Resolve (arg)));
 			}
 			if (explicitfilename != null)
