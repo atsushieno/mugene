@@ -4,6 +4,8 @@
 //	- at beginning:
 //		- set variables for DEFINE_SINGER operation.
 //		- call VSQ_INITIALIZE_TRACK. DEFINE_SINGER is indirectly called.
+//		- if it is the first singer track, call VSQ_SETUP_FIRST_TRACK
+//		- then, call VSQ_SETUP_DONE.
 //	- at finishing:
 //		- call OUTPUT_VSQ_TEXT
 //	- define vibrato using DEFINE_VIBRATO operation. Vibrato is referenced by definition index.
@@ -116,7 +118,9 @@
 #macro VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
 	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
-	"\nTracks=", $MasterTracks, "\n" } }
+	"\nTracks=", $MasterTracks, "\n" } \
+	}
+#macro VSQ_SETUP_DONE { r1 r1 r1 r1}
 
 #variable __tmp_position
 #macro OUTPUT_VSQ_TEXT { \
@@ -222,7 +226,7 @@
 	__STORE {"GenderFactorBPList", "[GenderFactorBPList]\n"} \
 	__STORE {"PortamentTimingBPList", "[PortamentTimingBPList]\n"} \
 	__STORE {"OpeningBPList", "[OpeningBPList]\n"} \
-	r2 DEFINE_SINGER r2 \
+	DEFINE_SINGER \
 	}
 
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
