@@ -47,20 +47,30 @@
 
 
 // NRPNs
+#macro NRPNM val:number { CC #63,$val }
+#macro NRPNL val:number { CC #62,$val }
+#macro DTEM val:number { CC #06,$val }
+#macro DTEL val:number { CC #26,$val }
+#macro NRPNMP key,val { NRPNM $key DTEM $val }
+#macro NRPNMPW key,msb,lsb { NRPNM $key DTE $msb,$lsb }
+#macro NRPNLP key,val { NRPNL $key DTEM $val }
+#macro NRPNLPW key,msb,lsb { NRPNL $key DTE $msb,$lsb }
+
 #variable __version:number = 0
 #variable __device:number = 0
 #variable __delay:number = 0
-#macro VER_DEV_DELAY_VAL msb,vmsb,vlsb { \
+
+#macro VER_DEV_DELAY_VAL msb,vmsb { \
 	NRPN $msb,0 DTE $__version, $__device \
-	NRPN $msb,1 DTE $__delay % #80, $__delay / #80 \
-	NRPN $msb,2 DTE $vmsb,$vlsb }
-#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val,0 }
-#macro V val:number { VER_DEV_DELAY_VAL #61,$val,0 }
-#macro P val:number { VER_DEV_DELAY_VAL #62,$val,0 }
-#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val,0 }
-#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val,0 }
+	NRPNLPW 1, $__delay % #80, $__delay / #80 \
+	NRPNLP 2,$vmsb }
+#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val }
+#macro V val:number { VER_DEV_DELAY_VAL #61,$val }
+#macro P val:number { VER_DEV_DELAY_VAL #62,$val }
+#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val }
+#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val }
 // FIXME: what is Effect2, which occupies #66?
-#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val,0 }
+#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val }
 #macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
 
 // Buffer definitions
@@ -114,33 +124,39 @@
 	__LET {"__timeline_position", 0 } \
 	SETUP_COMMON \
 	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
-		,$PitchBendBPList \
-		,$PitchBendSensBPList \
-		,$DynamicsBPList \
-		,$EpRResidualBPList \
-		,$EpRESlopeBPList \
-		,$EpRESlopeDepthBPList \
-		,$EpRSineBPList \
-		,$ResoAFreqBPList \
-		,$ResoBFreqBPList \
-		,$ResoCFreqBPList \
-		,$ResoDFreqBPList \
-		,$ResoABWBPList \
-		,$ResoBBWBPList \
-		,$ResoCBWBPList \
-		,$ResoDBWBPList \
-		,$ResoAAmpBPList \
-		,$ResoBAmpBPList \
-		,$ResoCAmpBPList \
-		,$ResoDAmpBPList \
-		,$VibTremDepthBPList \
-		,$GenderFactorBPList \
-		,$PortamentTimingBPList \
-		,$OpeningBPList \
+		\// FIXME: move back commented BPLists here.
 		} \
 	TEXT $EntireText \
 	__LET {"__timeline_position", $__tmp_position } \
 	}
+
+#comment
+
+//		,$PitchBendBPList \
+//		,$PitchBendSensBPList \
+//		,$DynamicsBPList \
+//		,$EpRResidualBPList \
+//		,$EpRESlopeBPList \
+//		,$EpRESlopeDepthBPList \
+//		,$EpRSineBPList \
+//		,$ResoAFreqBPList \
+//		,$ResoBFreqBPList \
+//		,$ResoCFreqBPList \
+//		,$ResoDFreqBPList \
+//		,$ResoABWBPList \
+//		,$ResoBBWBPList \
+//		,$ResoCBWBPList \
+//		,$ResoDBWBPList \
+//		,$ResoAAmpBPList \
+//		,$ResoBAmpBPList \
+//		,$ResoCAmpBPList \
+//		,$ResoDAmpBPList \
+//		,$VibTremDepthBPList \
+//		,$GenderFactorBPList \
+//		,$PortamentTimingBPList \
+//		,$OpeningBPList \
+
+#endcomment
 
 #variable __handle_defs
 #variable __handle_uses
@@ -174,7 +190,7 @@
 		"\nOriginal=", $Original, "\nCaption=", $Caption, "\nLength=", $Length, \
 		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
 	__STORE {"Events", "0=ID#0000\n"} \
-	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
+	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=h#0000\n"} \
 	@ $Program, $Language \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
 	__LET { "__handle_uses", $__handle_uses + 1 } \
@@ -182,7 +198,6 @@
 	}
 
 #macro VSQ_INITIALIZE_TRACK { \
-	r%1 \
 	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
 	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
 	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
@@ -206,17 +221,11 @@
 	__STORE {"GenderFactorBPList", "[GenderFactorBPList]\n"} \
 	__STORE {"PortamentTimingBPList", "[PortamentTimingBPList]\n"} \
 	__STORE {"OpeningBPList", "[OpeningBPList]\n"} \
-	DEFINE_SINGER \
+	r2 DEFINE_SINGER r2 \
 	}
 
-#macro NRPNM val:number { CC #63,$val }
-#macro NRPNL val:number { CC #62,$val }
-#macro DTEM val:number { CC #06,$val }
-#macro DTEL val:number { CC #26,$val }
-#macro NRPNMP key,val { NRPNM $key DTEM $val }
-#macro NRPNLP key,val { NRPNL $key DTEL $val }
-
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
+#define HANDLE_USES_COND {$__handle_uses \> 10000 ? "h#{0:D08}\n", "h#{0:D04}\n"}
 #variable tmp_phonLen, phonA, phonB, phonC
 #macro L label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
@@ -264,11 +273,12 @@
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
 	__STORE_FORMAT {"Defs", EVENTS_COND, $__events } \
-	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote=", $key, \
+	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote#=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
 	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
 	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
-	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, "\n" } \
+	"\nDEMaccept=", $dem_accent, "\nLyricHandle=" } \
+	__STORE_FORMAT {"Defs", HANDLE_USES_COND, $__handle_uses } \
 	__APPLY {$vibrato ? "AddVibratoHandle", "NOP", $vibrato} \
 	__LET {"vibrato", $vibrato_constant } \
 	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
