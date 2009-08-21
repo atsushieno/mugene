@@ -371,7 +371,6 @@ namespace Commons.Music.Midi
 				default:
 					if (DisableRunningStatus || e.Message.StatusByte != running_status)
 						stream.WriteByte (e.Message.StatusByte);
-					running_status = e.Message.StatusByte;
 					int len = SmfMessage.FixedDataSize (e.Message.MessageType);
 					stream.WriteByte (e.Message.Msb);
 					if (len > 1)
@@ -380,6 +379,7 @@ namespace Commons.Music.Midi
 						throw new Exception ("Unexpected data size: " + len);
 					break;
 				}
+				running_status = e.Message.StatusByte;
 			}
 		}
 
@@ -403,9 +403,6 @@ namespace Commons.Music.Midi
 				// delta time
 				size += GetVariantLength (e.DeltaTime);
 
-				// message type & channel
-				running_status = e.Message.StatusByte;
-
 				// arguments
 				switch (e.Message.MessageType) {
 				case SmfMessage.Meta:
@@ -418,11 +415,14 @@ namespace Commons.Music.Midi
 					size += e.Message.Data.Length;
 					break;
 				default:
+					// message type & channel
 					if (DisableRunningStatus || running_status != e.Message.StatusByte)
 						size++;
 					size += SmfMessage.FixedDataSize (e.Message.MessageType);
 					break;
 				}
+
+				running_status = e.Message.StatusByte;
 			}
 			return size;
 		}
@@ -456,10 +456,12 @@ namespace Commons.Music.Midi
 					if (e.Message.Data.Length == 0)
 						return 3; // 0xFF, metaType, 0
 
-					// [0x00] 0xFF metaType ... (note that for more than one meta event it requires step count of 0).
+					// [0x00] 0xFF metaType size ... (note that for more than one meta event it requires step count of 0).
 					int repeatCount = e.Message.Data.Length / 0x7F;
+					if (repeatCount == 0)
+						return 3 + e.Message.Data.Length;
 					int mod = e.Message.Data.Length % 0x7F;
-					return repeatCount * (3 + 0x7F) - 1 + (mod > 0 ? 3 + mod : 0);
+					return repeatCount * (4 + 0x7F) - 1 + (mod > 0 ? 4 + mod : 0);
 				}
 
 				int written = 0;
@@ -491,7 +493,7 @@ namespace Commons.Music.Midi
 					// (note that for more than one meta event it requires step count of 0).
 					int repeatCount = e.Message.Data.Length / 0x77;
 					int mod = e.Message.Data.Length % 0x77;
-					return repeatCount * (12 + 0x77) - 1 + (mod > 0 ? 12 + mod : 0);
+					return repeatCount * (12 + 0x77) - (repeatCount > 0 ? 1 : 0) + (mod > 0 ? 12 + mod : 0) - 1;
 				}
 
 
