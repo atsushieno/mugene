@@ -363,90 +363,97 @@
 #macro え { L "え", "e", "0", 1, #65 }
 #macro お { L "お", "o", "0", 1, #6F }
 #macro か { L "か", "k a", "64,0", 2, #6B, #61 }
-// FIXME: fix following ones too.
-#macro き en:string="k' i",params:string="64,0" { L "き",$en,$params }
-#macro く en:string="k M",params:string="64,0" { L "く",$en,$params }
-#macro け en:string="k e",params:string="64,0" { L "け",$en,$params }
-#macro こ en:string="k o",params:string="64,0" { L "こ",$en,$params }
-#macro が en:string="g a",params:string="64,0" { L "が",$en,$params }
-#macro ぎ en:string="g' i",params:string="64,0" { L "ぎ",$en,$params }
-#macro ぐ en:string="g M",params:string="64,0" { L "ぐ",$en,$params }
-#macro げ en:string="g e",params:string="64,0" { L "げ",$en,$params }
-#macro ご en:string="g o",params:string="64,0" { L "ご",$en,$params }
-#macro んが en:string="N a",params:string="64,0" { L "んが",$en,$params }
-#macro んぎ en:string="N' i",params:string="64,0" { L "んぎ",$en,$params }
-#macro んぐ en:string="N M",params:string="64,0" { L "んぐ",$en,$params }
-#macro んげ en:string="N e",params:string="64,0" { L "んげ",$en,$params }
-#macro んご en:string="N o",params:string="64,0" { L "んご",$en,$params }
-#macro さ en:string="s a",params:string="64,0" { L "さ",$en,$params }
-#macro し en:string="S i",params:string="64,0" { L "し",$en,$params }
-#macro す en:string="s M",params:string="64,0" { L "す",$en,$params }
-#macro せ en:string="s e",params:string="64,0" { L "せ",$en,$params }
-#macro そ en:string="s o",params:string="64,0" { L "そ",$en,$params }
-#macro ざ en:string="z a",params:string="64,0" { L "ざ",$en,$params }
-#macro じ en:string="Z i",params:string="64,0" { L "じ",$en,$params }
-#macro ず en:string="z M",params:string="64,0" { L "ず",$en,$params }
-#macro ぜ en:string="z e",params:string="64,0" { L "ぜ",$en,$params }
-#macro ぞ en:string="z o",params:string="64,0" { L "ぞ",$en,$params }
-#macro _ざ en:string="dz a",params:string="64,0" { L "ざ",$en,$params }	// 単語の始め
-#macro _じ en:string="dZ i",params:string="64,0" { L "じ",$en,$params }
-#macro _ず en:string="dz M",params:string="64,0" { L "ず",$en,$params }
-#macro _ぜ en:string="dz e",params:string="64,0" { L "ぜ",$en,$params }
-#macro _ぞ en:string="dz o",params:string="64,0" { L "ぞ",$en,$params }
-#macro た en:string="t a",params:string="64,0" { L "た",$en,$params }
-#macro てぃ en:string="t i",params:string="64,0" { L "てぃ",$en,$params }
-#macro ち en:string="tS i",params:string="64,0" { L "ち",$en,$params }
-#macro つ en:string="ts M",params:string="64,0" { L "つ",$en,$params }
-#macro て en:string="t e",params:string="64,0" { L "て",$en,$params }
-#macro と en:string="t o",params:string="64,0" { L "と",$en,$params }
-#macro だ en:string="d a",params:string="64,0" { L "だ",$en,$params }
-#macro ぢ en:string="Z i",params:string="64,0" { L "ぢ",$en,$params }
-#macro づ en:string="z M",params:string="64,0" { L "づ",$en,$params }
-#macro でぃ en:string="d' i",params:string="64,0" { L "でぃ",$en,$params }
-#macro どぅ en:string="d M",params:string="64,0" { L "どぅ",$en,$params }
-#macro で en:string="d e",params:string="64,0" { L "で",$en,$params }
-#macro ど en:string="d o",params:string="64,0" { L "ど",$en,$params }
-#macro な en:string="n a",params:string="64,0" { L "な",$en,$params }
-#macro に en:string="J i",params:string="64,0" { L "に",$en,$params }
-#macro ぬ en:string="n M",params:string="64,0" { L "ぬ",$en,$params }
-#macro ね en:string="n e",params:string="64,0" { L "ね",$en,$params }
-#macro の en:string="n o",params:string="64,0" { L "の",$en,$params }
-#macro は en:string="h\\ a",params:string="64,0" { L "は",$en,$params }	// 単語の途中
-#macro ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
-#macro ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
-#macro ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
-#macro へ en:string="h\\ e",params:string="64,0" { L "へ",$en,$params }
-#macro ほ en:string="h\\ o",params:string="64,0" { L "ほ",$en,$params }
-#macro _は en:string="h a",params:string="64,0" { L "は",$en,$params }	// (単語の始め)
-#macro _ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
-#macro _ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
-#macro _ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
-#macro _へ en:string="h e",params:string="64,0" { L "へ",$en,$params }
-#macro _ほ en:string="h o",params:string="64,0" { L "ほ",$en,$params }
-#macro ば en:string="b a",params:string="64,0" { L "ば",$en,$params }
-#macro び en:string="b' i",params:string="64,0" { L "び",$en,$params }
-#macro ぶ en:string="b M",params:string="64,0" { L "ぶ",$en,$params }
-#macro べ en:string="b e",params:string="64,0" { L "べ",$en,$params }
-#macro ぼ en:string="b o",params:string="64,0" { L "ぼ",$en,$params }
-#macro ぱ en:string="p a",params:string="64,0" { L "ぱ",$en,$params }
-#macro ぴ en:string="p' i",params:string="64,0" { L "ぴ",$en,$params }
-#macro ぷ en:string="p M",params:string="64,0" { L "ぷ",$en,$params }
-#macro ぺ en:string="p e",params:string="64,0" { L "ぺ",$en,$params }
-#macro ぽ en:string="p o",params:string="64,0" { L "ぽ",$en,$params }
-#macro ま en:string="m a",params:string="64,0" { L "ま",$en,$params }
-#macro み en:string="m' i",params:string="64,0" { L "み",$en,$params }
-#macro む en:string="m M",params:string="64,0" { L "む",$en,$params }
-#macro め en:string="m e",params:string="64,0" { L "め",$en,$params }
-#macro も en:string="m o",params:string="64,0" { L "も",$en,$params }
-#macro や en:string="j a",params:string="64,0" { L "や",$en,$params }
-#macro ゆ en:string="j u",params:string="64,0" { L "ゆ",$en,$params }
-#macro よ en:string="j o",params:string="64,0" { L "よ",$en,$params }
-#macro ら en:string="4 a",params:string="64,0" { L "ら",$en,$params }
-#macro り en:string="4' i",params:string="64,0" { L "り",$en,$params }
-#macro る en:string="4 M",params:string="64,0" { L "る",$en,$params }
-#macro れ en:string="4 e",params:string="64,0" { L "れ",$en,$params }
-#macro ろ en:string="4 o",params:string="64,0" { L "ろ",$en,$params }
-#macro わ en:string="w a",params:string="64,0" { L "わ",$en,$params }
-#macro を en:string="o",params:string="0" { L "を",$en,$params }
-#macro ん en:string="n",params:string="64" { L "ん",$en,$params }
+#macro き { L "き", "k' i", "64,0", 3, #6B, #27, #69 }
+#macro く { L "く", "k M", "64,0", 2, #6B, #4D }
+#macro け { L "け", "k e", "64,0", 2, #6B, #65 }
+#macro こ { L "こ", "k o", "64,0", 2, #6B, #6F }
+#macro が { L "が", "g a", "64,0", 2, #67, #61 }
+#macro ぎ { L "ぎ", "g' i", "64,0", 3, #67, #27, #69 }
+#macro ぐ { L "ぐ", "g M", "64,0", 2, #67, #4D }
+#macro げ { L "げ", "g e", "64,0", 2, #67, #65 }
+#macro ご { L "ご", "g o", "64,0", 2, #67, #6F }
+#macro んが { L "んが", "N a", "64,0", 2, #4E, #61 }
+#macro んぎ { L "んぎ", "N' i", "64,0", 3, #4E, #27, #69 }
+#macro んぐ { L "んぐ", "N M", "64,0", 2, #4E, #4D }
+#macro んげ { L "んげ", "N e", "64,0", 2, #4E, #65 }
+#macro んご { L "んご", "N o", "64,0", 2, #4E, #6F }
+#macro さ { L "さ", "s a", "64,0", 2, #73, #61 }
+#macro し { L "し", "S i", "64,0", 2, #53, #69 }
+#macro す { L "す", "s M", "64,0", 2, #73, #4D }
+#macro せ { L "せ", "s e", "64,0", 2, #73, #65 }
+#macro そ { L "そ", "s o", "64,0", 2, #73, #6F }
+#macro ざ { L "ざ", "z a", "64,0", 2, #7A, #61 }
+#macro じ { L "じ", "Z i", "64,0", 2, #5A, #69 }
+#macro ず { L "ず", "z M", "64,0", 2, #7A, #4D }
+#macro ぜ { L "ぜ", "z e", "64,0", 2, #7A, #65 }
+#macro ぞ { L "ぞ", "z o", "64,0", 2, #7A, #6F }
+// for word-initiator
+#macro _ざ { L "ざ", "dz a", "64,0", 3, #64, #7A, #61 }
+#macro _じ { L "じ", "dZ i", "64,0", 3, #64, #5A, #69 }
+#macro _ず { L "ず", "dz M", "64,0", 3, #64, #7A, #4D }
+#macro _ぜ { L "ぜ", "dz e", "64,0", 3, #64, #7A, #65 }
+#macro _ぞ { L "ぞ", "dz o", "64,0", 3, #64, #7A, #6F }
+#macro た { L "た", "t a", "64,0", 2, #74, #61 }
+#macro てぃ { L "てぃ", "t i", "64,0", 2, #74, #69 }
+#macro ち { L "ち", "tS i", "64,0", 3, #74, #53, #69 }
+#macro つ { L "つ", "ts M", "64,0", 3, #74, #53, #4D }
+#macro て { L "て", "t e", "64,0", 2, #74, #65 }
+#macro と { L "と", "t o", "64,0", 2, #74, #6F }
+#macro だ { L "た", "d a", "64,0", 2, #64, #61 }
+#macro でぃ { L "てぃ", "d i", "64,0", 2, #64, #69 }
+#macro ぢ { L "ち", "Z i", "64,0", 3, #7A, #69 }
+#macro どぅ { L "どぅ", "d M", "64,0", 3, #64, #4D }
+#macro づ { L "づ", "z M", "64,0", 3, #7A, #4D }
+#macro で { L "で", "d e", "64,0", 2, #64, #65 }
+#macro ど { L "ど", "d o", "64,0", 2, #64, #6F }
+#macro な { L "な", "n a", "64,0", 2, #6E, #61 }
+#macro ぬ { L "ぬ", "n M", "64,0", 2, #6E, #4D }
+#macro ね { L "ね", "n e", "64,0", 2, #6E, #65 }
+#macro の { L "の", "n o", "64,0", 2, #6E, #6F }
+#macro にゃ { L "にゃ", "J a", "64,0", 2, #4A, #61 }
+#macro に { L "に", "J i", "64,0", 2, #4A, #69 }
+#macro にゅ { L "にゅ", "J M", "64,0", 2, #4A, #4D }
+#macro にぇ { L "にぇ", "J e", "64,0", 2, #4A, #65 }
+#macro にょ { L "にょ", "J o", "64,0", 2, #4A, #6F }
+// in-the-middle-of-words
+#macro は { L "は", "h\\ a", "64,0", 3, #68, #5C, #61 }
+#macro ひ { L "ひ", "C i", "64,0", 2, #43, #69 }
+#macro ふぃ { L "ふぃ", "p\\' i", "64,0", 4, #70, #5C, #27, #69 }
+#macro ふ { L "ふ", "p\\ M", "64,0", 3, #70, #5C, #4D }
+#macro ふゅ { L "ふゅ", "p\\' M", "64,64,64,0", 4, #70, #5C, #27, #4D }
+#macro へ { L "へ", "h\\ e", "64,0", 3, #68, #5C, #65 }
+#macro ほ { L "ほ", "h\\ o", "64,0", 3, #68, #5C, #6F }
+// word-initiator
+#macro _は { L "は", "h a", "64,0", 2, #68, #61 }
+#macro _ひ { L "ひ", "C i", "64,0", 2, #43, #69 }
+#macro _ふぃ { ふぃ }
+#macro _ふ { ふ }
+#macro _へ { L "へ", "h e", "64,0", 2, #68, #65 }
+#macro _ほ { L "ほ", "h o", "64,0", 2, #68, #6F }
+#macro ば { L "ば", "b a", "64,0", 2, #62, #61 }
+#macro び { L "び", "b' i", "64,0", 3, #62, #27, #69 }
+#macro ぶ { L "ぶ", "b M", "64,0", 2, #62, #4D }
+#macro べ { L "べ", "b e", "64,0", 2, #62, #65 }
+#macro ぼ { L "ぼ", "b o", "64,0", 2, #62, #6F }
+#macro ぱ { L "ぱ", "p a", "64,0", 2, #70, #61 }
+#macro ぴ { L "ぴ", "p' i", "64,0", 3, #70, #27, #69 }
+#macro ぷ { L "ぷ", "p M", "64,0", 2, #70, #4D }
+#macro ぺ { L "ぺ", "p e", "64,0", 2, #70, #65 }
+#macro ぽ { L "ぽ", "p o", "64,0", 2, #70, #6F }
+#macro ま { L "ま", "m a", "64,0", 2, #6D, #61 }
+#macro み { L "み", "m' i", "64,0", 3, #6D, #27, #69 }
+#macro む { L "む", "m M", "64,0", 2, #6D, #4D }
+#macro め { L "め", "m e", "64,0", 2, #6D, #65 }
+#macro も { L "も", "m o", "64,0", 2, #6D, #6F }
+#macro や { L "や", "j a", "64,0", 2, #6A, #61 }
+#macro ゆ { L "ゆ", "j u", "64,0", 2, #6A, #75 }
+#macro よ { L "よ", "j o", "64,0", 2, #6A, #6F }
+#macro ら { L "ら", "4 a", "64,0", 2, #34, #61 }
+#macro り { L "り", "4' i", "64,0", 3, #34, #27, #69 }
+#macro る { L "る", "4 M", "64,0", 2, #34, #4D }
+#macro れ { L "れ", "4 e", "64,0", 2, #34, #65 }
+#macro ろ { L "ろ", "4 o", "64,0", 2, #34, #6F }
+#macro わ { L "わ", "w a", "64,0", 2, #77, #61 }
+#macro を { L "を", "o", "0", 1, #6F }
+#macro ん { L "ん", "N \\", "64,64", 1, #4E, #5C }
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
