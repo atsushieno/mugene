@@ -227,6 +227,7 @@
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
 #define HANDLE_USES_COND {$__handle_uses \> 10000 ? "h#{0:D08}\n", "h#{0:D04}\n"}
 #variable tmp_phonLen, phonA, phonB, phonC
+#variable __prev_vowel
 #macro L label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
@@ -235,7 +236,9 @@
 	__SAVE_OPER_BEGIN \
 	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #4F,#7F \
 	__SAVE_OPER_END $__handle_defs \
-	__LET{"__handle_defs", $__handle_defs + 1} }
+	__LET{"__handle_defs", $__handle_defs + 1} \
+	__LET{"__prev_vowel", $phonC ? $phonC, $phonB ? $phonB, $phonA } \
+	 }
 // lyric macros are defined later (they are bunch).
 
 // Vibrato operations ----
@@ -354,7 +357,6 @@
 	__STORE { "OpeningBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN35,$val }
 #macro O+ val:number { O $__opening + $val }
 #macro O_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
-
 
 // Lyrics macro ----
 #macro あ { L "あ", "a", "0", 1, #61 }
@@ -503,6 +505,9 @@
 #macro わ { L "わ", "w a", "64,0", 2, #77, #61 }
 #macro を { L "を", "o", "0", 1, #6F }
 #macro ん { L "ん", "N", "64", 1, #4E }
+#macro ー { } // do nothing
+#macro っ { } // do nothing, by default
+#macro っ_ { __APPLY { $__prev_vowel \<= #4D ? "う", { $__prev_vowel \<=#61 ? "あ", { $__prev_vowel \<=#65 ? "え", { $__prev_vowel \<= #69 ? "い", "お" } } } } }
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
 
 #macro _へ_ { L "へ", "e", "0", 1, #65 }
