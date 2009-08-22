@@ -502,5 +502,7 @@
 #macro りょ { L "りょ", "4' o", "64,64,0", 3, #34, #27, #6F }
 #macro わ { L "わ", "w a", "64,0", 2, #77, #61 }
 #macro を { L "を", "o", "0", 1, #6F }
-#macro ん { L "ん", "N \\", "64,64", 1, #4E, #5C }
+#macro ん { L "ん", "N", "64", 1, #4E }
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
+
+#macro _へ_ { L "へ", "e", "0", 1, #65 }
