@@ -73,8 +73,12 @@ namespace Commons.Music.Midi.Mml.Parser
 				return Token.Caret;
 			case MmlTokenType.BackSlashLesser:
 				return Token.BackSlashLesser;
+			case MmlTokenType.BackSlashLesserEqual:
+				return Token.BackSlashLesserEqual;
 			case MmlTokenType.BackSlashGreater:
 				return Token.BackSlashGreater;
+			case MmlTokenType.BackSlashGreaterEqual:
+				return Token.BackSlashGreaterEqual;
 			case MmlTokenType.KeywordNumber:
 				return Token.KeywordNumber;
 			case MmlTokenType.KeywordLength:
@@ -144,6 +148,7 @@ namespace Commons.Music.Midi.Mml.Parser
 %left OpenCurly
 %left CloseCurly
 %left Question
+%left Caret
 %left Plus
 %left Minus
 %left Asterisk
