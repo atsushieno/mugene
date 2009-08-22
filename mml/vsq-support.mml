@@ -505,9 +505,17 @@
 #macro わ { L "わ", "w a", "64,0", 2, #77, #61 }
 #macro を { L "を", "o", "0", 1, #6F }
 #macro ん { L "ん", "N", "64", 1, #4E }
-#macro ー { } // do nothing
 #macro っ { } // do nothing, by default
-#macro っ_ { __APPLY { $__prev_vowel \<= #4D ? "う", { $__prev_vowel \<=#61 ? "あ", { $__prev_vowel \<=#65 ? "え", { $__prev_vowel \<= #69 ? "い", "お" } } } } }
+#macro __a label:string { L $label, "a", "0", 1, #61 }
+#macro __i label:string { L $label, "i", "0", 1, #69 }
+#macro __u label:string { L $label, "M", "0", 1, #4D }
+#macro __e label:string { L $label, "e", "0", 1, #65 }
+#macro __o label:string { L $label, "o", "0", 1, #6F }
+#macro __keep_vowel label:string { __APPLY { $__prev_vowel \<= #4D ? "__u", { $__prev_vowel \<=#61 ? "__a", { $__prev_vowel \<=#65 ? "__e", { $__prev_vowel \<= #69 ? "__i", "__o" } } }, $label } }
+#macro っ_ { __keep_vowel "っ" }
+#macro ー { っ } // do nothing
+#macro ー_ { __keep_vowel "ー" }
+#macro う_ { __keep_vowel "う" } // for natural notation (eg. ue-wo-mu-i-te a-ruko--'u')
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
 
 #macro _へ_ { L "へ", "e", "0", 1, #65 }
