@@ -44,7 +44,9 @@
     <None Include="mml\nrpn-gs-xg.mml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="mml\vsq-support.mml" />
+    <None Include="mml\vsq-support.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\mml_compiler_main.cs" />
