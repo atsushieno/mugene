@@ -63,10 +63,21 @@ namespace Commons.Music.Midi.Mml
 			var inputs = new List<MmlInputSource> ();
 			string outfilename = null, explicitfilename = null;
 			bool disableRunningStatus = false;
+			bool useVsqMetadata = false;
+			string extension = ".mid";
 			foreach (string arg in args) {
 				switch (arg) {
+				case "--vsq": // for convenience
+					useVsqMetadata = true;
+					disableRunningStatus = true;
+					MmlValueExpr.StringToBytes = s => Encoding.GetEncoding (932).GetBytes (s);
+					extension = ".vsq";
+					continue;
 				case "--verbose":
 					verbose = true;
+					continue;
+				case "--use-vsq-metadata":
+					useVsqMetadata = true;
 					continue;
 				case "--disable-running-status":
 					disableRunningStatus = true;
@@ -83,7 +94,7 @@ namespace Commons.Music.Midi.Mml
 					}
 					break;
 				}
-				outfilename = Path.ChangeExtension (arg, ".mid");
+				outfilename = Path.ChangeExtension (arg, extension);
 				inputs.Add (new MmlInputSource (arg, Resolver.Resolve (arg)));
 			}
 			if (explicitfilename != null)
@@ -108,8 +119,13 @@ namespace Commons.Music.Midi.Mml
 			var smf = MmlSmfGenerator.Generate (resolved);
 
 			// output
-			using (var outfile = File.Create (outfilename))
-				new SmfWriter (outfile) { DisableRunningStatus = disableRunningStatus }.WriteMusic (smf);
+			using (var outfile = File.Create (outfilename)) {
+				var w = new SmfWriter (outfile);
+				w.DisableRunningStatus = disableRunningStatus;
+				if (useVsqMetadata)
+					w.MetaEventWriter = SmfWriterExtension.VsqMetaTextSplitter;
+				w.WriteMusic (smf);
+			}
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 	}

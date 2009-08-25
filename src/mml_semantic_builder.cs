@@ -12,11 +12,13 @@ namespace Commons.Music.Midi.Mml
 	{
 		public MmlSemanticTreeSet ()
 		{
+			BaseCount = 192;
 			Tracks = new List<MmlSemanticTrack> ();
 			Macros = new List<MmlSemanticMacro> ();
 			Variables = new List<MmlSemanticVariable> ();
 		}
 
+		public int BaseCount { get; set; }
 		public List<MmlSemanticTrack> Tracks { get; private set; }
 		public List<MmlSemanticMacro> Macros { get; private set; }
 		public List<MmlSemanticVariable> Variables { get; private set; }
@@ -349,7 +351,7 @@ namespace Commons.Music.Midi.Mml
 			if (tokenSet == null)
 				throw new ArgumentNullException ("tokenSet");
 			token_set = tokenSet;
-			result = new MmlSemanticTreeSet ();
+			result = new MmlSemanticTreeSet () { BaseCount = tokenSet.BaseCount };
 		}
 
 		MmlTokenSet token_set;

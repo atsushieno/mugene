@@ -4,6 +4,8 @@
 //	- at beginning:
 //		- set variables for DEFINE_SINGER operation.
 //		- call VSQ_INITIALIZE_TRACK. DEFINE_SINGER is indirectly called.
+//		- if it is the first singer track, call VSQ_SETUP_FIRST_TRACK
+//		- then, call VSQ_SETUP_DONE.
 //	- at finishing:
 //		- call OUTPUT_VSQ_TEXT
 //	- define vibrato using DEFINE_VIBRATO operation. Vibrato is referenced by definition index.
@@ -43,24 +45,34 @@
 //	  480 base count) to make them consistent.
 //
 
-#basecount 480
+#basecount 1920
 
 
 // NRPNs
+#macro NRPNM val:number { CC #63,$val }
+#macro NRPNL val:number { CC #62,$val }
+#macro DTEM val:number { CC #06,$val }
+#macro DTEL val:number { CC #26,$val }
+#macro NRPNMP key,val { NRPNM $key DTEM $val }
+#macro NRPNMPW key,msb,lsb { NRPNM $key DTE $msb,$lsb }
+#macro NRPNLP key,val { NRPNL $key DTEM $val }
+#macro NRPNLPW key,msb,lsb { NRPNL $key DTE $msb,$lsb }
+
 #variable __version:number = 0
 #variable __device:number = 0
 #variable __delay:number = 0
-#macro VER_DEV_DELAY_VAL msb,vmsb,vlsb { \
+
+#macro VER_DEV_DELAY_VAL msb,vmsb { \
 	NRPN $msb,0 DTE $__version, $__device \
-	NRPN $msb,1 DTE $__delay % #80, $__delay / #80 \
-	NRPN $msb,2 DTE $vmsb,$vlsb }
-#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val,0 }
-#macro V val:number { VER_DEV_DELAY_VAL #61,$val,0 }
-#macro P val:number { VER_DEV_DELAY_VAL #62,$val,0 }
-#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val,0 }
-#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val,0 }
+	NRPNLPW 1, $__delay % #80, $__delay / #80 \
+	NRPNLP 2,$vmsb }
+#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val }
+#macro V val:number { VER_DEV_DELAY_VAL #61,$val }
+#macro P val:number { VER_DEV_DELAY_VAL #62,$val }
+#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val }
+#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val }
 // FIXME: what is Effect2, which occupies #66?
-#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val,0 }
+#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val }
 #macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
 
 // Buffer definitions
@@ -106,12 +118,15 @@
 #macro VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
 	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
-	"\nTracks=", $MasterTracks } }
+	"\nTracks=", $MasterTracks, "\n" } \
+	}
+#macro VSQ_SETUP_DONE { r1 r1 r1 r1}
 
 #variable __tmp_position
 #macro OUTPUT_VSQ_TEXT { \
 	__LET {"__tmp_position", $__timeline_position } \
 	__LET {"__timeline_position", 0 } \
+	TRACKNAME $CommonName \
 	SETUP_COMMON \
 	__STORE { "EntireText", $Common, $MasterTrackSetup, "[EventList]\n", $Events, $Defs, $Handles \
 		,$PitchBendBPList \
@@ -142,6 +157,7 @@
 	__LET {"__timeline_position", $__tmp_position } \
 	}
 
+
 #variable __handle_defs
 #variable __handle_uses
 #variable __events
@@ -159,7 +175,7 @@
 #variable CommonColorRed:number = 157
 #variable CommonColorGreen:number = 181
 #variable CommonColorBlue:number = 123
-#variable CommonDynamicsMode:number = 0
+#variable CommonDynamicsMode:number = 1
 #variable CommonPlayMode:number = 1
 
 #macro SINGER_MIKU { \
@@ -174,7 +190,7 @@
 		"\nOriginal=", $Original, "\nCaption=", $Caption, "\nLength=", $Length, \
 		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
 	__STORE {"Events", "0=ID#0000\n"} \
-	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=", 0, "\n"} \
+	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=h#0000\n"} \
 	@ $Program, $Language \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
 	__LET { "__handle_uses", $__handle_uses + 1 } \
@@ -182,7 +198,6 @@
 	}
 
 #macro VSQ_INITIALIZE_TRACK { \
-	r%1 \
 	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
 	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
 	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
@@ -209,15 +224,10 @@
 	DEFINE_SINGER \
 	}
 
-#macro NRPNM val:number { CC #63,$val }
-#macro NRPNL val:number { CC #62,$val }
-#macro DTEM val:number { CC #06,$val }
-#macro DTEL val:number { CC #26,$val }
-#macro NRPNMP key,val { NRPNM $key DTEM $val }
-#macro NRPNLP key,val { NRPNL $key DTEL $val }
-
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
+#define HANDLE_USES_COND {$__handle_uses \> 10000 ? "h#{0:D08}\n", "h#{0:D04}\n"}
 #variable tmp_phonLen, phonA, phonB, phonC
+#variable __prev_vowel
 #macro L label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
@@ -226,7 +236,9 @@
 	__SAVE_OPER_BEGIN \
 	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #4F,#7F \
 	__SAVE_OPER_END $__handle_defs \
-	__LET{"__handle_defs", $__handle_defs + 1} }
+	__LET{"__handle_defs", $__handle_defs + 1} \
+	__LET{"__prev_vowel", $phonC ? $phonC, $phonB ? $phonB, $phonA } \
+	 }
 // lyric macros are defined later (they are bunch).
 
 // Vibrato operations ----
@@ -264,11 +276,12 @@
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
 	__STORE_FORMAT {"Defs", EVENTS_COND, $__events } \
-	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote=", $key, \
+	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote#=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
 	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
 	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
-	"\nDEMaccept=", $dem_accent, "\nLyricHandle=h#", $__handle_uses, "\n" } \
+	"\nDEMaccept=", $dem_accent, "\nLyricHandle=" } \
+	__STORE_FORMAT {"Defs", HANDLE_USES_COND, $__handle_uses } \
 	__APPLY {$vibrato ? "AddVibratoHandle", "NOP", $vibrato} \
 	__LET {"vibrato", $vibrato_constant } \
 	__STORE_FORMAT {"Events", EVENTS_APPLY_COND, $__timeline_position, $__events } \
@@ -345,7 +358,6 @@
 #macro O+ val:number { O $__opening + $val }
 #macro O_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
 
-
 // Lyrics macro ----
 #macro あ { L "あ", "a", "0", 1, #61 }
 #macro い { L "い", "i", "0", 1, #69 }
@@ -353,90 +365,158 @@
 #macro え { L "え", "e", "0", 1, #65 }
 #macro お { L "お", "o", "0", 1, #6F }
 #macro か { L "か", "k a", "64,0", 2, #6B, #61 }
-// FIXME: fix following ones too.
-#macro き en:string="k' i",params:string="64,0" { L "き",$en,$params }
-#macro く en:string="k M",params:string="64,0" { L "く",$en,$params }
-#macro け en:string="k e",params:string="64,0" { L "け",$en,$params }
-#macro こ en:string="k o",params:string="64,0" { L "こ",$en,$params }
-#macro が en:string="g a",params:string="64,0" { L "が",$en,$params }
-#macro ぎ en:string="g' i",params:string="64,0" { L "ぎ",$en,$params }
-#macro ぐ en:string="g M",params:string="64,0" { L "ぐ",$en,$params }
-#macro げ en:string="g e",params:string="64,0" { L "げ",$en,$params }
-#macro ご en:string="g o",params:string="64,0" { L "ご",$en,$params }
-#macro んが en:string="N a",params:string="64,0" { L "んが",$en,$params }
-#macro んぎ en:string="N' i",params:string="64,0" { L "んぎ",$en,$params }
-#macro んぐ en:string="N M",params:string="64,0" { L "んぐ",$en,$params }
-#macro んげ en:string="N e",params:string="64,0" { L "んげ",$en,$params }
-#macro んご en:string="N o",params:string="64,0" { L "んご",$en,$params }
-#macro さ en:string="s a",params:string="64,0" { L "さ",$en,$params }
-#macro し en:string="S i",params:string="64,0" { L "し",$en,$params }
-#macro す en:string="s M",params:string="64,0" { L "す",$en,$params }
-#macro せ en:string="s e",params:string="64,0" { L "せ",$en,$params }
-#macro そ en:string="s o",params:string="64,0" { L "そ",$en,$params }
-#macro ざ en:string="z a",params:string="64,0" { L "ざ",$en,$params }
-#macro じ en:string="Z i",params:string="64,0" { L "じ",$en,$params }
-#macro ず en:string="z M",params:string="64,0" { L "ず",$en,$params }
-#macro ぜ en:string="z e",params:string="64,0" { L "ぜ",$en,$params }
-#macro ぞ en:string="z o",params:string="64,0" { L "ぞ",$en,$params }
-#macro _ざ en:string="dz a",params:string="64,0" { L "ざ",$en,$params }	// 単語の始め
-#macro _じ en:string="dZ i",params:string="64,0" { L "じ",$en,$params }
-#macro _ず en:string="dz M",params:string="64,0" { L "ず",$en,$params }
-#macro _ぜ en:string="dz e",params:string="64,0" { L "ぜ",$en,$params }
-#macro _ぞ en:string="dz o",params:string="64,0" { L "ぞ",$en,$params }
-#macro た en:string="t a",params:string="64,0" { L "た",$en,$params }
-#macro てぃ en:string="t i",params:string="64,0" { L "てぃ",$en,$params }
-#macro ち en:string="tS i",params:string="64,0" { L "ち",$en,$params }
-#macro つ en:string="ts M",params:string="64,0" { L "つ",$en,$params }
-#macro て en:string="t e",params:string="64,0" { L "て",$en,$params }
-#macro と en:string="t o",params:string="64,0" { L "と",$en,$params }
-#macro だ en:string="d a",params:string="64,0" { L "だ",$en,$params }
-#macro ぢ en:string="Z i",params:string="64,0" { L "ぢ",$en,$params }
-#macro づ en:string="z M",params:string="64,0" { L "づ",$en,$params }
-#macro でぃ en:string="d' i",params:string="64,0" { L "でぃ",$en,$params }
-#macro どぅ en:string="d M",params:string="64,0" { L "どぅ",$en,$params }
-#macro で en:string="d e",params:string="64,0" { L "で",$en,$params }
-#macro ど en:string="d o",params:string="64,0" { L "ど",$en,$params }
-#macro な en:string="n a",params:string="64,0" { L "な",$en,$params }
-#macro に en:string="J i",params:string="64,0" { L "に",$en,$params }
-#macro ぬ en:string="n M",params:string="64,0" { L "ぬ",$en,$params }
-#macro ね en:string="n e",params:string="64,0" { L "ね",$en,$params }
-#macro の en:string="n o",params:string="64,0" { L "の",$en,$params }
-#macro は en:string="h\\ a",params:string="64,0" { L "は",$en,$params }	// 単語の途中
-#macro ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
-#macro ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
-#macro ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
-#macro へ en:string="h\\ e",params:string="64,0" { L "へ",$en,$params }
-#macro ほ en:string="h\\ o",params:string="64,0" { L "ほ",$en,$params }
-#macro _は en:string="h a",params:string="64,0" { L "は",$en,$params }	// (単語の始め)
-#macro _ひ en:string="C i",params:string="64,0" { L "ひ",$en,$params }
-#macro _ふぃ en:string="p\\' i",params:string="64,0" { L "ふぃ",$en,$params }
-#macro _ふ en:string="p\\ M",params:string="64,0" { L "ふ",$en,$params }
-#macro _へ en:string="h e",params:string="64,0" { L "へ",$en,$params }
-#macro _ほ en:string="h o",params:string="64,0" { L "ほ",$en,$params }
-#macro ば en:string="b a",params:string="64,0" { L "ば",$en,$params }
-#macro び en:string="b' i",params:string="64,0" { L "び",$en,$params }
-#macro ぶ en:string="b M",params:string="64,0" { L "ぶ",$en,$params }
-#macro べ en:string="b e",params:string="64,0" { L "べ",$en,$params }
-#macro ぼ en:string="b o",params:string="64,0" { L "ぼ",$en,$params }
-#macro ぱ en:string="p a",params:string="64,0" { L "ぱ",$en,$params }
-#macro ぴ en:string="p' i",params:string="64,0" { L "ぴ",$en,$params }
-#macro ぷ en:string="p M",params:string="64,0" { L "ぷ",$en,$params }
-#macro ぺ en:string="p e",params:string="64,0" { L "ぺ",$en,$params }
-#macro ぽ en:string="p o",params:string="64,0" { L "ぽ",$en,$params }
-#macro ま en:string="m a",params:string="64,0" { L "ま",$en,$params }
-#macro み en:string="m' i",params:string="64,0" { L "み",$en,$params }
-#macro む en:string="m M",params:string="64,0" { L "む",$en,$params }
-#macro め en:string="m e",params:string="64,0" { L "め",$en,$params }
-#macro も en:string="m o",params:string="64,0" { L "も",$en,$params }
-#macro や en:string="j a",params:string="64,0" { L "や",$en,$params }
-#macro ゆ en:string="j u",params:string="64,0" { L "ゆ",$en,$params }
-#macro よ en:string="j o",params:string="64,0" { L "よ",$en,$params }
-#macro ら en:string="4 a",params:string="64,0" { L "ら",$en,$params }
-#macro り en:string="4' i",params:string="64,0" { L "り",$en,$params }
-#macro る en:string="4 M",params:string="64,0" { L "る",$en,$params }
-#macro れ en:string="4 e",params:string="64,0" { L "れ",$en,$params }
-#macro ろ en:string="4 o",params:string="64,0" { L "ろ",$en,$params }
-#macro わ en:string="w a",params:string="64,0" { L "わ",$en,$params }
-#macro を en:string="o",params:string="0" { L "を",$en,$params }
-#macro ん en:string="n",params:string="64" { L "ん",$en,$params }
+#macro く { L "く", "k M", "64,0", 2, #6B, #4D }
+#macro け { L "け", "k e", "64,0", 2, #6B, #65 }
+#macro こ { L "こ", "k o", "64,0", 2, #6B, #6F }
+#macro きゃ { L "きゃ", "k' a", "64,64,0", 3, #6B, #27, #61 }
+#macro き   { L "き",   "k' i", "64,64,0", 3, #6B, #27, #69 }
+#macro きゅ { L "きゅ", "k' M", "64,64,0", 3, #6B, #27, #4D }
+#macro きぇ { L "きぇ", "k' e", "64,64,0", 3, #6B, #27, #65 }
+#macro きょ { L "きょ", "k' o", "64,64,0", 3, #6B, #27, #6F }
+#macro が { L "が", "g a", "64,0", 2, #67, #61 }
+#macro ぐ { L "ぐ", "g M", "64,0", 2, #67, #4D }
+#macro げ { L "げ", "g e", "64,0", 2, #67, #65 }
+#macro ご { L "ご", "g o", "64,0", 2, #67, #6F }
+#macro ぎゃ { L "ぎゃ", "g' a", "64,64,0", 3, #67, #27, #61 }
+#macro ぎ   { L "ぎ",   "g' i", "64,64,0", 3, #67, #27, #69 }
+#macro ぎゅ { L "ぎゅ", "g' M", "64,64,0", 3, #67, #27, #4D }
+#macro ぎぇ { L "ぎぇ", "g' e", "64,64,0", 3, #67, #27, #65 }
+#macro ぎょ { L "ぎょ", "g' o", "64,64,0", 3, #67, #27, #6F }
+#macro さ { L "さ", "s a", "64,0", 2, #73, #61 }
+#macro し { L "し", "S i", "64,0", 2, #53, #69 }
+#macro す { L "す", "s M", "64,0", 2, #73, #4D }
+#macro せ { L "せ", "s e", "64,0", 2, #73, #65 }
+#macro そ { L "そ", "s o", "64,0", 2, #73, #6F }
+#macro ざ { L "ざ", "z a", "64,0", 2, #7A, #61 }
+#macro じ { L "じ", "Z i", "64,0", 2, #5A, #69 }
+#macro ず { L "ず", "z M", "64,0", 2, #7A, #4D }
+#macro ぜ { L "ぜ", "z e", "64,0", 2, #7A, #65 }
+#macro ぞ { L "ぞ", "z o", "64,0", 2, #7A, #6F }
+// for word-initiator
+#macro _ざ { L "ざ", "dz a", "64,0", 3, #64, #7A, #61 }
+#macro _ず { L "ず", "dz M", "64,0", 3, #64, #7A, #4D }
+#macro _ぜ { L "ぜ", "dz e", "64,0", 3, #64, #7A, #65 }
+#macro _ぞ { L "ぞ", "dz o", "64,0", 3, #64, #7A, #6F }
+#macro _じゃ { L "じゃ", "dZ a", "64,64,0", 3, #64, #5A, #61 }
+#macro _じ   { L "じ",   "dZ i", "64,64,0", 3, #64, #5A, #69 }
+#macro _じゅ { L "じゅ", "dZ M", "64,64,0", 3, #64, #5A, #4D }
+#macro _じぇ { L "じぇ", "dZ e", "64,64,0", 3, #64, #5A, #65 }
+#macro _じょ { L "じょ", "dZ o", "64,64,0", 3, #64, #5A, #6F }
+#macro た { L "た", "t a", "64,0", 2, #74, #61 }
+#macro て { L "て", "t e", "64,0", 2, #74, #65 }
+#macro と { L "と", "t o", "64,0", 2, #74, #6F }
+#macro ちゃ { L "ちゃ", "tS a", "64,64,0", 3, #74, #53, #61 }
+#macro ち   { L "ち",   "tS i", "64,64,0", 3, #74, #53, #69 }
+#macro ちゅ { L "ちゅ", "tS u", "64,64,0", 3, #74, #53, #4D }
+#macro ちぇ { L "ちぇ", "tS e", "64,64,0", 3, #74, #53, #65 }
+#macro ちょ { L "ちょ", "tS o", "64,64,0", 3, #74, #53, #6F }
+#macro つぁ { L "つぁ", "ts a", "64,64,0", 3, #74, #73, #61 }
+#macro つぃ { L "つぃ", "ts i", "64,64,0", 3, #74, #73, #69 }
+#macro つ   { L "つ",   "ts M", "64,64,0", 3, #74, #73, #4D }
+#macro つぇ { L "つぇ", "ts e", "64,64,0", 3, #74, #73, #65 }
+#macro つぉ { L "つぉ", "ts o", "64,64,0", 3, #74, #73, #6F }
+#macro てゃ { L "てゃ", "t' a", "64,64,0", 3, #74, #27, #61 }
+#macro てぃ { L "てぃ", "t' i", "64,64,0", 3, #74, #27, #69 }
+#macro てゅ { L "てゅ", "t' M", "64,64,0", 3, #74, #27, #4D }
+#macro てぇ { L "てぇ", "t' e", "64,64,0", 3, #74, #27, #65 }
+#macro てょ { L "てょ", "t' o", "64,64,0", 3, #74, #27, #6F }
+#macro だ   { L "だ",   "d a", "64,0", 2, #64, #61 }
+#macro どぅ { L "どぅ", "d M", "64,0", 3, #64, #4D }
+#macro で   { L "で",   "d e", "64,0", 2, #64, #65 }
+#macro ど   { L "ど",   "d o", "64,0", 2, #64, #6F }
+#macro でゃ { L "でゃ", "d' a", "64,64,0", 3, #64, #27, #61 }
+#macro でぃ { L "でぃ", "d' i", "64,64,0", 3, #64, #27, #69 }
+#macro でゅ { L "でゅ", "d' M", "64,64,0", 3, #64, #27, #4D }
+#macro でぇ { L "でぇ", "d' e", "64,64,0", 3, #64, #27, #65 }
+#macro でょ { L "でょ", "d' o", "64,64,0", 3, #64, #27, #6F }
+#macro ぢ { じ }
+#macro づ { ず }
+#macro な { L "な", "n a", "64,0", 2, #6E, #61 }
+#macro ぬ { L "ぬ", "n M", "64,0", 2, #6E, #4D }
+#macro ね { L "ね", "n e", "64,0", 2, #6E, #65 }
+#macro の { L "の", "n o", "64,0", 2, #6E, #6F }
+#macro にゃ { L "にゃ", "J a", "64,0", 2, #4A, #61 }
+#macro に   { L "に",   "J i", "64,0", 2, #4A, #69 }
+#macro にゅ { L "にゅ", "J M", "64,0", 2, #4A, #4D }
+#macro にぇ { L "にぇ", "J e", "64,0", 2, #4A, #65 }
+#macro にょ { L "にょ", "J o", "64,0", 2, #4A, #6F }
+// in-the-middle-of-words
+#macro は { L "は", "h\\ a", "64,0", 3, #68, #5C, #61 }
+#macro へ { L "へ", "h\\ e", "64,0", 3, #68, #5C, #65 }
+#macro ほ { L "ほ", "h\\ o", "64,0", 3, #68, #5C, #6F }
+#macro ひゃ { L "ひゃ", "C a", "64,0", 2, #43, #61 }
+#macro ひ   { L "ひ",   "C i", "64,0", 2, #43, #69 }
+#macro ひゅ { L "ひゅ", "C M", "64,0", 2, #43, #4D }
+#macro ひぇ { L "ひぇ", "C e", "64,0", 2, #43, #65 }
+#macro ひょ { L "ひょ", "C o", "64,0", 2, #43, #6F }
+#macro ふぁ { L "ふぁ", "p\\ a", "64,64,0", 3, #70, #5C, #61 }
+#macro ふ   { L "ふ",   "p\\ M", "64,64,0", 3, #70, #5C, #4D }
+#macro ふぇ { L "ふぇ", "p\\ e", "64,64,0", 3, #70, #5C, #65 }
+#macro ふぉ { L "ふぉ", "p\\ o", "64,64,0", 3, #70, #5C, #6F }
+#macro ふゃ { L "ふゃ", "p\\' a", "64,64,64,0", 4, #70, #5C, #27, #61 }
+#macro ふぃ { L "ふぃ", "p\\' i", "64,64,64,0", 4, #70, #5C, #27, #69 }
+#macro ふゅ { L "ふゅ", "p\\' M", "64,64,64,0", 4, #70, #5C, #27, #4D }
+// word-initiator
+#macro _は { L "は", "h a", "64,0", 2, #68, #61 }
+#macro _ひ { ひ }
+#macro _ふぃ { ふぃ }
+#macro _ふ { ふ }
+#macro _へ { L "へ", "h e", "64,0", 2, #68, #65 }
+#macro _ほ { L "ほ", "h o", "64,0", 2, #68, #6F }
+#macro ば { L "ば", "b a", "64,0", 2, #62, #61 }
+#macro ぶ { L "ぶ", "b M", "64,0", 2, #62, #4D }
+#macro べ { L "べ", "b e", "64,0", 2, #62, #65 }
+#macro ぼ { L "ぼ", "b o", "64,0", 2, #62, #6F }
+#macro びゃ { L "びゃ", "b' a", "64,64,0", 3, #62, #27, #61 }
+#macro び   { L "び",   "b' i", "64,64,0", 3, #62, #27, #69 }
+#macro びゅ { L "びゅ", "b' M", "64,64,0", 3, #62, #27, #4D }
+#macro びぇ { L "びぇ", "b' e", "64,64,0", 3, #62, #27, #65 }
+#macro びょ { L "びょ", "b' o", "64,64,0", 3, #62, #27, #6F }
+#macro ぱ { L "ぱ", "p a", "64,0", 2, #70, #61 }
+#macro ぷ { L "ぷ", "p M", "64,0", 2, #70, #4D }
+#macro ぺ { L "ぺ", "p e", "64,0", 2, #70, #65 }
+#macro ぽ { L "ぽ", "p o", "64,0", 2, #70, #6F }
+#macro ぴゃ { L "ぴゃ", "p' a", "64,64,0", 3, #70, #27, #61 }
+#macro ぴ   { L "ぴ",   "p' i", "64,64,0", 3, #70, #27, #69 }
+#macro ぴゅ { L "ぴゅ", "p' M", "64,64,0", 3, #70, #27, #4D }
+#macro ぴぇ { L "ぴぇ", "p' e", "64,64,0", 3, #70, #27, #65 }
+#macro ぴょ { L "ぴょ", "p' o", "64,64,0", 3, #70, #27, #6F }
+#macro ま { L "ま", "m a", "64,0", 2, #6D, #61 }
+#macro む { L "む", "m M", "64,0", 2, #6D, #4D }
+#macro め { L "め", "m e", "64,0", 2, #6D, #65 }
+#macro も { L "も", "m o", "64,0", 2, #6D, #6F }
+#macro みゃ { L "み", "m' a", "64,64,0", 3, #6D, #27, #61 }
+#macro み   { L "み", "m' i", "64,64,0", 3, #6D, #27, #69 }
+#macro みゅ { L "み", "m' M", "64,64,0", 3, #6D, #27, #4D }
+#macro みぇ { L "み", "m' e", "64,64,0", 3, #6D, #27, #65 }
+#macro みょ { L "み", "m' o", "64,64,0", 3, #6D, #27, #6F }
+#macro や { L "や", "j a", "64,0", 2, #6A, #61 }
+#macro ゆ { L "ゆ", "j u", "64,0", 2, #6A, #75 }
+#macro よ { L "よ", "j o", "64,0", 2, #6A, #6F }
+#macro ら { L "ら", "4 a", "64,0", 2, #34, #61 }
+#macro る { L "る", "4 M", "64,0", 2, #34, #4D }
+#macro れ { L "れ", "4 e", "64,0", 2, #34, #65 }
+#macro ろ { L "ろ", "4 o", "64,0", 2, #34, #6F }
+#macro りゃ { L "りゃ", "4' a", "64,64,0", 3, #34, #27, #61 }
+#macro り   { L "り",   "4' i", "64,64,0", 3, #34, #27, #69 }
+#macro りゅ { L "りゅ", "4' M", "64,64,0", 3, #34, #27, #4D }
+#macro りぇ { L "りぇ", "4' e", "64,64,0", 3, #34, #27, #65 }
+#macro りょ { L "りょ", "4' o", "64,64,0", 3, #34, #27, #6F }
+#macro わ { L "わ", "w a", "64,0", 2, #77, #61 }
+#macro を { L "を", "o", "0", 1, #6F }
+#macro ん { L "ん", "N", "64", 1, #4E }
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
+
+#macro __a label:string { L $label, "a", "0", 1, #61 }
+#macro __i label:string { L $label, "i", "0", 1, #69 }
+#macro __u label:string { L $label, "M", "0", 1, #4D }
+#macro __e label:string { L $label, "e", "0", 1, #65 }
+#macro __o label:string { L $label, "o", "0", 1, #6F }
+#macro __keep_vowel label:string { __APPLY { $__prev_vowel \<= #4D ? "__u", { $__prev_vowel \<=#61 ? "__a", { $__prev_vowel \<=#65 ? "__e", { $__prev_vowel \<= #69 ? "__i", "__o" } } }, $label } }
+#macro っ { __keep_vowel "っ" }
+#macro っ_ { } // do nothing, skipping note
+#macro ー { __keep_vowel "ー" } // it'd be more frequently used
+#macro ー_ { } // do nothing, implying the same note holds
+#macro う_ { __keep_vowel "う" } // for natural notation (eg. ue-wo-mu-i-te a-ruko--'u')
+#macro _へ_ { L "へ", "e", "0", 1, #65 } // for natural note
+
