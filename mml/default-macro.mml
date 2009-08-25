@@ -15,7 +15,7 @@
 #variable __length:length = 4
 #macro CH val:number { __LET {"__channel", $val - 1} } // CH1-CH16 are valid.
 // note that __ERROR is undefined and it indeed is an error (literally).
-#macro ASSERT_STEP val:length { __LET {"__dummy", {$__timeline_position - $val ? $__ERROR, $__dummy}} }
+#macro ASSERT_STEP val:length { __LET {"__dummy", $__timeline_position - $val ? $__ERROR, $__dummy} }
 #macro DEBUG val:string { __PRINT {$val} }
 
 // primitive variables used in primitive macro operations
@@ -64,6 +64,13 @@
 #macro Kg- { __LET{"__trans_g", -1} }
 #macro Ka- { __LET{"__trans_a", -1} }
 #macro Kb- { __LET{"__trans_b", -1} }
+#macro Kc= { __LET{"__trans_c", 0} }
+#macro Kd= { __LET{"__trans_d", 0} }
+#macro Ke= { __LET{"__trans_e", 0} }
+#macro Kf= { __LET{"__trans_f", 0} }
+#macro Kg= { __LET{"__trans_g", 0} }
+#macro Ka= { __LET{"__trans_a", 0} }
+#macro Kb= { __LET{"__trans_b", 0} }
 #macro v val:number { __LET{"__velocity", $val} }
 #macro ( val:number=$__velocity_sense { __LET{"__velocity", $__velocity - $val} }
 #macro ) val:number=$__velocity_sense { __LET{"__velocity", $__velocity + $val} }
@@ -138,8 +145,8 @@
 #define KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=0
 #define KEYARGAPPLY $step, $gate, $vel, $offvel
 #macro n key:number, KEYARGDEF   { \
-	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
-	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
+	__LET{"__current_note_step", $gate + %1 ? $gate, $step}  \
+	__LET{"__current_note_gate", $__current_note_step * $__gate_rel * {1 / $__gate_rel_denom} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
 	NON$key, $vel \
 	NOP$__current_note_gate \
@@ -149,37 +156,37 @@
 
 // These + and - are nasty, but to be defined as macro, they had better be
 // formalized as below, without being treated specially by the parser.
-#macro c__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + $mod, KEYARGAPPLY }
+#macro c__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + $mod, KEYARGAPPLY }
 #macro c- KEYARGDEF { c__= - 1, KEYARGAPPLY } // should be used for some chord
 #macro c= KEYARGDEF { c__= 0, KEYARGAPPLY }
 #macro c KEYARGDEF { c__= $__trans_c, KEYARGAPPLY }
 #macro c+ KEYARGDEF { c__= 1, KEYARGAPPLY }
-#macro d__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 2 + $mod, KEYARGAPPLY }
+#macro d__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 2 + $mod, KEYARGAPPLY }
 #macro d- KEYARGDEF { d__= - 1, KEYARGAPPLY }
 #macro d= KEYARGDEF { d__= 0, KEYARGAPPLY }
 #macro d KEYARGDEF { d__= $__trans_d, KEYARGAPPLY }
 #macro d+ KEYARGDEF { d__= 1, KEYARGAPPLY }
-#macro e__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 4 + $mod, KEYARGAPPLY }
+#macro e__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 4 + $mod, KEYARGAPPLY }
 #macro e- KEYARGDEF { e__= - 1, KEYARGAPPLY }
 #macro e= KEYARGDEF { e__= 0, KEYARGAPPLY }
 #macro e KEYARGDEF { e__= $__trans_e, KEYARGAPPLY }
 #macro e+ KEYARGDEF { e__= 1, KEYARGAPPLY } // should be used for some chord
-#macro f__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 5 + $mod, KEYARGAPPLY }
+#macro f__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 5 + $mod, KEYARGAPPLY }
 #macro f- KEYARGDEF { f__= - 1, KEYARGAPPLY } // should be used for some chord
 #macro f= KEYARGDEF { f__= 0, KEYARGAPPLY }
 #macro f KEYARGDEF { f__= $__trans_f, KEYARGAPPLY }
 #macro f+ KEYARGDEF { f__= 1, KEYARGAPPLY }
-#macro g__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 7 + $mod, KEYARGAPPLY }
+#macro g__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 7 + $mod, KEYARGAPPLY }
 #macro g- KEYARGDEF { g__= - 1, KEYARGAPPLY }
 #macro g= KEYARGDEF { g__= 0, KEYARGAPPLY }
 #macro g KEYARGDEF { g__= $__trans_g, KEYARGAPPLY }
 #macro g+ KEYARGDEF { g__= 1, KEYARGAPPLY }
-#macro a__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 9 + $mod, KEYARGAPPLY }
+#macro a__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 9 + $mod, KEYARGAPPLY }
 #macro a- KEYARGDEF { a__= - 1, KEYARGAPPLY }
 #macro a= KEYARGDEF { a__= 0, KEYARGAPPLY }
 #macro a KEYARGDEF { a__= $__trans_a, KEYARGAPPLY }
 #macro a+ KEYARGDEF { a__= 1, KEYARGAPPLY }
-#macro b__= mod:number, KEYARGDEF { n {$__octave * 12} + $__trans + 11 + $mod, KEYARGAPPLY }
+#macro b__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 11 + $mod, KEYARGAPPLY }
 #macro b- KEYARGDEF { b__= - 1, KEYARGAPPLY }
 #macro b= KEYARGDEF, KEYARGDEF { b__= 0, KEYARGAPPLY }
 #macro b KEYARGDEF { b__= $__trans_b, KEYARGAPPLY }
