@@ -777,7 +777,7 @@ namespace Commons.Music.Midi.Mml
 								current_output.Add (new MmlResolvedEvent (rop, loop.FirstBreakAt.Tick + rop.Tick - breakOffset + loop.BeginAt.Tick + tickOffset));
 							tickOffset += elb.Tick - lb.Tick;
 #else
-							ProcessOperations (track, rctx, list, lb.Source + 9, elb.Source - lb.Source - 18);
+							ProcessOperations (track, rctx, list, lb.Source + 1, elb.Source - lb.Source - 1);
 #endif
 						}
 					}
