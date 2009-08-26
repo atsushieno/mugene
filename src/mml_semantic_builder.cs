@@ -15,13 +15,13 @@ namespace Commons.Music.Midi.Mml
 			BaseCount = 192;
 			Tracks = new List<MmlSemanticTrack> ();
 			Macros = new List<MmlSemanticMacro> ();
-			Variables = new List<MmlSemanticVariable> ();
+			Variables = new C5.HashDictionary<string,MmlSemanticVariable> ();
 		}
 
 		public int BaseCount { get; set; }
 		public List<MmlSemanticTrack> Tracks { get; private set; }
 		public List<MmlSemanticMacro> Macros { get; private set; }
-		public List<MmlSemanticVariable> Variables { get; private set; }
+		public C5.HashDictionary<string,MmlSemanticVariable> Variables { get; private set; }
 	}
 
 	public partial class MmlSemanticTrack
@@ -370,7 +370,7 @@ namespace Commons.Music.Midi.Mml
 				result.Tracks.Add (metaTrack);
 			// compile variable reference tokens into expr
 			foreach (var variable in token_set.Variables)
-				result.Variables.Add (BuildVariableDeclaration (variable));
+				result.Variables.Add (variable.Name,BuildVariableDeclaration (variable));
 			// build operation list for macros
 			foreach (var macro in token_set.Macros)
 				result.Macros.Add (BuildMacroOperationList (macro));

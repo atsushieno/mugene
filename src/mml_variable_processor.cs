@@ -134,15 +134,15 @@ namespace Commons.Music.Midi.Mml
 //Util.DebugWriter.WriteLine ();
 
 			if (!excludeMacroArgs) { // reference to macro argument takes precedence
-				var arg = ctx.MacroArguments.LastOrDefault (v => v.Key.Name == Name);
-				if (arg.Key != null) {
+				KeyValuePair<MmlSemanticVariable,object> arg;
+				if (ctx.MacroArguments.Find (Name, out arg)) {
 					ResolvedValue = GetTypedValue (arg.Value, type);
 					return;
 				}
 			}
 
-			var variable = ctx.SourceTree.Variables.FirstOrDefault (v => v.Name == Name);
-			if (variable == null)
+			MmlSemanticVariable variable;
+			if (!ctx.SourceTree.Variables.Find (Name, out variable))
 				// FIXME: supply location
 				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), null);
 			var val = ctx.EnsureDefaultResolvedVariable (variable);
@@ -281,14 +281,19 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlResolvedTrack
 	{
-		public MmlResolvedTrack (int number)
+		public MmlResolvedTrack (int number, MmlSemanticTreeSet source)
 		{
 			Number = number;
 			Events = new List<MmlResolvedEvent> ();
+			Macros = new C5.HashDictionary<string, Commons.Music.Midi.Mml.MmlSemanticMacro> ();
+			foreach (var m in source.Macros)
+				if (m.TargetTracks == null || m.TargetTracks.Contains (number))
+					Macros [m.Name] = m; // possibly overwrite.
 		}
 
 		public int Number { get; set; }
 		public List<MmlResolvedEvent> Events { get; private set; }
+		public C5.HashDictionary<string,MmlSemanticMacro> Macros { get; private set; }
 	}
 
 	public class MmlResolvedEvent
@@ -370,7 +375,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			GlobalContext = globalContext;
 			SourceTree = song;
-			MacroArguments = new List<KeyValuePair<MmlSemanticVariable,object>> ();
+			MacroArguments = new C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> ();
 			Values = new Dictionary<MmlSemanticVariable,object> ();
 			Loops = new Stack<Loop> ();
 		}
@@ -381,7 +386,7 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlSemanticTreeSet SourceTree { get; set; }
 
-		public List<KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; internal set; }
+		public C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; internal set; }
 		public Dictionary<MmlSemanticVariable,object> Values { get; internal set; }
 		public Stack<Loop> Loops { get; private set; }
 
@@ -427,7 +432,7 @@ namespace Commons.Music.Midi.Mml
 			global_context = new MmlResolveContext (source, null);
 
 			foreach (var track in source.Tracks) {
-				var rtrk = new MmlResolvedTrack (track.Number);
+				var rtrk = new MmlResolvedTrack (track.Number, source);
 				result.Tracks.Add (rtrk);
 				var tctx = new MmlResolveContext (source, global_context);
 				var list = track.Data;
@@ -451,7 +456,7 @@ namespace Commons.Music.Midi.Mml
 			
 			public List<MmlOperationUse> Operations { get; set; }
 			public Dictionary<MmlSemanticVariable,object> Values { get; set; }
-			public List<KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; set; }
+			public C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; set; }
 		}
 
 		Stack<MmlLineInfo> locations = new Stack<MmlLineInfo> ();
@@ -490,8 +495,8 @@ namespace Commons.Music.Midi.Mml
 				case "__LET": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					string name = oper.Arguments [0].StringValue;
-					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
-					if (variable == null)
+					MmlSemanticVariable variable;
+					if (!source.Variables.Find (name, out variable))
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					oper.Arguments [1].Resolve (rctx, variable.Type);
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
@@ -503,7 +508,8 @@ namespace Commons.Music.Midi.Mml
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
-					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
+					MmlSemanticVariable variable;
+					if (!source.Variables.Find (name, out variable))
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (variable.Type != MmlDataType.Buffer)
@@ -519,8 +525,8 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
 					string format = oper.Arguments [1].StringValue;
-					var variable = source.Variables.FirstOrDefault (v => v.Name == name);
-					if (variable == null)
+					MmlSemanticVariable variable;
+					if (!source.Variables.Find (name, out variable))
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (variable.Type != MmlDataType.Buffer)
 						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
@@ -603,7 +609,7 @@ namespace Commons.Music.Midi.Mml
 					current_output = storeDummy;
 					currentStoredOperations = new StoredOperations ();
 					currentStoredOperations.Values = new Dictionary<MmlSemanticVariable, object> (rctx.Values);
-					currentStoredOperations.MacroArguments = new List<KeyValuePair<MmlSemanticVariable, object>> (rctx.MacroArguments);
+					currentStoredOperations.MacroArguments = (C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable, object>>) rctx.MacroArguments.Clone ();
 					break;
 				case "__SAVE_OPER_END": {
 					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
@@ -628,7 +634,7 @@ namespace Commons.Music.Midi.Mml
 					rctx.MacroArguments = ss.MacroArguments;
 					foreach (var v in rctx.Values.Keys) Console.Write ("### " + v.Name);
 					// adjust timeline_position (no need to update rctx.TimelinePosition here).
-					rctx.Values [source.Variables.First (v => v.Name == "__timeline_position")] = rctx.TimelinePosition;
+					rctx.Values [source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
 					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count);
 					rctx.Values = valuesBak;
 					rctx.MacroArguments = macroArgsBak;
@@ -787,8 +793,8 @@ namespace Commons.Music.Midi.Mml
 
 		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper)
 		{
-			var macro = source.Macros.LastOrDefault (mm => mm.Name == oper.Name && (mm.TargetTracks == null || mm.TargetTracks.Contains (track.Number)));
-			if (macro == null)
+			MmlSemanticMacro macro;
+			if (!track.Macros.Find (oper.Name, out macro))
 				throw new MmlException (String.Format ("Macro {0} was not found", oper.Name), location);
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
@@ -797,18 +803,20 @@ namespace Commons.Music.Midi.Mml
 			//	if (variable.DefaultValue == null)
 			//			variable.FillDefaultValue ();
 
-			int nArgs = ctx.MacroArguments.Count;
+			
+			var args = new C5.HashDictionary<string, System.Collections.Generic.KeyValuePair<Commons.Music.Midi.Mml.MmlSemanticVariable, object>> ();
 			for (int i = 0; i < macro.Arguments.Count; i++) {
 				MmlSemanticVariable argdef = macro.Arguments [i];
 				MmlValueExpr arg = i < oper.Arguments.Count ? oper.Arguments [i] : null;
 				if (arg == null)
 					arg = argdef.DefaultValue;
 				arg.Resolve (ctx, argdef.Type);
-				ctx.MacroArguments.Add (new KeyValuePair<MmlSemanticVariable, object> (argdef,  arg.ResolvedValue));
+				args.Add (argdef.Name, new KeyValuePair<MmlSemanticVariable, object> (argdef,  arg.ResolvedValue));
 			}
-
+			var argsBak = ctx.MacroArguments;
+			ctx.MacroArguments = args;
 			ProcessOperations (track, ctx, macro.Data, 0, macro.Data.Count);
-			ctx.MacroArguments.RemoveRange (nArgs, ctx.MacroArguments.Count - nArgs);
+			ctx.MacroArguments = argsBak;
 			
 			expansion_stack.Pop ();
 		}

@@ -63,6 +63,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Mono.C5, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ba07f434b1c35cbd">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Mono.C5.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="mml\" />
