@@ -10,12 +10,12 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlSemanticTrack
 	{
-		public List<MmlOperationUse> Expanded { get; set; }
+//		public List<MmlOperationUse> Expanded { get; set; }
 	}
 
 	public partial class MmlSemanticMacro
 	{
-		public List<MmlOperationUse> Expanded { get; set; }
+//		public List<MmlOperationUse> Expanded { get; set; }
 	}
 
 	#endregion
@@ -59,37 +59,48 @@ namespace Commons.Music.Midi.Mml
 
 		void ExpandContent (List<MmlOperationUse> src, List<MmlOperationUse> dst, int targetTrackNumber)
 		{
+			/*
 			foreach (var op in src) {
 				if (MmlPrimitiveOperation.All.Any (poper => poper.Name == op.Name)) {
 					dst.Add (op);
 					continue;
 				}
+				var locdef = new MmlOperationUse ("__LOCATE", op.Location);
+				locdef.Arguments.Add (new MmlConstantExpr (MmlDataType.Any, op.Location));
+				dst.Add (locdef);
+
 				var m = source.Macros.LastOrDefault (mm => mm.Name == op.Name && (mm.TargetTracks == null || mm.TargetTracks.Contains (targetTrackNumber)));
 				if (m == null)
 					throw new MmlException (String.Format ("Macro {0} is not defined", op.Name), op.Location);
 				ExpandMacro (m); // while expanding track, it must do nothing.
 				AddMacroUseToResult (dst, m, op);
+
+				var unlocdef = new MmlOperationUse ("__UNLOCATE", op.Location);
+				dst.Add (unlocdef);
 			}
+			*/
 		}
 
 		void ExpandTrack (MmlSemanticTrack track)
 		{
+			/*
 //Util.DebugWriter.Write ("Expanding track {0}, of {1} operation(s)", track.Number, track.Data.Count);
 			track.Expanded = new List<MmlOperationUse> ();
 
 			ExpandContent (track.Data, track.Expanded, track.Number);
 //Util.DebugWriter.WriteLine (" ... into {0} operation(s)", track.Expanded.Count);
 //foreach (var op in track.Expanded) Util.DebugWriter.WriteLine (op);
+			*/
 		}
 
 		void ExpandMacro (MmlSemanticMacro macro)
 		{
 //Util.DebugWriter.Write ("Expanding macro {0}, from {1} operation(s)", macro.Name, macro.Data.Count);
-			if (macro.Expanded != null)
-				return;
-			macro.Expanded = new List<MmlOperationUse> ();
+//			if (macro.Expanded != null)
+//				return;
+//			macro.Expanded = new List<MmlOperationUse> ();
 
-			ExpandMacro (macro.Arguments, macro.Data, macro.Expanded, macro);
+			ExpandMacro (macro.Arguments, macro.Data, null, macro);
 		}
 
 		internal void ExpandMacro (List<MmlSemanticVariable> args, List<MmlOperationUse> src, List<MmlOperationUse> output, MmlSemanticMacro macro)
@@ -97,6 +108,7 @@ namespace Commons.Music.Midi.Mml
 			foreach (var variable in args)
 				if (variable.DefaultValue == null)
 						variable.FillDefaultValue ();
+return;
 
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
@@ -108,6 +120,7 @@ namespace Commons.Music.Midi.Mml
 			expansion_stack.Pop ();
 		}
 
+		/*
 		internal static void AddMacroUseToResult (List<MmlOperationUse> referencing, MmlSemanticMacro used, MmlOperationUse op)
 		{
 			var macro = used;
@@ -129,6 +142,7 @@ namespace Commons.Music.Midi.Mml
 				referencing.Add (def);
 			}
 		}
+		*/
 	}
 
 	#endregion
