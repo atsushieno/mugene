@@ -64,18 +64,11 @@ namespace Commons.Music.Midi.Mml
 					dst.Add (op);
 					continue;
 				}
-				var locdef = new MmlOperationUse ("__LOCATE", op.Location);
-				locdef.Arguments.Add (new MmlConstantExpr (MmlDataType.Any, op.Location));
-				dst.Add (locdef);
-
 				var m = source.Macros.LastOrDefault (mm => mm.Name == op.Name && (mm.TargetTracks == null || mm.TargetTracks.Contains (targetTrackNumber)));
 				if (m == null)
 					throw new MmlException (String.Format ("Macro {0} is not defined", op.Name), op.Location);
 				ExpandMacro (m); // while expanding track, it must do nothing.
 				AddMacroUseToResult (dst, m, op);
-
-				var unlocdef = new MmlOperationUse ("__UNLOCATE", op.Location);
-				dst.Add (unlocdef);
 			}
 		}
 
