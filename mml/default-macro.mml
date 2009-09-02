@@ -50,13 +50,13 @@
 // Variable storage
 #macro l val:length { __LET{"__length", $val} }
 #macro K val:number { __LET{"__trans", $val} }
-#macro Kc { __LET{"__trans_c", 1} }
-#macro Kd { __LET{"__trans_d", 1} }
-#macro Ke { __LET{"__trans_e", 1} }
-#macro Kf { __LET{"__trans_f", 1} }
-#macro Kg { __LET{"__trans_g", 1} }
-#macro Ka { __LET{"__trans_a", 1} }
-#macro Kb { __LET{"__trans_b", 1} }
+#macro Kc+ { __LET{"__trans_c", 1} }
+#macro Kd+ { __LET{"__trans_d", 1} }
+#macro Ke+ { __LET{"__trans_e", 1} }
+#macro Kf+ { __LET{"__trans_f", 1} }
+#macro Kg+ { __LET{"__trans_g", 1} }
+#macro Ka+ { __LET{"__trans_a", 1} }
+#macro Kb+ { __LET{"__trans_b", 1} }
 #macro Kc- { __LET{"__trans_c", -1} }
 #macro Kd- { __LET{"__trans_d", -1} }
 #macro Ke- { __LET{"__trans_e", -1} }
@@ -188,7 +188,7 @@
 #macro a+ KEYARGDEF { a__= 1, KEYARGAPPLY }
 #macro b__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + 11 + $mod, KEYARGAPPLY }
 #macro b- KEYARGDEF { b__= - 1, KEYARGAPPLY }
-#macro b= KEYARGDEF, KEYARGDEF { b__= 0, KEYARGAPPLY }
+#macro b= KEYARGDEF { b__= 0, KEYARGAPPLY }
 #macro b KEYARGDEF { b__= $__trans_b, KEYARGAPPLY }
 #macro b+ KEYARGDEF { b__= 1, KEYARGAPPLY } // should be used for some chord
 

@@ -811,6 +811,8 @@ namespace Commons.Music.Midi.Mml
 				if (arg == null)
 					arg = argdef.DefaultValue;
 				arg.Resolve (ctx, argdef.Type);
+				if (args.Contains (argdef.Name))
+					throw new MmlException (String.Format ("Argument name must be identical to all other argument names. Argument '{0}' in '{1}' macro", argdef.Name, oper.Name), oper.Location);
 				args.Add (argdef.Name, new KeyValuePair<MmlSemanticVariable, object> (argdef,  arg.ResolvedValue));
 			}
 			var argsBak = ctx.MacroArguments;
