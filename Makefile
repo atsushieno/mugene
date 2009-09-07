@@ -1,5 +1,5 @@
 
-EXTRA_DIST = mugenelib.make rules.make configure Makefile.include bin/Debug/Mono.C5.dll
+EXTRA_DIST = mugenelib.make rules.make configure Makefile.include bin/Debug/Mono.C5.dll bin/Debug/Mono.C5.dll.mdb
 
 all: all-recursive
 
