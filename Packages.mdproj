@@ -16,7 +16,7 @@
           </Builder>
         </Package>
         <Package name="Tarball">
-          <Builder TargetDirectory="/Users/atsushieno/svn/commons-music-prog/mugene" DefaultConfiguration="Debug" ctype="TarballDeployTarget">
+          <Builder TargetDirectory="." DefaultConfiguration="Debug" ctype="TarballDeployTarget">
             <ChildEntries>
               <SolutionItemReference path="mugene.csproj" />
             </ChildEntries>
@@ -25,5 +25,6 @@
         </Package>
       </Packages>
     </Packages>
+    <ReleaseVersion>0.3</ReleaseVersion>
   </PropertyGroup>
 </Project>

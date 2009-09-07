@@ -1,9 +1,10 @@
 
+EXTRA_DIST =  Makefile
 
 # Warning: This is an automatically generated file, do not edit!
 
 srcdir=.
-top_srcdir=.
+top_srcdir=..
 
 include $(top_srcdir)/config.make
 
@@ -14,18 +15,18 @@ ASSEMBLY = bin/Debug/mugene.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES =  \
-	mugenelib/bin/Debug/mugenelib.dll
+	../bin/Debug/mugenelib.dll
 BUILD_DIR = bin/Debug
 
-MUGENELIB_DLL_SOURCE=mugenelib/bin/Debug/mugenelib.dll
-DEFAULT_MACRO_MML_SOURCE=mugenelib/mml/default-macro.mml
-DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
-GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
-NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
-VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
-MUGENELIB_DLL_MDB_SOURCE=mugenelib/bin/Debug/mugenelib.dll.mdb
+MUGENELIB_DLL_SOURCE=../bin/Debug/mugenelib.dll
+DEFAULT_MACRO_MML_SOURCE=../mml/default-macro.mml
+DRUM_PART_MML_SOURCE=../mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=../mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=../mml/nrpn-gs-xg.mml
+VSQ_SUPPORT_MML_SOURCE=../mml/vsq-support.mml
+MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
+MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
+MUGENELIB_DLL_MDB_SOURCE=../bin/Debug/mugenelib.dll.mdb
 MUGENELIB_DLL_MDB=$(BUILD_DIR)/mugenelib.dll.mdb
 MUGENE_EXE_MDB_SOURCE=bin/Debug/mugene.exe.mdb
 MUGENE_EXE_MDB=$(BUILD_DIR)/mugene.exe.mdb
@@ -39,17 +40,17 @@ ASSEMBLY = bin/Release/mugene.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
 PROJECT_REFERENCES =  \
-	mugenelib/bin/Release/mugenelib.dll
+	../bin/Release/mugenelib.dll
 BUILD_DIR = bin/Release
 
-MUGENELIB_DLL_SOURCE=mugenelib/bin/Release/mugenelib.dll
-DEFAULT_MACRO_MML_SOURCE=mugenelib/mml/default-macro.mml
-DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
-GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
-NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
-VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
+MUGENELIB_DLL_SOURCE=../bin/Release/mugenelib.dll
+DEFAULT_MACRO_MML_SOURCE=../mml/default-macro.mml
+DRUM_PART_MML_SOURCE=../mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=../mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=../mml/nrpn-gs-xg.mml
+VSQ_SUPPORT_MML_SOURCE=../mml/vsq-support.mml
+MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
+MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB=
 MUGENE_EXE_MDB=
 
@@ -96,6 +97,8 @@ DATA_FILES =
 RESOURCES = 
 
 EXTRAS = \
+	../MMLspec.txt \
+	../LICENSE \
 	mugene.in 
 
 REFERENCES =  \
@@ -107,7 +110,10 @@ DLL_REFERENCES =
 CLEANFILES = $(PROGRAMFILES) $(PROGRAMFILES_MML) $(BINARIES) 
 
 #Targets
-all-local: $(ASSEMBLY) $(PROGRAMFILES) $(PROGRAMFILES_MML) $(BINARIES)  $(top_srcdir)/config.make
+all: $(ASSEMBLY) $(PROGRAMFILES) $(PROGRAMFILES_MML) $(BINARIES)  $(top_srcdir)/config.make
+
+include $(top_srcdir)/Makefile.include
+#include $(srcdir)/custom-hooks.make
 
 
 
@@ -175,3 +181,9 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)
+
+install: install-local
+uninstall: uninstall-local
+clean: clean-local
+
+include $(top_srcdir)/rules.make

@@ -9,6 +9,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>mugene</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <ReleaseVersion>0.3</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,46 +30,37 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="LICENSE" />
-    <None Include="MMLspec.txt" />
-    <None Include="mml\default-macro.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\drum-part.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\gs-sysex.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="src\mml_parser.jay" />
-    <None Include="mml\nrpn-gs-xg.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\vsq-support.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="src\mml_compiler_main.cs" />
-    <Compile Include="src\mml_macro_expander.cs" />
-    <Compile Include="src\mml_semantic_builder.cs" />
-    <Compile Include="src\mml_smf_generator.cs" />
-    <Compile Include="src\mml_tokenizer.cs" />
-    <Compile Include="src\mml_variable_processor.cs" />
-    <Compile Include="src\SMF.cs" />
-    <Compile Include="src\mml_parser.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Mono.C5, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ba07f434b1c35cbd">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Mono.C5.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="mml\" />
+    <Compile Include="driver.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\MMLspec.txt" />
+    <None Include="..\LICENSE" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mugenelib.csproj">
+      <Project>{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}</Project>
+      <Name>mugenelib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile" SyncReferences="true">
+          <BuildFilesVar Sync="true" Name="FILES" />
+          <DeployFilesVar />
+          <ResourcesVar Sync="true" Name="RESOURCES" />
+          <OthersVar />
+          <GacRefVar Sync="true" Name="REFERENCES" />
+          <AsmRefVar Sync="true" Name="REFERENCES" />
+          <ProjectRefVar Sync="true" Name="REFERENCES" />
+        </MonoDevelop.Autotools.MakefileInfo>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

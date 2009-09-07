@@ -1,5 +1,5 @@
 
-EXTRA_DIST = mugene.make rules.make configure Makefile.include bin/Debug/Mono.C5.dll
+EXTRA_DIST = mugenelib.make rules.make configure Makefile.include bin/Debug/Mono.C5.dll
 
 all: all-recursive
 
@@ -12,14 +12,14 @@ include $(top_srcdir)/rules.make
 
 #Warning: This is an automatically generated file, do not edit!
 ifeq ($(CONFIG),DEBUG)
- SUBDIRS =  . 
+ SUBDIRS =  .  mugene
 endif
 ifeq ($(CONFIG),RELEASE)
- SUBDIRS =  . 
+ SUBDIRS =  .  mugene
 endif
 
 # プロジェクト固有のmakefileを含める
-include mugene.make
+include mugenelib.make
 
 CONFIG_MAKE=$(top_srcdir)/config.make
 

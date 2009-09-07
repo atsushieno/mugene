@@ -10,60 +10,46 @@ include $(top_srcdir)/config.make
 ifeq ($(CONFIG),DEBUG)
 ASSEMBLY_COMPILER_COMMAND = gmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG"
-ASSEMBLY = bin/Debug/mugene.exe
+ASSEMBLY = bin/Debug/mugenelib.dll
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
-COMPILE_TARGET = exe
-PROJECT_REFERENCES =  \
-	mugenelib/bin/Debug/mugenelib.dll
+COMPILE_TARGET = library
+PROJECT_REFERENCES = 
 BUILD_DIR = bin/Debug
 
-MUGENELIB_DLL_SOURCE=mugenelib/bin/Debug/mugenelib.dll
-DEFAULT_MACRO_MML_SOURCE=mugenelib/mml/default-macro.mml
-DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
-GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
-NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
-VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
+DEFAULT_MACRO_MML_SOURCE=mml/default-macro.mml
+DRUM_PART_MML_SOURCE=mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
+VSQ_SUPPORT_MML_SOURCE=mml/vsq-support.mml
 MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
 MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
-MUGENELIB_DLL_MDB_SOURCE=mugenelib/bin/Debug/mugenelib.dll.mdb
+MUGENELIB_DLL_MDB_SOURCE=bin/Debug/mugenelib.dll.mdb
 MUGENELIB_DLL_MDB=$(BUILD_DIR)/mugenelib.dll.mdb
-MUGENE_EXE_MDB_SOURCE=bin/Debug/mugene.exe.mdb
-MUGENE_EXE_MDB=$(BUILD_DIR)/mugene.exe.mdb
 
 endif
 
 ifeq ($(CONFIG),RELEASE)
 ASSEMBLY_COMPILER_COMMAND = gmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize-
-ASSEMBLY = bin/Release/mugene.exe
+ASSEMBLY = bin/Release/mugenelib.dll
 ASSEMBLY_MDB = 
-COMPILE_TARGET = exe
-PROJECT_REFERENCES =  \
-	mugenelib/bin/Release/mugenelib.dll
+COMPILE_TARGET = library
+PROJECT_REFERENCES = 
 BUILD_DIR = bin/Release
 
-MUGENELIB_DLL_SOURCE=mugenelib/bin/Release/mugenelib.dll
-DEFAULT_MACRO_MML_SOURCE=mugenelib/mml/default-macro.mml
-DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
-GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
-NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
-VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
+DEFAULT_MACRO_MML_SOURCE=mml/default-macro.mml
+DRUM_PART_MML_SOURCE=mml/drum-part.mml
+GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
+NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
+VSQ_SUPPORT_MML_SOURCE=mml/vsq-support.mml
 MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
 MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB=
-MUGENE_EXE_MDB=
 
 endif
 
 AL=al2
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
-
-PROGRAMFILES = \
-	$(MUGENELIB_DLL) \
-	$(MONO_C5_DLL) \
-	$(MONO_C5_DLL_MDB) \
-	$(MUGENELIB_DLL_MDB) \
-	$(MUGENE_EXE_MDB)  
 
 PROGRAMFILES_MML = \
 	$(DEFAULT_MACRO_MML) \
@@ -72,13 +58,17 @@ PROGRAMFILES_MML = \
 	$(NRPN_GS_XG_MML) \
 	$(VSQ_SUPPORT_MML)  
 
-BINARIES = \
-	$(MUGENE)  
+PROGRAMFILES = \
+	$(MONO_C5_DLL) \
+	$(MONO_C5_DLL_MDB) \
+	$(MUGENELIB_DLL_MDB)  
+
+LINUX_PKGCONFIG = \
+	$(MUGENELIB_PC)  
 
 
 RESGEN=resgen2
 
-MUGENELIB_DLL = $(BUILD_DIR)/mugenelib.dll
 DEFAULT_MACRO_MML = $(BUILD_DIR)/mml/default-macro.mml
 DRUM_PART_MML = $(BUILD_DIR)/mml/drum-part.mml
 GS_SYSEX_MML = $(BUILD_DIR)/mml/gs-sysex.mml
@@ -86,32 +76,46 @@ NRPN_GS_XG_MML = $(BUILD_DIR)/mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML = $(BUILD_DIR)/mml/vsq-support.mml
 MONO_C5_DLL = $(BUILD_DIR)/Mono.C5.dll
 MONO_C5_DLL_MDB = $(BUILD_DIR)/Mono.C5.dll.mdb
-MUGENE = $(BUILD_DIR)/mugene
+MUGENELIB_PC = $(BUILD_DIR)/mugenelib.pc
 
 FILES = \
-	driver.cs 
+	src/SMF.cs \
+	src/mml_variable_processor.cs \
+	src/mml_tokenizer.cs \
+	src/mml_smf_generator.cs \
+	src/mml_semantic_builder.cs \
+	src/mml_parser.cs \
+	src/mml_macro_expander.cs \
+	src/mml_compiler_main.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	mugene.in 
+	mml/default-macro.mml \
+	mml/drum-part.mml \
+	mml/gs-sysex.mml \
+	mml/nrpn-gs-xg.mml \
+	mml/vsq-support.mml \
+	src/mml_parser.jay \
+	src \
+	mugenelib.pc.in 
 
 REFERENCES =  \
-	System \
-	System.Core
+	System.Core \
+	System
 
-DLL_REFERENCES = 
+DLL_REFERENCES =  \
+	bin/Debug/Mono.C5.dll
 
-CLEANFILES = $(PROGRAMFILES) $(PROGRAMFILES_MML) $(BINARIES) 
+CLEANFILES = $(PROGRAMFILES_MML) $(PROGRAMFILES) $(LINUX_PKGCONFIG) 
 
 #Targets
-all-local: $(ASSEMBLY) $(PROGRAMFILES) $(PROGRAMFILES_MML) $(BINARIES)  $(top_srcdir)/config.make
+all-local: $(ASSEMBLY) $(PROGRAMFILES_MML) $(PROGRAMFILES) $(LINUX_PKGCONFIG)  $(top_srcdir)/config.make
 
 
 
-$(eval $(call emit-deploy-target,MUGENELIB_DLL))
 $(eval $(call emit-deploy-target,DEFAULT_MACRO_MML))
 $(eval $(call emit-deploy-target,DRUM_PART_MML))
 $(eval $(call emit-deploy-target,GS_SYSEX_MML))
@@ -119,8 +123,7 @@ $(eval $(call emit-deploy-target,NRPN_GS_XG_MML))
 $(eval $(call emit-deploy-target,VSQ_SUPPORT_MML))
 $(eval $(call emit-deploy-target,MONO_C5_DLL))
 $(eval $(call emit-deploy-target,MONO_C5_DLL_MDB))
-$(eval $(call emit-deploy-target,MUGENELIB_DLL_MDB))
-$(eval $(call emit-deploy-wrapper,MUGENE,mugene,x))
+$(eval $(call emit-deploy-wrapper,MUGENELIB_PC,mugenelib.pc))
 
 
 $(eval $(call emit_resgen_targets))
@@ -143,7 +146,6 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)'
 	$(call cp,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MUGENELIB_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)/mml'
 	$(call cp,$(DEFAULT_MACRO_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(DRUM_PART_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
@@ -153,9 +155,8 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call cp,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	mkdir -p '$(DESTDIR)$(bindir)'
-	$(call cp,$(MUGENE),$(DESTDIR)$(bindir))
+	mkdir -p '$(DESTDIR)$(libdir)/pkgconfig'
+	$(call cp,$(MUGENELIB_PC),$(DESTDIR)$(libdir)/pkgconfig)
 	make post-install-local-hook prefix=$(prefix)
 
 uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
@@ -163,7 +164,6 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	make uninstall-satellite-assemblies prefix=$(prefix)
 	$(call rm,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENELIB_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(DEFAULT_MACRO_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(DRUM_PART_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
@@ -172,6 +172,5 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
+	$(call rm,$(MUGENELIB_PC),$(DESTDIR)$(libdir)/pkgconfig)
 	make post-uninstall-local-hook prefix=$(prefix)
