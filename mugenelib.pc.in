@@ -1,6 +1,6 @@
 Name: mugenelib
 Description: mugenelib
-Version: 0.3
+Version: 0.4
 
 Requires: 
 Libs: -r:@expanded_libdir@/@PACKAGE@/mugenelib.dll

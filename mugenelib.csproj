@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>mugenelib</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>0.3</ReleaseVersion>
+    <ReleaseVersion>0.4</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,7 +51,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="Mono.C5, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ba07f434b1c35cbd">
+    <Reference Include="Mono.C5">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\Mono.C5.dll</HintPath>
     </Reference>
