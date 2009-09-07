@@ -26,8 +26,6 @@ NRPN_GS_XG_MML_SOURCE=../mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=../mml/vsq-support.mml
 MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
 MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
-MUGENELIB_DLL_MDB_SOURCE=../bin/Debug/mugenelib.dll.mdb
-MUGENELIB_DLL_MDB=$(BUILD_DIR)/mugenelib.dll.mdb
 MUGENE_EXE_MDB_SOURCE=bin/Debug/mugene.exe.mdb
 MUGENE_EXE_MDB=$(BUILD_DIR)/mugene.exe.mdb
 
@@ -51,7 +49,6 @@ NRPN_GS_XG_MML_SOURCE=../mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=../mml/vsq-support.mml
 MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
 MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
-MUGENELIB_DLL_MDB=
 MUGENE_EXE_MDB=
 
 endif
@@ -63,7 +60,6 @@ PROGRAMFILES = \
 	$(MUGENELIB_DLL) \
 	$(MONO_C5_DLL) \
 	$(MONO_C5_DLL_MDB) \
-	$(MUGENELIB_DLL_MDB) \
 	$(MUGENE_EXE_MDB)  
 
 PROGRAMFILES_MML = \
@@ -125,7 +121,6 @@ $(eval $(call emit-deploy-target,NRPN_GS_XG_MML))
 $(eval $(call emit-deploy-target,VSQ_SUPPORT_MML))
 $(eval $(call emit-deploy-target,MONO_C5_DLL))
 $(eval $(call emit-deploy-target,MONO_C5_DLL_MDB))
-$(eval $(call emit-deploy-target,MUGENELIB_DLL_MDB))
 $(eval $(call emit-deploy-wrapper,MUGENE,mugene,x))
 
 
@@ -158,7 +153,6 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call cp,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(bindir)'
 	$(call cp,$(MUGENE),$(DESTDIR)$(bindir))
@@ -177,7 +171,6 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)

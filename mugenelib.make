@@ -99,7 +99,6 @@ EXTRAS = \
 	mml/nrpn-gs-xg.mml \
 	mml/vsq-support.mml \
 	src/mml_parser.jay \
-	src \
 	mugenelib.pc.in 
 
 REFERENCES =  \
