@@ -399,8 +399,8 @@
 
 	- / (slash), as it is used for division.
 	- : (colon), as it is used for separation between name and type.
-	- ) (open paren)
-	- ( (close paren)
+	- ( (open paren)
+	- ) (close paren)
 
 	It is often sloppy to allow strange characters than other languages. For example:
 
@@ -430,10 +430,8 @@
 	directive ::=
 		comment_directive |
 		end_comment_directive |
-		include_directive |
 		conditional_compilation_directive |
 		macro_definition |
-		variable_declaration |
 		meta_directive |
 		basecount_directive
 
@@ -460,9 +458,6 @@
 		"scopes" scopes
 		"bars" ranges
 		"steps" ranges
-
-	include_directive ::=
-		"#include" string	// filename
 
 	macro_definition ::=
 		"#macro" identifier opt_macro_args '{' MML_operation+ '}'

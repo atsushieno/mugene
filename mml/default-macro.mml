@@ -106,9 +106,9 @@
 #macro B val:number { BEND$val }
 #macro B+ val:number { BEND $__bend + $val }
 #macro B- val:number { BEND $__bend - $val }
-#macro POLTATIME val:number { CC5,$val }
+#macro PORTATIME val:number { CC5,$val }
 #macro DTE msb:number,lsb:number { CC6,$msb CC#26,$lsb }
-#macro POLTA val:number { CC#41,$val }
+#macro PORTA val:number { CC#41,$val }
 #macro SOS val:number { CC#42,$val } // sostenuto
 #macro SOFT val:number { CC#43,$val } // soft pedal
 #macro LEGATO val:number { CC#54,$val }

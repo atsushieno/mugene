@@ -137,8 +137,8 @@ namespace Commons.Music.Midi.Mml
 		static MmlPrimitiveOperation ()
 		{
 			var l = new List<MmlPrimitiveOperation> ();
-			l.Add (new MmlPrimitiveOperation () { Name = "__LOCATE"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__UNLOCATE"});
+			//l.Add (new MmlPrimitiveOperation () { Name = "__LOCATE"});
+			//l.Add (new MmlPrimitiveOperation () { Name = "__UNLOCATE"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__PRINT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__LET"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__STORE"});
@@ -159,8 +159,8 @@ namespace Commons.Music.Midi.Mml
 			l.Add (new MmlPrimitiveOperation () { Name = "/"});
 			l.Add (new MmlPrimitiveOperation () { Name = "]"});
 #endif
-			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_DEF"}); // internal use
-			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_UNDEF"}); // internal use
+//			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_DEF"}); // internal use
+//			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_UNDEF"}); // internal use
 			All = l;
 		}
 
