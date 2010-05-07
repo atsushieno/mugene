@@ -287,7 +287,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			Number = number;
 			Events = new List<MmlResolvedEvent> ();
-			Macros = new C5.HashDictionary<string, Commons.Music.Midi.Mml.MmlSemanticMacro> ();
+			Macros = new Hashtable ();
 			foreach (var m in source.Macros)
 				if (m.TargetTracks == null || m.TargetTracks.Contains (number))
 					Macros [m.Name] = m; // possibly overwrite.
@@ -295,7 +295,7 @@ namespace Commons.Music.Midi.Mml
 
 		public int Number { get; set; }
 		public List<MmlResolvedEvent> Events { get; private set; }
-		public C5.HashDictionary<string,MmlSemanticMacro> Macros { get; private set; }
+		public Hashtable Macros { get; private set; }
 	}
 
 	public class MmlResolvedEvent
@@ -797,8 +797,8 @@ namespace Commons.Music.Midi.Mml
 
 		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper)
 		{
-			MmlSemanticMacro macro;
-			if (!track.Macros.Find (oper.Name, out macro))
+			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
+			if (macro == null)
 				throw new MmlException (String.Format ("Macro {0} was not found", oper.Name), location);
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
