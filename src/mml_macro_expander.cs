@@ -42,7 +42,7 @@ namespace Commons.Music.Midi.Mml
 			var ctx = new MmlResolveContext (source, null);
 
 			// resolve variables without any context.
-			foreach (var variable in source.Variables.Values) {
+			foreach (MmlSemanticVariable variable in source.Variables.Values) {
 				if (variable.DefaultValue == null)
 					variable.FillDefaultValue ();
 				if (variable.DefaultValue == null)

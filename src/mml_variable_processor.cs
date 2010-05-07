@@ -143,8 +143,8 @@ namespace Commons.Music.Midi.Mml
 				}
 			}
 
-			MmlSemanticVariable variable;
-			if (!ctx.SourceTree.Variables.Find (Name, out variable))
+			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables [Name];
+			if (variable == null)
 				// FIXME: supply location
 				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), null);
 			var val = ctx.EnsureDefaultResolvedVariable (variable);
@@ -497,8 +497,8 @@ namespace Commons.Music.Midi.Mml
 				case "__LET": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					string name = oper.Arguments [0].StringValue;
-					MmlSemanticVariable variable;
-					if (!source.Variables.Find (name, out variable))
+					var variable = (MmlSemanticVariable) source.Variables [name];
+					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					oper.Arguments [1].Resolve (rctx, variable.Type);
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
@@ -510,8 +510,7 @@ namespace Commons.Music.Midi.Mml
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
-					MmlSemanticVariable variable;
-					if (!source.Variables.Find (name, out variable))
+					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (variable.Type != MmlDataType.Buffer)
@@ -527,8 +526,8 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
 					string format = oper.Arguments [1].StringValue;
-					MmlSemanticVariable variable;
-					if (!source.Variables.Find (name, out variable))
+					var variable = (MmlSemanticVariable) source.Variables [name];
+					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (variable.Type != MmlDataType.Buffer)
 						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
@@ -636,7 +635,7 @@ namespace Commons.Music.Midi.Mml
 					rctx.MacroArguments = ss.MacroArguments;
 					foreach (var v in rctx.Values.Keys) Console.Write ("### " + v.Name);
 					// adjust timeline_position (no need to update rctx.TimelinePosition here).
-					rctx.Values [source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
+					rctx.Values [(MmlSemanticVariable) source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
 					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count);
 					rctx.Values = valuesBak;
 					rctx.MacroArguments = macroArgsBak;

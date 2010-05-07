@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,13 +16,13 @@ namespace Commons.Music.Midi.Mml
 			BaseCount = 192;
 			Tracks = new List<MmlSemanticTrack> ();
 			Macros = new List<MmlSemanticMacro> ();
-			Variables = new C5.HashDictionary<string,MmlSemanticVariable> ();
+			Variables = new Hashtable ();
 		}
 
 		public int BaseCount { get; set; }
 		public List<MmlSemanticTrack> Tracks { get; private set; }
 		public List<MmlSemanticMacro> Macros { get; private set; }
-		public C5.HashDictionary<string,MmlSemanticVariable> Variables { get; private set; }
+		public Hashtable Variables { get; private set; }
 	}
 
 	public partial class MmlSemanticTrack
