@@ -178,16 +178,18 @@ namespace Commons.Music.Midi.Mml
 
 	public struct MmlLength
 	{
-		public MmlLength (int number)
+		public MmlLength (int num)
 		{
-			Number = number;
-			Dots = 0;
-			IsValueByStep = false;
+			dots = 0;
+			is_value_by_step = false;
+			number = num;
 		}
 
-		public int Number { get; set; }
-		public int Dots { get; set; }
-		public bool IsValueByStep { get; set; }
+		int number, dots;
+		bool is_value_by_step;
+		public int Number { get { return number; } set { number = value; } }
+		public int Dots { get { return dots; } set { dots = value; } }
+		public bool IsValueByStep { get { return is_value_by_step; } set { is_value_by_step = value; } }
 
 		public int GetSteps (int numerator)
 		{

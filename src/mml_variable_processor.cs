@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using MacroArgDict = C5.HashDictionary<string, System.Collections.Generic.KeyValuePair<Commons.Music.Midi.Mml.MmlSemanticVariable, object>>;
+
 namespace Commons.Music.Midi.Mml
 {
 	#region variable resolver structures
@@ -791,6 +793,9 @@ namespace Commons.Music.Midi.Mml
 		
 		Stack<MmlSemanticMacro> expansion_stack = new  Stack<MmlSemanticMacro> ();
 
+		List<MacroArgDict> arg_caches = new List<MacroArgDict> ();
+		int cache_stack_num;
+
 		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper)
 		{
 			MmlSemanticMacro macro;
@@ -803,8 +808,9 @@ namespace Commons.Music.Midi.Mml
 			//	if (variable.DefaultValue == null)
 			//			variable.FillDefaultValue ();
 
-			
-			var args = new C5.HashDictionary<string, System.Collections.Generic.KeyValuePair<Commons.Music.Midi.Mml.MmlSemanticVariable, object>> ();
+			if (cache_stack_num == arg_caches.Count)
+				arg_caches.Add (new MacroArgDict ());
+			var args = arg_caches [cache_stack_num++];
 			for (int i = 0; i < macro.Arguments.Count; i++) {
 				MmlSemanticVariable argdef = macro.Arguments [i];
 				MmlValueExpr arg = i < oper.Arguments.Count ? oper.Arguments [i] : null;
@@ -821,6 +827,8 @@ namespace Commons.Music.Midi.Mml
 			ctx.MacroArguments = argsBak;
 			
 			expansion_stack.Pop ();
+			args.Clear ();
+			--cache_stack_num;
 		}
 
 		void Sort (List<MmlResolvedEvent> l)
