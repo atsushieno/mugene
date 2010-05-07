@@ -1,11 +1,10 @@
 //#define LOOP_BY_RESULT
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
-using MacroArgDict = C5.HashDictionary<string, System.Collections.Generic.KeyValuePair<Commons.Music.Midi.Mml.MmlSemanticVariable, object>>;
 
 namespace Commons.Music.Midi.Mml
 {
@@ -136,8 +135,9 @@ namespace Commons.Music.Midi.Mml
 //Util.DebugWriter.WriteLine ();
 
 			if (!excludeMacroArgs) { // reference to macro argument takes precedence
-				KeyValuePair<MmlSemanticVariable,object> arg;
-				if (ctx.MacroArguments.Find (Name, out arg)) {
+				object _arg = ctx.MacroArguments [Name];
+				if (_arg != null) {
+					var arg = (KeyValuePair<MmlSemanticVariable,object>) _arg;
 					ResolvedValue = GetTypedValue (arg.Value, type);
 					return;
 				}
@@ -377,7 +377,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			GlobalContext = globalContext;
 			SourceTree = song;
-			MacroArguments = new C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> ();
+			MacroArguments = new Hashtable ();
 			Values = new Dictionary<MmlSemanticVariable,object> ();
 			Loops = new Stack<Loop> ();
 		}
@@ -388,7 +388,7 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlSemanticTreeSet SourceTree { get; set; }
 
-		public C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; internal set; }
+		public Hashtable MacroArguments { get; internal set; }
 		public Dictionary<MmlSemanticVariable,object> Values { get; internal set; }
 		public Stack<Loop> Loops { get; private set; }
 
@@ -458,7 +458,7 @@ namespace Commons.Music.Midi.Mml
 			
 			public List<MmlOperationUse> Operations { get; set; }
 			public Dictionary<MmlSemanticVariable,object> Values { get; set; }
-			public C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable,object>> MacroArguments { get; set; }
+			public Hashtable MacroArguments { get; set; }
 		}
 
 		Stack<MmlLineInfo> locations = new Stack<MmlLineInfo> ();
@@ -611,7 +611,7 @@ namespace Commons.Music.Midi.Mml
 					current_output = storeDummy;
 					currentStoredOperations = new StoredOperations ();
 					currentStoredOperations.Values = new Dictionary<MmlSemanticVariable, object> (rctx.Values);
-					currentStoredOperations.MacroArguments = (C5.HashDictionary<string,KeyValuePair<MmlSemanticVariable, object>>) rctx.MacroArguments.Clone ();
+					currentStoredOperations.MacroArguments = (Hashtable) rctx.MacroArguments.Clone ();
 					break;
 				case "__SAVE_OPER_END": {
 					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
@@ -793,7 +793,7 @@ namespace Commons.Music.Midi.Mml
 		
 		Stack<MmlSemanticMacro> expansion_stack = new  Stack<MmlSemanticMacro> ();
 
-		List<MacroArgDict> arg_caches = new List<MacroArgDict> ();
+		List<Hashtable> arg_caches = new List<Hashtable> ();
 		int cache_stack_num;
 
 		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper)
@@ -809,7 +809,7 @@ namespace Commons.Music.Midi.Mml
 			//			variable.FillDefaultValue ();
 
 			if (cache_stack_num == arg_caches.Count)
-				arg_caches.Add (new MacroArgDict ());
+				arg_caches.Add (new Hashtable ());
 			var args = arg_caches [cache_stack_num++];
 			for (int i = 0; i < macro.Arguments.Count; i++) {
 				MmlSemanticVariable argdef = macro.Arguments [i];
