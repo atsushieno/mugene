@@ -25,9 +25,7 @@ Global
 		{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		version = 0.4
-		outputpath = bin
-		StartupItem = Packages.mdproj
+		StartupItem = mugene\mugene.csproj
 		Policies = $0
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = None
@@ -39,5 +37,7 @@ Global
 		$3.MessageStyle = $4
 		$4.LineAlign = 0
 		$3.inheritsSet = Mono
+		version = 0.4
+		outputpath = bin
 	EndGlobalSection
 EndGlobal
