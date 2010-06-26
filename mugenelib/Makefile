@@ -22,8 +22,6 @@ DRUM_PART_MML_SOURCE=mml/drum-part.mml
 GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
 NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB_SOURCE=bin/Debug/mugenelib.dll.mdb
 MUGENELIB_DLL_MDB=$(BUILD_DIR)/mugenelib.dll.mdb
 
@@ -43,8 +41,6 @@ DRUM_PART_MML_SOURCE=mml/drum-part.mml
 GS_SYSEX_MML_SOURCE=mml/gs-sysex.mml
 NRPN_GS_XG_MML_SOURCE=mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=../bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=../bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB=
 
 endif
@@ -60,8 +56,6 @@ PROGRAMFILES_MML = \
 	$(VSQ_SUPPORT_MML)  
 
 PROGRAMFILES = \
-	$(MONO_C5_DLL) \
-	$(MONO_C5_DLL_MDB) \
 	$(MUGENELIB_DLL_MDB)  
 
 LINUX_PKGCONFIG = \
@@ -75,8 +69,6 @@ DRUM_PART_MML = $(BUILD_DIR)/mml/drum-part.mml
 GS_SYSEX_MML = $(BUILD_DIR)/mml/gs-sysex.mml
 NRPN_GS_XG_MML = $(BUILD_DIR)/mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML = $(BUILD_DIR)/mml/vsq-support.mml
-MONO_C5_DLL = $(BUILD_DIR)/Mono.C5.dll
-MONO_C5_DLL_MDB = $(BUILD_DIR)/Mono.C5.dll.mdb
 MUGENELIB_PC = $(BUILD_DIR)/mugenelib.pc
 
 FILES = \
@@ -108,8 +100,7 @@ REFERENCES =  \
 	System.Core \
 	System
 
-DLL_REFERENCES =  \
-	../bin/Debug/Mono.C5.dll
+DLL_REFERENCES =
 
 CLEANFILES = $(PROGRAMFILES_MML) $(PROGRAMFILES) $(LINUX_PKGCONFIG) 
 
@@ -126,8 +117,6 @@ $(eval $(call emit-deploy-target,DRUM_PART_MML))
 $(eval $(call emit-deploy-target,GS_SYSEX_MML))
 $(eval $(call emit-deploy-target,NRPN_GS_XG_MML))
 $(eval $(call emit-deploy-target,VSQ_SUPPORT_MML))
-$(eval $(call emit-deploy-target,MONO_C5_DLL))
-$(eval $(call emit-deploy-target,MONO_C5_DLL_MDB))
 $(eval $(call emit-deploy-wrapper,MUGENELIB_PC,mugenelib.pc))
 
 
@@ -157,8 +146,6 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call cp,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
-	$(call cp,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(libdir)/pkgconfig'
 	$(call cp,$(MUGENELIB_PC),$(DESTDIR)$(libdir)/pkgconfig)
@@ -174,8 +161,6 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
-	$(call rm,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENELIB_PC),$(DESTDIR)$(libdir)/pkgconfig)
 	make post-uninstall-local-hook prefix=$(prefix)

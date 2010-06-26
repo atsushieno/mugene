@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>mugenelib</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>0.4</ReleaseVersion>
+    <ReleaseVersion>0.5</ReleaseVersion>
     <RootNamespace>mugenelib</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

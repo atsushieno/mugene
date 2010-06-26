@@ -23,8 +23,6 @@ DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
 GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
 NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB_SOURCE=mugenelib/bin/Debug/mugenelib.dll.mdb
 MUGENELIB_DLL_MDB=$(BUILD_DIR)/mugenelib.dll.mdb
 MUGENE_EXE_MDB_SOURCE=bin/Debug/mugene.exe.mdb
@@ -48,8 +46,6 @@ DRUM_PART_MML_SOURCE=mugenelib/mml/drum-part.mml
 GS_SYSEX_MML_SOURCE=mugenelib/mml/gs-sysex.mml
 NRPN_GS_XG_MML_SOURCE=mugenelib/mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML_SOURCE=mugenelib/mml/vsq-support.mml
-MONO_C5_DLL_SOURCE=bin/Debug/Mono.C5.dll
-MONO_C5_DLL_MDB_SOURCE=bin/Debug/Mono.C5.dll.mdb
 MUGENELIB_DLL_MDB=
 MUGENE_EXE_MDB=
 
@@ -60,8 +56,6 @@ SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
 	$(MUGENELIB_DLL) \
-	$(MONO_C5_DLL) \
-	$(MONO_C5_DLL_MDB) \
 	$(MUGENELIB_DLL_MDB) \
 	$(MUGENE_EXE_MDB)  
 
@@ -84,8 +78,6 @@ DRUM_PART_MML = $(BUILD_DIR)/mml/drum-part.mml
 GS_SYSEX_MML = $(BUILD_DIR)/mml/gs-sysex.mml
 NRPN_GS_XG_MML = $(BUILD_DIR)/mml/nrpn-gs-xg.mml
 VSQ_SUPPORT_MML = $(BUILD_DIR)/mml/vsq-support.mml
-MONO_C5_DLL = $(BUILD_DIR)/Mono.C5.dll
-MONO_C5_DLL_MDB = $(BUILD_DIR)/Mono.C5.dll.mdb
 MUGENE = $(BUILD_DIR)/mugene
 
 FILES = \
@@ -117,8 +109,6 @@ $(eval $(call emit-deploy-target,DRUM_PART_MML))
 $(eval $(call emit-deploy-target,GS_SYSEX_MML))
 $(eval $(call emit-deploy-target,NRPN_GS_XG_MML))
 $(eval $(call emit-deploy-target,VSQ_SUPPORT_MML))
-$(eval $(call emit-deploy-target,MONO_C5_DLL))
-$(eval $(call emit-deploy-target,MONO_C5_DLL_MDB))
 $(eval $(call emit-deploy-target,MUGENELIB_DLL_MDB))
 $(eval $(call emit-deploy-wrapper,MUGENE,mugene,x))
 
@@ -150,8 +140,6 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call cp,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call cp,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
-	$(call cp,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(bindir)'
@@ -169,8 +157,6 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(GS_SYSEX_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(NRPN_GS_XG_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
 	$(call rm,$(VSQ_SUPPORT_MML),$(DESTDIR)$(libdir)/$(PACKAGE)/mml)
-	$(call rm,$(MONO_C5_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MONO_C5_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENELIB_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MUGENE),$(DESTDIR)$(bindir))
