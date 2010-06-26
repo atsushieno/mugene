@@ -9,11 +9,24 @@ namespace Commons.Music.Midi.Mml
 {
 	internal class Util
 	{
+		public const string VsqInclude = "vsq-support.mml";
+
+		static readonly string [] default_includes = {
+			"default-macro.mml",
+			"drum-part.mml",
+			"gs-sysex.mml",
+			"nrpn-gs-xg.mml",
+		};
+
 		static Util ()
 		{
 			DebugWriter = TextWriter.Null;
 		}
 		public static TextWriter DebugWriter { get; set; }
+		
+		public static IList<string> DefaultIncludes {
+			get { return default_includes; }
+		}
 	}
 
 	public class MmlCompilerDriver
@@ -56,17 +69,50 @@ namespace Commons.Music.Midi.Mml
 				Console.Error.WriteLine (ex);
 			}
 		}
+		
+		const string help = @"
+Usage: mugene [options] mml_files
+
+Options:
+  --output
+			specify explicit output file name.
+  --vsq
+			Vocaloid VSQ mode on.
+			Changes extension to .vsq and encoding to ShiftJIS,
+			and uses VSQ metadata mode.
+  --verbose
+			prints debugging aid.
+  --use-vsq-metadata
+			uses Vocaloid VSQ metadata mode.
+  --disable-running-status
+			disables running status in SMF.
+  --encoding
+			uses specified encoding.
+			Shift_JIS, euc-jp, iso-2022-jp etc.
+  --nodefault
+			prevents default mml files being included.
+			This option is for core MML operation hackers.
+";
 
 		void CompileCore (string [] args)
 		{
+			if (args == null || args.Length == 0)
+				throw new MmlException (help, null);
+
 			// file names -> input sources
-			var inputs = new List<MmlInputSource> ();
+			var inputFilenames = new List<string> ();
 			string outfilename = null, explicitfilename = null;
 			bool disableRunningStatus = false;
 			bool useVsqMetadata = false;
 			string extension = ".mid";
+			var metaWriter = SmfWriterExtension.DefaultMetaEventWriter;
+			bool noDefault = false;
+
 			foreach (string arg in args) {
 				switch (arg) {
+				case "--nodefault":
+					noDefault = true;
+					continue;
 				case "--vsq": // for convenience
 					useVsqMetadata = true;
 					disableRunningStatus = true;
@@ -92,14 +138,42 @@ namespace Commons.Music.Midi.Mml
 						explicitfilename = arg.Substring (9);
 						continue;
 					}
+					if (arg == "--help")
+						throw new MmlException (help, null);
 					break;
 				}
 				outfilename = Path.ChangeExtension (arg, extension);
-				inputs.Add (new MmlInputSource (arg, Resolver.Resolve (arg)));
+				inputFilenames.Add (arg);
 			}
 			if (explicitfilename != null)
 				outfilename = explicitfilename;
+			
+			var resolver = new FileStreamResolver ();
+			Resolver = resolver;
+			if (!noDefault) {
+				foreach (var fname in Util.DefaultIncludes) {
+					resolver.DefaultFiles.Add (fname);
+					inputFilenames.Add (fname);
+				}
+			}
+			if (extension == ".vsq" && !noDefault) {
+				resolver.DefaultFiles.Add (Util.VsqInclude);
+				inputFilenames.Add (Util.VsqInclude);
+			}
 
+			var inputs = new List<MmlInputSource> ();
+			foreach (var fname in inputFilenames)
+				inputs.Add (new MmlInputSource (fname, Resolver.Resolve (fname)));
+			if (useVsqMetadata)
+				metaWriter = SmfWriterExtension.VsqMetaTextSplitter;
+
+			using (var output = File.Create (outfilename))
+				Compile (inputs, metaWriter, output, disableRunningStatus);
+			Console.WriteLine ("Written SMF file ... {0}", outfilename);
+		}
+
+		public void Compile (IList<MmlInputSource> inputs, Func<bool, SmfEvent, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
+		{
 			// input sources -> tokenizer sources
 			var tokenizerSources = MmlInputSourceReader.Parse (inputs);
 
@@ -119,14 +193,11 @@ namespace Commons.Music.Midi.Mml
 			var smf = MmlSmfGenerator.Generate (resolved);
 
 			// output
-			using (var outfile = File.Create (outfilename)) {
-				var w = new SmfWriter (outfile);
-				w.DisableRunningStatus = disableRunningStatus;
-				if (useVsqMetadata)
-					w.MetaEventWriter = SmfWriterExtension.VsqMetaTextSplitter;
-				w.WriteMusic (smf);
-			}
-			Console.WriteLine ("Written SMF file ... {0}", outfilename);
+			var w = new SmfWriter (output);
+			w.DisableRunningStatus = disableRunningStatus;
+			if (metaWriter != null)
+				w.MetaEventWriter = metaWriter;
+			w.WriteMusic (smf);
 		}
 	}
 

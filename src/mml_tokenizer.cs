@@ -162,9 +162,19 @@ namespace Commons.Music.Midi.Mml
 
 	public class FileStreamResolver : StreamResolver
 	{
+		public FileStreamResolver ()
+		{
+			DefaultFiles = new List<string> ();
+		}
+
+		public IList<string> DefaultFiles { get; private set; }
+
 		public override TextReader Resolve (string uri)
 		{
-			return File.OpenText (uri);
+			if (DefaultFiles.Contains (uri))
+				return File.OpenText (Path.Combine (new Uri (GetType ().Assembly.CodeBase).LocalPath, "../mml/" + uri));
+			else
+				return File.OpenText (uri);
 		}
 	}
 
@@ -300,14 +310,13 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlInputSourceReader
 	{
-		public static MmlTokenizerSource Parse (List<MmlInputSource> inputs)
+		public static MmlTokenizerSource Parse (IList<MmlInputSource> inputs)
 		{
 			var r = new MmlInputSourceReader ();
 			r.Process (inputs);
 			return r.result;
 		}
 
-		List<MmlInputSource> inputs;
 		MmlTokenizerSource result;
 
 		public MmlInputSourceReader ()
@@ -333,9 +342,8 @@ namespace Commons.Music.Midi.Mml
 				return TrimComments (s, idx3 + 1); // skip this literal. There still may be another literal to care.
 		}
 
-		public void Process (List<MmlInputSource> inputs)
+		public void Process (IList<MmlInputSource> inputs)
 		{
-			this.inputs = inputs;
 			result = new MmlTokenizerSource ();
 
 			for (int i = 0; i < inputs.Count; i++) {
