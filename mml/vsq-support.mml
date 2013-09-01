@@ -532,6 +532,7 @@
 #variable __bopomofo_consonant:string = ""
 
 #macro LBC label:string, consonant:string { __LET {"__bopomofo_consonant", $consonant } }
+#macro LBV label:string, vowel:string { } // FIXME: implement!!!
 
 #macro ㄅ { LBC "ㄅ", "p" }
 #macro ㄆ { LBC "ㄆ", "p_h" }
@@ -547,11 +548,50 @@
 #macro ㄐ { LBC "ㄐ", "ts\\" }
 #macro ㄑ { LBC "ㄑ", "ts\\_h" }
 #macro ㄒ { LBC "ㄒ", "s\\" }
-#macro ㄓ { LBC "ㄓ", "ts`" }
-#macro ㄔ { LBC "ㄔ", "ts`_h" }
-#macro ㄕ { LBC "ㄕ", "s`" }
-#macro ㄖ { LBC "ㄖ", "z`" }
-#macro ㄗ { LBC "ㄗ", "ts" }
-#macro ㄘ { LBC "ㄘ", "ts_h" }
-#macro ㄙ { LBC "ㄙ", "s" }
+#macro ㄓ { LBC "ㄓ", "ts`i`" }
+#macro ㄔ { LBC "ㄔ", "ts`_hi`" }
+#macro ㄕ { LBC "ㄕ", "s`i`" }
+#macro ㄖ { LBC "ㄖ", "z`i`" }
+#macro ㄗ { LBC "ㄗ", "tsi\" }
+#macro ㄘ { LBC "ㄘ", "ts_hi\" }
+#macro ㄙ { LBC "ㄙ", "si\" }
 
+#macro ㄚ { LBV "ㄚ", "a" }
+#macro ㄛ { LBV "ㄛ", "o" }
+#macro ㄜ { LBV "ㄜ", "7" }
+#macro ㄧ { LBV "ㄧ", "i" }
+#macro ㄨ { LBV "ㄨ", "u" }
+#macro ㄩ { LBV "ㄩ", "y" }
+#macro ㄦ { LBV "ㄦ", "@`" }
+#macro ㄞ { LBV "ㄞ", "aI" }
+#macro ㄟ { LBV "ㄟ", "ei" }
+#macro ㄠ { LBV "ㄠ", "AU" }
+#macro ㄡ { LBV "ㄡ", "@U" }
+#macro ㄧㄚ { LBV "ㄧㄚ", "ia" }
+#macro ㄧㄝ { LBV "ㄧㄝ", "iE_r" }
+#macro ㄨㄚ { LBV "ㄨㄚ", "ua" }
+#macro ㄨㄛ { LBV "ㄨㄛ", "uo" }
+#macro ㄩㄝ { LBV "ㄩㄝ", "yE_r" }
+#macro ㄧㄠ { LBV "ㄧㄠ", "iAU" }
+#macro ㄧㄡ { LBV "ㄧㄡ", "i@U" }
+#macro ㄨㄞ { LBV "ㄨㄞ", "uaI" }
+#macro ㄨㄟ { LBV "ㄨㄟ", "uei" }
+#macro ㄢ { LBV "ㄢ", "a_n" }
+#macro ㄣ { LBV "ㄣ", "@_n" }
+#macro ㄧㄣ { LBV "ㄧㄣ", "i_n" }
+#macro ㄧㄢ { LBV "ㄧㄢ", "iE_n" }
+#macro ㄨㄢ { LBV "ㄨㄢ", "ua_n" }
+#macro ㄨㄣ { LBV "ㄨㄣ", "u@_n" }
+#macro ㄩㄣ { LBV "ㄩㄣ", "y_n" }
+#macro ㄩㄢ { LBV "ㄩㄢ", "y{_n" }
+#macro ㄤ { LBV "ㄤ", "AN" }
+#macro ㄥ { LBV "ㄥ", "@N" }
+#macro ㄧㄥ { LBV "ㄧㄥ", "iN" }
+#macro ㄧㄤ { LBV "ㄧㄤ", "iAN" }
+#macro ㄨㄤ { LBV "ㄨㄤ", "uAN" }
+// FIXME: this must be conditional. U@N without consonant, UN with consonant.
+// This distinction should be done automatically.
+// Differentiating with ‘_' is kind of stupid.
+#macro ㄨㄥ { LBV "ㄨㄥ", "UN" }
+#macro _ㄨㄥ { LBV "ㄨㄥ", "u@N" }
+#macro ㄩㄥ { LBV "ㄩㄥ", "iUN" }
