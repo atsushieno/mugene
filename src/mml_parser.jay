@@ -134,7 +134,7 @@ namespace Commons.Music.Midi.Mml.Parser
 			try {
 				return yyparse (input);
 			} catch (yyParser.yyException ex) {
-				throw new MmlException ("MML parser error", current_location);
+				throw new MmlException ("MML parser error", current_location, ex);
 			}
 		}
 
