@@ -635,7 +635,7 @@
 	of inclusion as an error.
 
 	An AST track consists of a sequence of MML operation, which can be
-	either a primitive operation or a macro use. Both consist of the
+	either a primitive operation or a macro use. Both consist of a
 	name and a sequence of arguments.
 
 	Then it proceeds to AST expansion, which contains the following
@@ -680,5 +680,5 @@
 			compiler file argument.
 		--verbose : gives some debugging output
 
-	The unix shell "mugene" takes mml filenames in lib/mugene/mml
+	The unix shell command "mugene" takes mml filenames in lib/mugene/mml
 	directory as arguments.
