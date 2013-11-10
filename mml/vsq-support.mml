@@ -231,6 +231,18 @@
 #variable tmp_phonLen, phonA, phonB, phonC
 #variable __prev_vowel
 #macro LJ label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
+	__APPLY { $__is_nsx_one ? "LJ_NSX_ONE", "LJ_VOCALOID", $label, $en, $params, $phonLen, $phonA, $phonB, $phonC } }
+
+#macro LJ_NSX_ONE label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
+	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
+	__SAVE_OPER_BEGIN \
+	NRPNM #71 NRPNLP #12,0 NRPNLP #13,$phonA NRPNLP #13,$phonB NRPNLP #13,$phonC NRPNLP #4F,#7F \
+	__SAVE_OPER_END $__handle_defs \
+	__LET{"__handle_defs", $__handle_defs + 1} \
+	__LET{"__prev_vowel", $phonC ? $phonC, $phonB ? $phonB, $phonA } \
+	}
+
+#macro LJ_VOCALOID label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// meta text
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
 	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
