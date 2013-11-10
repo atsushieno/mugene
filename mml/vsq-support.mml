@@ -387,21 +387,22 @@
 #macro す { LJ "す", "s M", "64,0", 2, #73, #4D }
 #macro せ { LJ "せ", "s e", "64,0", 2, #73, #65 }
 #macro そ { LJ "そ", "s o", "64,0", 2, #73, #6F }
-#macro ざ { LJ "ざ", "z a", "64,0", 2, #7A, #61 }
-#macro じ { LJ "じ", "Z i", "64,0", 2, #5A, #69 }
-#macro ず { LJ "ず", "z M", "64,0", 2, #7A, #4D }
-#macro ぜ { LJ "ぜ", "z e", "64,0", 2, #7A, #65 }
-#macro ぞ { LJ "ぞ", "z o", "64,0", 2, #7A, #6F }
-// for word-initiator
-#macro _ざ { LJ "ざ", "dz a", "64,0", 3, #64, #7A, #61 }
-#macro _ず { LJ "ず", "dz M", "64,0", 3, #64, #7A, #4D }
-#macro _ぜ { LJ "ぜ", "dz e", "64,0", 3, #64, #7A, #65 }
-#macro _ぞ { LJ "ぞ", "dz o", "64,0", 3, #64, #7A, #6F }
-#macro _じゃ { LJ "じゃ", "dZ a", "64,64,0", 3, #64, #5A, #61 }
-#macro _じ   { LJ "じ",   "dZ i", "64,64,0", 3, #64, #5A, #69 }
-#macro _じゅ { LJ "じゅ", "dZ M", "64,64,0", 3, #64, #5A, #4D }
-#macro _じぇ { LJ "じぇ", "dZ e", "64,64,0", 3, #64, #5A, #65 }
-#macro _じょ { LJ "じょ", "dZ o", "64,64,0", 3, #64, #5A, #6F }
+// word continuator (N/A in eVocaloid)
+#macro _ざ { LJ "ざ", "z a", "64,0", 2, #7A, #61 }
+#macro _じ { LJ "じ", "Z i", "64,0", 2, #5A, #69 }
+#macro _ず { LJ "ず", "z M", "64,0", 2, #7A, #4D }
+#macro _ぜ { LJ "ぜ", "z e", "64,0", 2, #7A, #65 }
+#macro _ぞ { LJ "ぞ", "z o", "64,0", 2, #7A, #6F }
+// word initiator
+#macro ざ { LJ "ざ", "dz a", "64,0", 3, #64, #7A, #61 }
+#macro ず { LJ "ず", "dz M", "64,0", 3, #64, #7A, #4D }
+#macro ぜ { LJ "ぜ", "dz e", "64,0", 3, #64, #7A, #65 }
+#macro ぞ { LJ "ぞ", "dz o", "64,0", 3, #64, #7A, #6F }
+#macro じゃ { LJ "じゃ", "dZ a", "64,64,0", 3, #64, #5A, #61 }
+#macro じ   { LJ "じ",   "dZ i", "64,64,0", 3, #64, #5A, #69 }
+#macro じゅ { LJ "じゅ", "dZ M", "64,64,0", 3, #64, #5A, #4D }
+#macro じぇ { LJ "じぇ", "dZ e", "64,64,0", 3, #64, #5A, #65 }
+#macro じょ { LJ "じょ", "dZ o", "64,64,0", 3, #64, #5A, #6F }
 #macro た { LJ "た", "t a", "64,0", 2, #74, #61 }
 #macro て { LJ "て", "t e", "64,0", 2, #74, #65 }
 #macro と { LJ "と", "t o", "64,0", 2, #74, #6F }
@@ -440,10 +441,14 @@
 #macro にゅ { LJ "にゅ", "J M", "64,0", 2, #4A, #4D }
 #macro にぇ { LJ "にぇ", "J e", "64,0", 2, #4A, #65 }
 #macro にょ { LJ "にょ", "J o", "64,0", 2, #4A, #6F }
-// in-the-middle-of-words
-#macro は { LJ "は", "h\\ a", "64,0", 3, #68, #5C, #61 }
-#macro へ { LJ "へ", "h\\ e", "64,0", 3, #68, #5C, #65 }
-#macro ほ { LJ "ほ", "h\\ o", "64,0", 3, #68, #5C, #6F }
+// word continuator (N/A in eVocaloid)
+#macro _は { LJ "は", "h\\ a", "64,0", 3, #68, #5C, #61 }
+#macro _へ { LJ "へ", "h\\ e", "64,0", 3, #68, #5C, #65 }
+#macro _ほ { LJ "ほ", "h\\ o", "64,0", 3, #68, #5C, #6F }
+// word-initiator
+#macro は { LJ "は", "h a", "64,0", 2, #68, #61 }
+#macro へ { LJ "へ", "h e", "64,0", 2, #68, #65 }
+#macro ほ { LJ "ほ", "h o", "64,0", 2, #68, #6F }
 #macro ひゃ { LJ "ひゃ", "C a", "64,0", 2, #43, #61 }
 #macro ひ   { LJ "ひ",   "C i", "64,0", 2, #43, #69 }
 #macro ひゅ { LJ "ひゅ", "C M", "64,0", 2, #43, #4D }
@@ -456,13 +461,6 @@
 #macro ふゃ { LJ "ふゃ", "p\\' a", "64,64,64,0", 4, #70, #5C, #27, #61 }
 #macro ふぃ { LJ "ふぃ", "p\\' i", "64,64,64,0", 4, #70, #5C, #27, #69 }
 #macro ふゅ { LJ "ふゅ", "p\\' M", "64,64,64,0", 4, #70, #5C, #27, #4D }
-// word-initiator
-#macro _は { LJ "は", "h a", "64,0", 2, #68, #61 }
-#macro _ひ { ひ }
-#macro _ふぃ { ふぃ }
-#macro _ふ { ふ }
-#macro _へ { LJ "へ", "h e", "64,0", 2, #68, #65 }
-#macro _ほ { LJ "ほ", "h o", "64,0", 2, #68, #6F }
 #macro ば { LJ "ば", "b a", "64,0", 2, #62, #61 }
 #macro ぶ { LJ "ぶ", "b M", "64,0", 2, #62, #4D }
 #macro べ { LJ "べ", "b e", "64,0", 2, #62, #65 }
@@ -505,6 +503,15 @@
 #macro わ { LJ "わ", "w a", "64,0", 2, #77, #61 }
 #macro を { LJ "を", "o", "0", 1, #6F }
 #macro ん { LJ "ん", "N", "64", 1, #4E }
+// FIXME: for eVocaloid, ん has a lot of variants depending on the *next* phonetics:
+//	- N\ for ending form
+//	- N\ before vowel, semi-vowel or fricatives
+//	- m before p, b or m
+//	- m' before p', b' or m'
+//	- N before k, g or N
+//	- N' before k' g' or N'
+//	- J before J
+//	- n for anything else
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
 
 // FIXME: Katakanas!
