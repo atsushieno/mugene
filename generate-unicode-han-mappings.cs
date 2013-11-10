@@ -22,7 +22,7 @@ namespace Mugene
 				DumpBopomofoReadings (args);
 				break;
 			case "traditional":
-				GenerateTraditionalVariantsMap (args);
+				PrintTraditional (args);
 				break;
 			case "readings":
 				GenerateReadingMap (args);
@@ -41,6 +41,11 @@ Commands and args:
 ");
 				break;
 			}
+		}
+		
+		static void PrintTraditional (string [] args)
+		{
+			Console.WriteLine (ConvertToTraditional (args [1], args [2]));
 		}
 
 		static void HanziToPinyin (string [] args)
@@ -340,11 +345,11 @@ Commands and args:
 			return sb.ToString ();
 		}
 
-		static void GenerateTraditionalVariantsMap (string [] args)
+		static string GenerateTraditionalVariantsMap (string variantsFile)
 		{
 			StringBuilder sb = new StringBuilder ();
 			int n = 0;
-			foreach (var line in File.ReadAllLines (args [1])) {
+			foreach (var line in File.ReadAllLines (variantsFile)) {
 				var ents = line.Split (null);
 				if (ents.Length < 3 || ents [1] != "kTraditionalVariant")
 					continue;
@@ -353,8 +358,7 @@ Commands and args:
 				if (++n % 16 == 0)
 					sb.Append ('\n');
 			}
-			Console.WriteLine (sb);
-			Console.WriteLine ("Database size: " + sb.Length);
+			return sb.ToString ();
 		}
 
 		static void AppendHexAsChar (StringBuilder sb, string s)
@@ -364,6 +368,38 @@ Commands and args:
 				sb.Append ((char) x);
 			else
 				sb.Append ((char) ((x - 0x10000) / 0x400 + 0xD800)).Append ((char) ((x - 0x10000) % 0x400 + 0xDC00));
+		}
+		
+		static string ConvertToTraditional (string variantsFile, string textFile)
+		{
+			var sb = new StringBuilder ();
+			var db = GenerateTraditionalVariantsMap (variantsFile);
+			Console.WriteLine ("Database size: " + db.Length);
+			char hs = '\0';
+			int c = 0;
+			foreach (var ch in File.ReadAllText (textFile)) {
+				if (char.IsSurrogate (ch)) {
+					if (hs == '\0')
+						hs = ch;
+					else {
+						int l = 0;
+						do {
+							l = db.IndexOf (hs, l, db.Length - l);
+							if (l < db.Length - 3 && db [l + 1] == ch) {
+								sb.Append (db [l + 2]).Append (db [l + 3]);
+								break;
+							}
+						} while (true);
+						if (l < 0)
+							sb.Append (hs).Append (ch);
+					}
+				}
+				else {
+					c = db.IndexOf (ch);
+					sb.Append (c < 0 || c % 2 != 0 ? (char) ch : db [c + 1]);
+				}
+			}
+			return sb.ToString ();	
 		}
 	}
 }
