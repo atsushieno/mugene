@@ -47,6 +47,8 @@
 
 #basecount 1920
 
+#variable __is_nsx_one:number = 0
+#macro USE_NSX_ONE { __LET { "__is_nsx_one", 1 } }
 
 // NRPNs
 #macro NRPNM val:number { CC #63,$val }
@@ -272,6 +274,9 @@
 #define EVENTS_COND { $__events \> 10000 ? "[ID#{0:D08}]\n", "[ID#{0:D04}]\n" }
 #define EVENTS_APPLY_COND $__events \> 10000 ? "{0}=ID#{1:D08}\n", "{0}=ID#{1:D04}\n"
 #macro n key:number, step:length, gate:length, vel:number=$__velocity { \
+	__APPLY { $__is_nsx_one ? "n__NSX_ONE", "n__VOCALOID", $key, $step, $gate, $vel} }
+
+#macro n__VOCALOID key:number, step:length, gate:length, vel:number=$__velocity { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
@@ -290,9 +295,25 @@
 	VER_DEV_DELAY_VAL#50,$key NRPNLP 3,$vel NRPNLP 4,$__current_note_gate NRPNLP 5,3 \
 	DEBUG $handle_uses \
 	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
-	NOP $__current_note_step \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
+	\// FIXME: I reordered operations to work better with NSX-1, verify this still works on Vocaloid2 (which I don't have installed anymore...!)
+	NOP $__current_note_step \
 	} // One note operation consumes one lyric handle
+
+#macro n__NSX_ONE key:number, KEYARGDEF   { \
+	__LET{"__current_note_step", $gate + %1 ? $gate, $step}  \
+	__LET{"__current_note_gate", $__current_note_step * $__gate_rel * {1 / $__gate_rel_denom} - $__gate_abs} \
+	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
+	DEBUG $handle_uses \
+	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
+	__LET {"__handle_uses", $__handle_uses + 1 } \
+	NON$key, $vel \
+	NOP$__current_note_gate \
+	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \
+	NOFF$key, $offvel \
+	NOP$step - $__current_note_gate \
+	}
+
 
 // BPLists ----
 #macro BP_NRPN paraID,val { VER_DEV_DELAY #55,$paraID,0 NRPNLP 3,$val }
@@ -559,9 +580,9 @@
 #macro ㄔ { LBC "ㄔ", "ts`_hi`" }
 #macro ㄕ { LBC "ㄕ", "s`i`" }
 #macro ㄖ { LBC "ㄖ", "z`i`" }
-#macro ㄗ { LBC "ㄗ", "tsi\" }
-#macro ㄘ { LBC "ㄘ", "ts_hi\" }
-#macro ㄙ { LBC "ㄙ", "si\" }
+#macro ㄗ { LBC "ㄗ", "tsi\\" }
+#macro ㄘ { LBC "ㄘ", "ts_hi\\" }
+#macro ㄙ { LBC "ㄙ", "si\\" }
 
 #macro ㄚ { LBV "ㄚ", "a" }
 #macro ㄛ { LBV "ㄛ", "o" }
