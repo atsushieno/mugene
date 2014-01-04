@@ -11,12 +11,12 @@ namespace Commons.Music.Midi.Mml
 	{
 		public const string VsqInclude = "vsq-support.mml";
 
-		static readonly string [] default_includes = {
+		static List<string> default_includes = new List<string> (new string [] {
 			"default-macro.mml",
 			"drum-part.mml",
 			"gs-sysex.mml",
 			"nrpn-gs-xg.mml",
-		};
+		});
 
 		static Util ()
 		{
@@ -109,12 +109,14 @@ Options:
 					disableRunningStatus = true;
 					MmlValueExpr.StringToBytes = s => Encoding.GetEncoding (932).GetBytes (s);
 					extension = ".vsq";
+					Util.DefaultIncludes.Add (Util.VsqInclude);
 					continue;
 				case "--verbose":
 					verbose = true;
 					continue;
 				case "--use-vsq-metadata":
 					useVsqMetadata = true;
+					Util.DefaultIncludes.Add (Util.VsqInclude);
 					continue;
 				case "--disable-running-status":
 					disableRunningStatus = true;
@@ -146,10 +148,6 @@ Options:
 					resolver.DefaultFiles.Add (fname);
 					inputFilenames.Add (fname);
 				}
-			}
-			if (extension == ".vsq" && !noDefault) {
-				resolver.DefaultFiles.Add (Util.VsqInclude);
-				inputFilenames.Add (Util.VsqInclude);
 			}
 
 			var inputs = new List<MmlInputSource> ();

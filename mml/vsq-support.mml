@@ -1,6 +1,7 @@
 // Macro definitions for VSQ output support
 
 // Usage:
+//	- add USE_NSX_ONE on channel 1 if you want to use NSX-1
 //	- at beginning:
 //		- set variables for DEFINE_SINGER operation.
 //		- call VSQ_INITIALIZE_TRACK. DEFINE_SINGER is indirectly called.

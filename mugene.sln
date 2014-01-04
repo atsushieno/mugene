@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugenelib", "mugenelib.csproj", "{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene", "mugene\mugene.csproj", "{5A356A35-9B47-425F-98B9-BCE51F427F76}"

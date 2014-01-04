@@ -172,7 +172,7 @@ namespace Commons.Music.Midi.Mml
 		public override TextReader Resolve (string uri)
 		{
 			if (DefaultFiles.Contains (uri))
-				return File.OpenText (Path.Combine (new Uri (GetType ().Assembly.CodeBase).LocalPath, "../mml/" + uri));
+				return File.OpenText (Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", uri));
 			else
 				return File.OpenText (uri);
 		}
