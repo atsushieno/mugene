@@ -36,18 +36,18 @@ namespace Commons.Music.Midi.Mml
 			var rtrk = new SmfTrack ();
 			int cur = 0;
 			foreach (var ev in source.Events) {
-				SmfMessage msg;
+				SmfEvent evt;
 				if (ev.Arguments.Count == 3)
-					msg = new SmfMessage (ev.Arguments [0], ev.Arguments [1], ev.Arguments [2], null);
+					evt = new SmfEvent (ev.Arguments [0], ev.Arguments [1], ev.Arguments [2], null);
 				else if (ev.Arguments [0] == 0xFF)
-					msg = new SmfMessage (ev.Arguments [0], ev.Arguments [1], 0, ev.Arguments.Skip (2).ToArray ());
+					evt = new SmfEvent (ev.Arguments [0], ev.Arguments [1], 0, ev.Arguments.Skip (2).ToArray ());
 				else
-					msg = new SmfMessage (ev.Arguments [0], 0, 0, ev.Arguments.Skip (1).ToArray ());
-				var smfev = new SmfEvent (ev.Tick - cur, msg);
-				rtrk.Events.Add (smfev);
+					evt = new SmfEvent (ev.Arguments [0], 0, 0, ev.Arguments.Skip (1).ToArray ());
+				var msg = new SmfMessage (ev.Tick - cur, evt);
+				rtrk.Messages.Add (msg);
 				cur = ev.Tick;
 			}
-			rtrk.Events.Add (new SmfEvent (0, new SmfMessage (0xFF, 0x2F, 0, new byte [0])));
+			rtrk.Messages.Add (new SmfMessage (0, new SmfEvent (0xFF, 0x2F, 0, new byte [0])));
 			return rtrk;
 		}
 	}

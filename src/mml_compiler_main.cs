@@ -164,7 +164,7 @@ Options:
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 
-		public void Compile (IList<MmlInputSource> inputs, Func<bool, SmfEvent, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
+		public void Compile (IList<MmlInputSource> inputs, Func<bool, SmfMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
 		{
 			// input sources -> tokenizer sources
 			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs);
