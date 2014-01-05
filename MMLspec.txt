@@ -433,13 +433,17 @@
 		conditional_compilation_directive |
 		macro_definition |
 		meta_directive |
-		basecount_directive
+		basecount_directive |
+		include_directive
 
 	meta_directive ::=
 		"#meta" meta_type string_constant
 
 	meta_type ::=
 		"title" | "copyright" | "text"
+
+	include_directive ::=
+		"#include" filename
 
 	basecount_directive ::=
 		"#basecount" number_token
