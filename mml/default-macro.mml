@@ -126,7 +126,7 @@
 #macro CUE val:string { __MIDI_META{7, $val} }
 #macro BEAT num:number,denom:number { __MIDI_META{#58, $num, \
 	$denom - 16 ? $denom - 8 ? $denom - 4 ? $denom - 2 ? $denom, \
-	1, 2, 3, 4} }
+	1, 2, 3, 4, 0, 0} }
 // #macro KEY TBD {__MIDI_META{ 59h}}
 
 #macro PITCH_BEND_SENSITIVITY val:number { RPN 0,0 DTE $val,0 }
