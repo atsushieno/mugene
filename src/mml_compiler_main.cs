@@ -105,18 +105,19 @@ Options:
 					noDefault = true;
 					continue;
 				case "--vsq": // for convenience
+					extension = ".vsq";
+					Util.DefaultIncludes.Add (Util.VsqInclude);
+					goto case "--nsx";
+				case "--nsx":
 					useVsqMetadata = true;
 					disableRunningStatus = true;
 					MmlValueExpr.StringToBytes = s => Encoding.GetEncoding (932).GetBytes (s);
-					extension = ".vsq";
-					Util.DefaultIncludes.Add (Util.VsqInclude);
 					continue;
 				case "--verbose":
 					verbose = true;
 					continue;
 				case "--use-vsq-metadata":
 					useVsqMetadata = true;
-					Util.DefaultIncludes.Add (Util.VsqInclude);
 					continue;
 				case "--disable-running-status":
 					disableRunningStatus = true;
@@ -150,6 +151,8 @@ Options:
 				}
 			}
 
+			// FIXME: stream resolver should be processed within the actual parsing phase.
+			// This makes it redundant to support #include
 			var inputs = new List<MmlInputSource> ();
 			foreach (var fname in inputFilenames)
 				inputs.Add (new MmlInputSource (fname, Resolver.Resolve (fname)));
@@ -164,7 +167,7 @@ Options:
 		public void Compile (IList<MmlInputSource> inputs, Func<bool, SmfEvent, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
 		{
 			// input sources -> tokenizer sources
-			var tokenizerSources = MmlInputSourceReader.Parse (inputs);
+			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs);
 
 			// tokenizer sources -> token streams
 			var tokens = MmlTokenizer.Tokenize (tokenizerSources);

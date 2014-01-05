@@ -171,8 +171,11 @@ namespace Commons.Music.Midi.Mml
 
 		public override TextReader Resolve (string uri)
 		{
-			if (DefaultFiles.Contains (uri))
-				return File.OpenText (Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", uri));
+			if (File.Exists (uri))
+				return File.OpenText (uri);
+			string commonPath = Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", uri);
+			if (File.Exists (commonPath))
+				return File.OpenText (commonPath);
 			else
 				return File.OpenText (uri);
 		}
@@ -310,17 +313,19 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlInputSourceReader
 	{
-		public static MmlTokenizerSource Parse (IList<MmlInputSource> inputs)
+		public static MmlTokenizerSource Parse (MmlCompiler compiler, IList<MmlInputSource> inputs)
 		{
-			var r = new MmlInputSourceReader ();
+			var r = new MmlInputSourceReader (compiler);
 			r.Process (inputs);
 			return r.result;
 		}
 
+		MmlCompiler compiler;
 		MmlTokenizerSource result;
 
-		public MmlInputSourceReader ()
+		public MmlInputSourceReader (MmlCompiler compiler)
 		{
+			this.compiler = compiler;
 		}
 
 		bool in_comment_mode;
@@ -389,6 +394,8 @@ namespace Commons.Music.Midi.Mml
 			// get identifier
 			var identifier = result.Lexer.ReadNewIdentifier ();
 			switch (identifier) {
+			case "include":
+				return ProcessIncludeLine (line);
 			case "variable":
 				result.Lexer.SkipWhitespaces (true);
 				return ProcessVariableLine (line);
@@ -415,6 +422,13 @@ namespace Commons.Music.Midi.Mml
 			ps.Lines.Add (line);
 			result.Pragmas.Add (ps);
 			return ps;
+		}
+		
+		MmlSourceLineSet ProcessIncludeLine (MmlLine line)
+		{
+			string file = line.Text.Substring (line.Location.LinePosition).Trim ();
+			this.Process (new MmlInputSource [] {new MmlInputSource (file, compiler.Resolver.Resolve (file))});
+			return new MmlUntypedSource (line);
 		}
 
 		MmlSourceLineSet ProcessMacroLine (MmlLine line)
