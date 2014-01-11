@@ -1,0 +1,16 @@
+39	USE_NSX_ONE
+#define NSX_ONE_CHANNEL 39
+#include default-macro.mml
+#include nrpn-gs-xg.mml
+#include drum-part.mml
+#include vsq-support.mml
+// ---- Master track ----
+0   VSQ_INITIALIZE_MASTER BEAT4,4
+0	t166 XG_RESET
+
+// ---- vocal body ----
+//39  VSQ_INITIALIZE_TRACK VSQ_SETUP_FIRST_TRACK VSQ_SETUP_DONE
+39	CH1 @0 V100 
+39  うえをむーいて あるこーーう_
+
+39  l4o5 rffgafdc rf2gafdc

@@ -52,31 +52,31 @@
 #macro USE_NSX_ONE { __LET { "__is_nsx_one", 1 } }
 
 // NRPNs
-#macro NRPNM val:number { CC #63,$val }
-#macro NRPNL val:number { CC #62,$val }
-#macro DTEM val:number { CC #06,$val }
-#macro DTEL val:number { CC #26,$val }
-#macro NRPNMP key,val { NRPNM $key DTEM $val }
-#macro NRPNMPW key,msb,lsb { NRPNM $key DTE $msb,$lsb }
-#macro NRPNLP key,val { NRPNL $key DTEM $val }
-#macro NRPNLPW key,msb,lsb { NRPNL $key DTE $msb,$lsb }
+#macro NSX_ONE_CHANNEL NRPNM val:number { CC #63,$val }
+#macro NSX_ONE_CHANNEL NRPNL val:number { CC #62,$val }
+#macro NSX_ONE_CHANNEL DTEM val:number { CC #06,$val }
+#macro NSX_ONE_CHANNEL DTEL val:number { CC #26,$val }
+#macro NSX_ONE_CHANNEL NRPNMP key,val { NRPNM $key DTEM $val }
+#macro NSX_ONE_CHANNEL NRPNMPW key,msb,lsb { NRPNM $key DTE $msb,$lsb }
+#macro NSX_ONE_CHANNEL NRPNLP key,val { NRPNL $key DTEM $val }
+#macro NSX_ONE_CHANNEL NRPNLPW key,msb,lsb { NRPNL $key DTE $msb,$lsb }
 
 #variable __version:number = 0
 #variable __device:number = 0
 #variable __delay:number = 0
 
-#macro VER_DEV_DELAY_VAL msb,vmsb { \
+#macro NSX_ONE_CHANNEL VER_DEV_DELAY_VAL msb,vmsb { \
 	NRPN $msb,0 DTE $__version, $__device \
 	NRPNLPW 1, $__delay % #80, $__delay / #80 \
 	NRPNLP 2,$vmsb }
-#macro BANK val:number { VER_DEV_DELAY_VAL #60,$val }
-#macro V val:number { VER_DEV_DELAY_VAL #61,$val }
-#macro P val:number { VER_DEV_DELAY_VAL #62,$val }
-#macro VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val }
-#macro VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val }
+#macro NSX_ONE_CHANNEL BANK val:number { VER_DEV_DELAY_VAL #60,$val }
+#macro NSX_ONE_CHANNEL V val:number { VER_DEV_DELAY_VAL #61,$val }
+#macro NSX_ONE_CHANNEL P val:number { VER_DEV_DELAY_VAL #62,$val }
+#macro NSX_ONE_CHANNEL VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val }
+#macro NSX_ONE_CHANNEL VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val }
 // FIXME: what is Effect2, which occupies #66?
-#macro PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val }
-#macro @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
+#macro NSX_ONE_CHANNEL PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val }
+#macro NSX_ONE_CHANNEL @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
 
 // Buffer definitions
 #variable EntireText:buffer
@@ -112,21 +112,21 @@
 
 #macro VSQ_INITIALIZE_MASTER { TRACKNAME "Master Track" }
 
-#macro SETUP_COMMON { __STORE {"Common", "[Common]", \
+#macro NSX_ONE_CHANNEL SETUP_COMMON { __STORE {"Common", "[Common]", \
 	"\nVersion=", $CommonVersion, "\nName=", $CommonName, \
 	"\nColor=", $CommonColorRed, ",", $CommonColorGreen, ",", $CommonColorBlue, \
 	"\nDynamicsMode=", $CommonDynamicsMode, "\nPlayMode=", $CommonPlayMode, "\n" } }
 
 #variable MasterFeder, MasterPanpot, MasterMute, MasterOutputMode, MasterTracks:number=1
-#macro VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
+#macro NSX_ONE_CHANNEL VSQ_SETUP_FIRST_TRACK { __STORE {"MasterTrackSetup", "[Master]", "\nPreMeasure=4\n", \
 	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
 	"\nTracks=", $MasterTracks, "\n" } \
 	}
-#macro VSQ_SETUP_DONE { r1 r1 r1 r1}
+#macro NSX_ONE_CHANNEL VSQ_SETUP_DONE { r1 r1 r1 r1}
 
 #variable __tmp_position
-#macro OUTPUT_VSQ_TEXT { \
+#macro NSX_ONE_CHANNEL OUTPUT_VSQ_TEXT { \
 	__LET {"__tmp_position", $__timeline_position } \
 	__LET {"__timeline_position", 0 } \
 	TRACKNAME $CommonName \
@@ -181,13 +181,13 @@
 #variable CommonDynamicsMode:number = 1
 #variable CommonPlayMode:number = 1
 
-#macro SINGER_MIKU { \
+#macro NSX_ONE_CHANNEL SINGER_MIKU { \
 	__LET {"IconID", "$07010000" } __LET {"IDS", "Miku" } __LET {"Original", 0} \
 	__LET {"Language", 0 } __LET {"Program", 0 } __LET {"CommonVersion", "DSB301" } }
 // FIXME: define SINGER_RIN, SINGER_LEN, SINGER_LUKA, SINGER_GAK, SINGER_MEG etc.
 
 // relevant variables: $IconID, $IDS, $Original, $Caption, $Length, $Language, $Program
-#macro DEFINE_SINGER { \
+#macro NSX_ONE_CHANNEL DEFINE_SINGER { \
 	__STORE { \
 		"Handles", "[h#0000]\nIconID=", $IconID, "\nIDS=", $IDS, \
 		"\nOriginal=", $Original, "\nCaption=", $Caption, "\nLength=", $Length, \
@@ -200,7 +200,7 @@
 	__LET { "__events", $__events + 1 } \
 	}
 
-#macro VSQ_INITIALIZE_TRACK { \
+#macro NSX_ONE_CHANNEL VSQ_INITIALIZE_TRACK { \
 	__STORE {"PitchBendBPList", "[PitchBendBPList]\n"} \
 	__STORE {"PitchBendSensBPList", "[PitchBendSensBPList]\n"} \
 	__STORE {"DynamicsBPList", "[DynamicsBPList]\n"} \
@@ -231,10 +231,10 @@
 #define HANDLE_USES_COND {$__handle_uses \> 10000 ? "h#{0:D08}\n", "h#{0:D04}\n"}
 #variable tmp_phonLen, phonA, phonB, phonC
 #variable __prev_vowel
-#macro LJ label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
-	__APPLY { $__is_nsx_one ? "LJ_NSX_ONE", "LJ_VOCALOID", $label, $en, $params, $phonLen, $phonA, $phonB, $phonC } }
+#macro NSX_ONE_CHANNEL LJ label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
+	__APPLY { $__is_nsx_one \> 0 ? "LJ_NSX_ONE", "LJ_VOCALOID", $label, $en, $params, $phonLen, $phonA, $phonB, $phonC } }
 
-#macro LJ_NSX_ONE label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
+#macro NSX_ONE_CHANNEL LJ_NSX_ONE label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
 	__SAVE_OPER_BEGIN \
 	NRPNM #71 NRPNLP #12,0 NRPNLP #13,$phonA NRPNLP #13,$phonB NRPNLP #13,$phonC NRPNLP #4F,#7F \
@@ -243,10 +243,7 @@
 	__LET{"__prev_vowel", $phonC ? $phonC, $phonB ? $phonB, $phonA } \
 	}
 
-#macro LJ_VOCALOID label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
-	\// meta text
-	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
-	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
+#macro NSX_ONE_CHANNEL LJ_VOCALOID label:string, en:string, params:string, phonLen, phonA, phonB, phonC { \
 	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
 	__SAVE_OPER_BEGIN \
 	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #4F,#7F \
@@ -260,7 +257,7 @@
 #variable vibrato:number = 0
 #variable vibrato_constant:number = 0
 
-#macro DEFINE_VIBRATO \
+#macro NSX_ONE_CHANNEL DEFINE_VIBRATO \
 	ids:string="normal", caption:string, original:number=1, startRate:number, \
 	startDepth:number, len:number, depthBPNum:number=0, rateBPNum:number=0 { \
 	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
@@ -272,8 +269,8 @@
 	__LET {"__handle_uses", $__handle_uses + 1 } \
 	}
 
-#macro @V id:number { __LET { "vibrato", $id } } // ID is the defined order.
-#macro @VV id:number { __LET {"vibrato_constant", $id } @V $id }
+#macro NSX_ONE_CHANNEL @V id:number { __LET { "vibrato", $id } } // ID is the defined order.
+#macro NSX_ONE_CHANNEL @VV id:number { __LET {"vibrato_constant", $id } @V $id }
 
 // Note operations ----
 #variable dynamics:number = 0
@@ -283,13 +280,13 @@
 #variable dem_dec_gain_rate:number = 0
 #variable dem_accent:number = 0
 #variable handle_uses:number = 0
-#macro AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
+#macro NSX_ONE_CHANNEL AddVibratoHandle id:number { __STORE{"EventDefs", "VibratoHandle=", $id } }
 #define EVENTS_COND { $__events \> 10000 ? "[ID#{0:D08}]\n", "[ID#{0:D04}]\n" }
 #define EVENTS_APPLY_COND $__events \> 10000 ? "{0}=ID#{1:D08}\n", "{0}=ID#{1:D04}\n"
-#macro n key:number, step:length, gate:length, vel:number=$__velocity { \
-	__APPLY { $__is_nsx_one ? "n__NSX_ONE", "n__VOCALOID", $key, $step, $gate, $vel} }
+#macro NSX_ONE_CHANNEL n key:number, step:length, gate:length, vel:number=$__velocity { \
+	__APPLY { $__is_nsx_one \> 0 ? "n__NSX_ONE", "n__VOCALOID", $key, $step, $gate, $vel} }
 
-#macro n__VOCALOID key:number, step:length, gate:length, vel:number=$__velocity { \
+#macro NSX_ONE_CHANNEL n__VOCALOID key:number, step:length, gate:length, vel:number=$__velocity { \
 	__LET{"__current_note_step", {$gate + %1} ? $gate, $step}  \
 	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
@@ -313,10 +310,13 @@
 	NOP $__current_note_step \
 	} // One note operation consumes one lyric handle
 
-#macro n__NSX_ONE key:number, KEYARGDEF   { \
+#macro NSX_ONE_CHANNEL n__NSX_ONE key:number, KEYARGDEF   { \
 	__LET{"__current_note_step", $gate + %1 ? $gate, $step}  \
-	__LET{"__current_note_gate", $__current_note_step * $__gate_rel * {1 / $__gate_rel_denom} - $__gate_abs} \
+	__LET{"__current_note_gate", {{$__current_note_step * $__gate_rel * {1 / $__gate_rel_denom}}} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
+	\
+	__LET { "__events", $__events + 1 } \
+	\
 	DEBUG $handle_uses \
 	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
@@ -329,68 +329,68 @@
 
 
 // BPLists ----
-#macro BP_NRPN paraID,val { VER_DEV_DELAY #55,$paraID,0 NRPNLP 3,$val }
+#macro NSX_ONE_CHANNEL BP_NRPN paraID,val { VER_DEV_DELAY #55,$paraID,0 NRPNLP 3,$val }
 
 #variable __pitch_bend_bp:number
-#macro B val:number { __LET { "__pitch_bend_bp", $val } __STORE { "PitchBendBPList", $__timeline_position, "=", $val, "\n" } \
+#macro NSX_ONE_CHANNEL B val:number { __LET { "__pitch_bend_bp", $val } __STORE { "PitchBendBPList", $__timeline_position, "=", $val, "\n" } \
 	VER_DEV_DELAY #54, $val % #80, $val / #80 }
-#macro B+ val:number { P $__pitch_bend_bp + $val }
-#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL B+ val:number { P $__pitch_bend_bp + $val }
+#macro NSX_ONE_CHANNEL B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "P", "P+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __dynamics
-#macro D val:number { __LET { "__dynamics", $val } \
+#macro NSX_ONE_CHANNEL D val:number { __LET { "__dynamics", $val } \
 	__STORE { "DynamicsBPList", $__timeline_position, "=", $val, "\n" } VER_DEV_DELAY #63,$val,0 }
-#macro D+ val:number { D $__dynamics + $val }
-#macro D_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "D", "D+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL D+ val:number { D $__dynamics + $val }
+#macro NSX_ONE_CHANNEL D_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "D", "D+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __breathiness
-#macro BRE val:number { __LET { "__breathiness", $val } \
+#macro NSX_ONE_CHANNEL BRE val:number { __LET { "__breathiness", $val } \
 	__STORE { "EpRResidualBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN31,$val }
-#macro BRE+ val:number { BRE $__breathiness + $val }
-#macro BRE_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRE", "BRE+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL BRE+ val:number { BRE $__breathiness + $val }
+#macro NSX_ONE_CHANNEL BRE_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRE", "BRE+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __brightness
-#macro BRI val:number { __LET { "__brightness", $val } \
+#macro NSX_ONE_CHANNEL BRI val:number { __LET { "__brightness", $val } \
 	__STORE { "EpRESlopeBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN32,$val }
-#macro BRI+ val:number { BRI $__brightness + $val }
-#macro BRI_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRI", "BRI+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL BRI+ val:number { BRI $__brightness + $val }
+#macro NSX_ONE_CHANNEL BRI_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BRI", "BRI+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __clearness
-#macro C val:number { __LET { "__clearness", $val } \
+#macro NSX_ONE_CHANNEL C val:number { __LET { "__clearness", $val } \
 	__STORE { "EpRESlopeDepthBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN33,$val }
-#macro C+ val:number { C $__clearness + $val }
-#macro C_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "C", "C+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL C+ val:number { C $__clearness + $val }
+#macro NSX_ONE_CHANNEL C_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "C", "C+", SPECTRA_ONESHOT_ARG_USE }
 
 // only in V1
 #variable __harmonics
-#macro H val:number { __LET { "__harmonics", $val } \
+#macro NSX_ONE_CHANNEL H val:number { __LET { "__harmonics", $val } \
 	__STORE { "EpRSineBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN30,$val }
-#macro H+ val:number { H $__harmonics + $val }
-#macro H_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "H", "H+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL H+ val:number { H $__harmonics + $val }
+#macro NSX_ONE_CHANNEL H_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "H", "H+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __vib_trem_depth
 // FIXME: no NRPNs to write?
-#macro XD val:number { __LET { "__vib_trem_depth", $val } __STORE { "VibTremDepthBPList", $__timeline_position, "=", $val, "\n" } }
-#macro XD+ val:number { XD $__vib_trem_depth + $val }
-#macro XD_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "XD", "XD+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL XD val:number { __LET { "__vib_trem_depth", $val } __STORE { "VibTremDepthBPList", $__timeline_position, "=", $val, "\n" } }
+#macro NSX_ONE_CHANNEL XD+ val:number { XD $__vib_trem_depth + $val }
+#macro NSX_ONE_CHANNEL XD_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "XD", "XD+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __gender_factor
-#macro G val:number { __LET { "__gender_factor", $val } \
+#macro NSX_ONE_CHANNEL G val:number { __LET { "__gender_factor", $val } \
 	__STORE { "GenderFactorBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN70,$val }
-#macro G+ val:number { G $__gender_factor + $val }
-#macro G_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "G", "G+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL G+ val:number { G $__gender_factor + $val }
+#macro NSX_ONE_CHANNEL G_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "G", "G+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __portamento_timing
-#macro POR val:number { __LET { "__portamento_timing", $val } \
+#macro NSX_ONE_CHANNEL POR val:number { __LET { "__portamento_timing", $val } \
 	__STORE { "PortamentoTimingBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN34,$val }
-#macro POR+ val:number { POR $__portamento_timing + $val }
-#macro POR_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "POR", "POR+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL POR+ val:number { POR $__portamento_timing + $val }
+#macro NSX_ONE_CHANNEL POR_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "POR", "POR+", SPECTRA_ONESHOT_ARG_USE }
 
 #variable __opening
-#macro O val:number { __LET { "__opening", $val } \
+#macro NSX_ONE_CHANNEL O val:number { __LET { "__opening", $val } \
 	__STORE { "OpeningBPList", $__timeline_position, "=", $val, "\n" } BP_NRPN35,$val }
-#macro O+ val:number { O $__opening + $val }
-#macro O_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
+#macro NSX_ONE_CHANNEL O+ val:number { O $__opening + $val }
+#macro NSX_ONE_CHANNEL O_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "O", "O+", SPECTRA_ONESHOT_ARG_USE }
 
 // Lyrics macro for Japanese ----
 #macro あ { LJ "あ", "a", "0", 1, #61 }
