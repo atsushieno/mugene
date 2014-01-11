@@ -4,8 +4,9 @@
 #include nrpn-gs-xg.mml
 #include drum-part.mml
 #include vsq-support.mml
+#define DRUMTRACKS 10-11
 // ---- Master track ----
-0   VSQ_INITIALIZE_MASTER BEAT4,4
+0   GM_SYSTEM_ON VSQ_INITIALIZE_MASTER BEAT4,4
 0	t166 XG_RESET
 
 // ---- vocal body ----
@@ -13,4 +14,14 @@
 39	CH1 @0 V100 
 39  うえをむーいて あるこーーう_
 
-39  l4o5 rffgafdc rf2gafdc
+39  l4o5q0 rffgafdc rf2gafdc
+
+// ... so, real-time lyrics processing is not great. It gives significant delay.
+
+// ---- rhythm ----
+10	CH10 l4 V60
+10	[cccc]4
+
+// ---- rhythm 2 ----
+11	CH10 l4
+11	[bbsb]4
