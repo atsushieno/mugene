@@ -368,7 +368,11 @@ namespace Commons.Music.Midi.Mml
 		public void Process (IList<MmlInputSource> inputs)
 		{
 			result = new MmlTokenizerSource ();
+			DoProcess (inputs);
+		}
 
+		void DoProcess (IList<MmlInputSource> inputs)
+		{
 			for (int i = 0; i < inputs.Count; i++) {
 				int line = 0;
 				string s = String.Empty;
@@ -413,6 +417,7 @@ namespace Commons.Music.Midi.Mml
 			var identifier = result.Lexer.ReadNewIdentifier ();
 			switch (identifier) {
 			case "include":
+				result.Lexer.SkipWhitespaces (true);
 				return ProcessIncludeLine (line);
 			case "variable":
 				result.Lexer.SkipWhitespaces (true);
@@ -446,7 +451,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			string file = line.Text.Substring (line.Location.LinePosition).Trim ();
 			compiler.Resolver.PushInclude (file);
-			this.Process (new MmlInputSource [] {new MmlInputSource (file, compiler.Resolver.Resolve (file))});
+			this.DoProcess (new MmlInputSource [] {new MmlInputSource (file, compiler.Resolver.Resolve (file))});
 			compiler.Resolver.PopInclude ();
 			return new MmlUntypedSource (line);
 		}
