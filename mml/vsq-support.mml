@@ -562,7 +562,12 @@
 #macro っ_ { } // do nothing, skipping note
 #macro ー { __keep_vowel "ー" } // it'd be more frequently used
 #macro ー_ { } // do nothing, implying the same note holds
-#macro う_ { __keep_vowel "う" } // for natural notation (eg. ue-wo-mu-i-te a-ruko--'u')
+// for natural notation (eg. ue-wo-mu-i-te a-ruko--'u' / wa-ta-shi-no-se-'i'-ja-na-i)
+#macro あ_ { __keep_vowel "あ" }
+#macro い_ { __keep_vowel "い" }
+#macro う_ { __keep_vowel "う" }
+#macro え_ { __keep_vowel "え" }
+#macro お_ { __keep_vowel "お" }
 // complemental natural Japanese notation support
 #macro _は_ { わ }
 #macro _へ_ { え }
