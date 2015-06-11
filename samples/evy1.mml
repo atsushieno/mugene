@@ -1,5 +1,5 @@
 39	USE_NSX_ONE
-#define NSX_ONE_CHANNEL 39
+#define VOCAL_CHANNEL 39
 #include default-macro.mml
 #include nrpn-gs-xg.mml
 #include drum-part.mml
