@@ -105,6 +105,7 @@ Options:
 					noDefault = true;
 					continue;
 				case "--vsq": // for convenience
+					// FIXME: this is causing some invalid output...
 					extension = ".vsq";
 					Util.DefaultIncludes.Add (Util.VsqInclude);
 					goto case "--nsx";
