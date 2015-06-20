@@ -952,7 +952,7 @@ namespace Commons.Music.Midi.Mml
 				CurrentToken = MmlTokenType.Identifier;
 				return true;
 			}
-			var ident = GetIdentifier ();
+			var ident = TryReadIdentifier ();
 			if (ident != null) {
 				Value = ident;
 				CurrentToken = MmlTokenType.Identifier;
@@ -995,7 +995,7 @@ namespace Commons.Music.Midi.Mml
 			Value = value;
 		}
 
-		public abstract string GetIdentifier ();
+		public abstract string TryReadIdentifier ();
 
 		public virtual IEnumerable<string> GetValidIdentifiers ()
 		{
@@ -1024,7 +1024,7 @@ namespace Commons.Music.Midi.Mml
 		char [] buffer = new char[256];
 		int buffer_pos;
 
-		public override string GetIdentifier ()
+		public override string TryReadIdentifier ()
 		{
 			if (matchpos == null)
 				matchpos = new int [TokenizerSource.Macros.Count];
@@ -1074,6 +1074,19 @@ namespace Commons.Music.Midi.Mml
 		// examines if current token matches the argument identifier,
 		// proceeding the MmlLine.
 		bool Matches (string name)
+		{
+			bool ret = false;
+			int savedPos = Line.Location.LinePosition;
+			int savedBufferPos = buffer_pos;
+			ret = MatchesProceed (name);
+			if (!ret) {
+				buffer_pos = savedBufferPos;
+				Line.Location.LinePosition = savedPos;
+			}
+			return ret;
+		}
+
+		bool MatchesProceed (string name)
 		{
 			for (int i = 0; i < buffer_pos; i++) {
 				if (i == name.Length)

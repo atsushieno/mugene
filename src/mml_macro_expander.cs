@@ -42,12 +42,7 @@ namespace Commons.Music.Midi.Mml
 
 		void ExpandMacro (MmlSemanticMacro macro)
 		{
-			ExpandMacro (macro.Arguments, macro.Data, null, macro);
-		}
-
-		internal void ExpandMacro (List<MmlSemanticVariable> args, List<MmlOperationUse> src, List<MmlOperationUse> output, MmlSemanticMacro macro)
-		{
-			foreach (var variable in args)
+			foreach (var variable in macro.Arguments)
 				if (variable.DefaultValue == null)
 						variable.FillDefaultValue ();
 		}
