@@ -108,7 +108,7 @@
 #variable ResoDAmpBPList:buffer
 #variable VibTremDepthBPList:buffer
 #variable GenderFactorBPList:buffer
-#variable PortamentTimingBPList:buffer
+#variable PortamentoTimingBPList:buffer
 #variable OpeningBPList:buffer
 
 #macro VSQ_INITIALIZE_MASTER { TRACKNAME "Master Track" }
@@ -154,7 +154,7 @@
 		,$ResoDAmpBPList \
 		,$VibTremDepthBPList \
 		,$GenderFactorBPList \
-		,$PortamentTimingBPList \
+		,$PortamentoTimingBPList \
 		,$OpeningBPList \
 		} \
 	TEXT $EntireText \
@@ -223,7 +223,7 @@
 	__STORE {"ResoDAmpBPList", "[Reso4AmpBPList]\n"} \
 	__STORE {"VibTremDepthBPList", "[VibTremDepthBPList]\n"} \
 	__STORE {"GenderFactorBPList", "[GenderFactorBPList]\n"} \
-	__STORE {"PortamentTimingBPList", "[PortamentTimingBPList]\n"} \
+	__STORE {"PortamentoTimingBPList", "[PortamentoTimingBPList]\n"} \
 	__STORE {"OpeningBPList", "[OpeningBPList]\n"} \
 	DEFINE_SINGER \
 	}
@@ -294,7 +294,7 @@
 	__STORE_FORMAT {"Defs", EVENTS_COND, $__events } \
 	__STORE { "Defs", "Type=Anote\nLength=", $__current_note_gate, "\nNote#=", $key, \
 	"\nDynamics=", $dynamics, "\nPMBendDepth=", $pm_bend_depth, \
-	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentUse=", \
+	"\nPMBendLength=", $pm_bend_length, "\nPMbPortamentoUse=", \
 	$pmb_portament_use, "\nDEMdecGainRate=", $dem_dec_gain_rate, \
 	"\nDEMaccept=", $dem_accent, "\nLyricHandle=" } \
 	__STORE_FORMAT {"Defs", HANDLE_USES_COND, $__handle_uses } \
