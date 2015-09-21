@@ -106,17 +106,21 @@
 #macro B val:number { BEND$val }
 #macro B+ val:number { BEND $__bend + $val }
 #macro B- val:number { BEND $__bend - $val }
-#macro PORTATIME val:number { CC5,$val }
-#macro DTE msb:number,lsb:number { CC6,$msb CC#26,$lsb }
-#macro PORTA val:number { CC#41,$val }
+#macro DTEM val:number { CC #06,$val }
+#macro DTEL val:number { CC #26,$val }
+#macro DTE msb:number,lsb:number { DTEM$msb DTEL$lsb }
 #macro SOS val:number { CC#42,$val } // sostenuto
 #macro SOFT val:number { CC#43,$val } // soft pedal
 #macro LEGATO val:number { CC#54,$val }
 #macro RSD val:number { CC#5B, $val } // generally reverb send depth
 #macro CSD val:number { CC#5D, $val } // generally chorus send depth
 #macro DSD val:number { CC#5E, $val } // generally delay send depth, not always valid
-#macro NRPN msb:number,lsb:number { CC#63, $msb CC#62,$lsb }
-#macro RPN msb:number,lsb:number { CC#65, $msb CC#64,$lsb }
+#macro NRPNM val:number { CC #63,$val }
+#macro NRPNL val:number { CC #62,$val }
+#macro NRPN msb:number,lsb:number { NRPNM$msb NRPNL$lsb }
+#macro RPNM val:number { CC #65,$val }
+#macro RPNL val:number { CC #64,$val }
+#macro RPN msb:number,lsb:number { RPNM$msb RPNL$lsb }
 #macro TEXT val:string { __MIDI_META{1, $val} }
 #macro COPYRIGHT val:string { __MIDI_META{2, $val} }
 #macro TRACKNAME val:string { __MIDI_META{3, $val} }
