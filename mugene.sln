@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugenelib", "mugenelib.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene", "mugene\mugene.csproj", "{5A356A35-9B47-425F-98B9-BCE51F427F76}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene-decompiler", "mugene-decompiler\mugene-decompiler.csproj", "{782350E4-8F50-456B-A5C6-2A9565751B3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{782350E4-8F50-456B-A5C6-2A9565751B3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{782350E4-8F50-456B-A5C6-2A9565751B3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{782350E4-8F50-456B-A5C6-2A9565751B3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{782350E4-8F50-456B-A5C6-2A9565751B3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = mugene\mugene.csproj
