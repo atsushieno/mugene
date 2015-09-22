@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Commons.Music.Midi;
 
 namespace Commons.Music.Midi.Mml.Decompiler
@@ -10,18 +11,23 @@ namespace Commons.Music.Midi.Mml.Decompiler
 	{
 		public static void Main (string [] args)
 		{
+			Encoding enc = Encoding.UTF8;
 			foreach (var arg in args) {
+				if (arg.StartsWith ("--encoding:", StringComparison.Ordinal)) {
+					enc = Encoding.GetEncoding (arg.Substring ("--encoding:".Length));
+					continue;
+				}
 				using (var stream = File.OpenRead (arg)) {
 					var smfr = new SmfReader ();
 					smfr.Read (stream);
-					Decompiler.Decompile (smfr.Music, Console.Out);
+					Decompiler.Decompile (smfr.Music, Console.Out, enc);
 				}
 			}
 		}
 		
-		class MmlDecompilerContext
+		class ChannelContext
 		{
-			public MmlDecompilerContext ()
+			public ChannelContext ()
 			{
 				Channel = -1;
 				Octave = 5;
@@ -33,12 +39,13 @@ namespace Commons.Music.Midi.Mml.Decompiler
 			public int Velocity { get; set; }
 		}
 
-		public static void Decompile (SmfMusic music, TextWriter output)
+		public static void Decompile (SmfMusic music, TextWriter output, Encoding encoding)
 		{
-			new Decompiler () { Music = music, Out = output }.Decompile ();
+			new Decompiler () { Music = music, Out = output, Encoding = encoding }.Decompile ();
 		}
 
 		SmfMusic Music { get; set; }
+		Encoding Encoding { get; set; }
 		TextWriter Out { get; set; }
 
 		void OutputPreprocessing (string s, params object [] args)
@@ -71,7 +78,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 					checkTime = true;
 				}
 			}
-			var context = new MmlDecompilerContext ();
+			var context = new ChannelContext ();
 			Out.WriteLine ("// -------- track {0} --------", trackNo);
 			Out.WriteLine ("{0}\t o{1} v{2}", trackNo, context.Octave, context.Velocity);
 			Out.Write ("{0}\t", trackNo);
@@ -88,7 +95,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 			Out.WriteLine ();
 		}
 
-		void OutputTrackPart (int trackNo, MmlDecompilerContext context, List<SmfMessage> messages)
+		void OutputTrackPart (int trackNo, ChannelContext context, List<SmfMessage> messages)
 		{
 			int m = 0;
 			int deltaTime = messages.LastOrDefault ().DeltaTime;
@@ -233,13 +240,39 @@ namespace Commons.Music.Midi.Mml.Decompiler
 					break;
 				case SmfEvent.SysEx1:
 					Out.Write ("__MIDI {");
-					for (int x = 0; x < evt.Data.Length; x++) {
-						if (x > 0)
-							Out.Write (',');
-						Out.Write ('#');
-						Out.Write (x.ToString ("X02"));
-					}
+					WriteBinary (evt.Data, 0, evt.Data.Length);
 					Out.Write ("} ");
+					break;
+				case SmfEvent.Meta:
+					var ttype = GetMetaStringType (evt.MetaType);
+					if (ttype != null) {
+						Out.Write (ttype);
+						Out.Write (" \"");
+						Out.Write (Encoding.GetString (evt.Data, 0, evt.Data.Length).Replace ("\"", "\"\""));
+						Out.Write ('"');
+					} else {
+						switch (evt.MetaType) {
+						case SmfMetaType.Tempo:
+							Out.Write ("t");
+							Out.Write ((int) (60 * 1000000 / (evt.Data [0] * 0x10000 + evt.Data [1] * 0x100 + evt.Data [2])));
+							break;
+						case SmfMetaType.TimeSignature:
+							Out.Write ("BEAT");
+							Out.Write (evt.Data [0]);
+							Out.Write (",");
+							Out.Write (Math.Pow (2, evt.Data [1]));
+							break;
+						default:
+							Out.Write ("__MIDI_META { #");
+							Out.Write (evt.MetaType.ToString ("X02"));
+							if (evt.Data.Length > 0)
+								Out.Write (", ");
+							WriteBinary (evt.Data, 0, evt.Data.Length);
+							Out.Write ("} ");
+							break;
+						}
+					}
+					Out.Write (' ');
 					break;
 				case SmfEvent.NoteOn:
 					if (evt.Lsb == 0)
@@ -263,6 +296,37 @@ namespace Commons.Music.Midi.Mml.Decompiler
 					Out.Write ("r" + b);
 				else
 					Out.Write ("r#" + r);
+			}
+		}
+		
+		string GetMetaStringType (int type)
+		{
+			switch (type) {
+			case SmfMetaType.Copyright:
+				return "COPYRIGHT";
+			case SmfMetaType.Cue:
+				return "CUE";
+			case SmfMetaType.InstrumentName:
+				return "INSTRUMENTNAME";
+			case SmfMetaType.Lyric:
+				return "LYRIC";
+			case SmfMetaType.Marker:
+				return "MARKER";
+			case SmfMetaType.Text:
+				return "TEXT";
+			case SmfMetaType.TrackName:
+				return "TRACKNAME";
+			}
+			return null;
+		}
+		
+		void WriteBinary (byte [] data, int start, int length)
+		{
+			for (int x = start; x < start + length; x++) {
+				if (x > 0)
+					Out.Write (',');
+				Out.Write ('#');
+				Out.Write (x.ToString ("X02"));
 			}
 		}
 	}
