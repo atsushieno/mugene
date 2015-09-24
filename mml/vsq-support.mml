@@ -66,11 +66,15 @@
 #variable __device:number = 0
 #variable __delay:number = 0
 
-#macro VOCAL_CHANNEL VER_DEV_DELAY_VAL msb,vmsb { \
+#macro VOCAL_CHANNEL VER_DEV_DELAY_VAL_B msb,vmsb { \
 	NRPNM $msb DTE $__version, $__device \
 	NRPNLPW 1, $__delay % #80, $__delay / #80 \
 	NRPNLP 2,$vmsb }
-#macro VOCAL_CHANNEL BANK val:number { VER_DEV_DELAY_VAL #60,$val }
+#macro VOCAL_CHANNEL VER_DEV_DELAY_VAL msb,vmsb { \
+	NRPN $msb, 0 DTE $__version, $__device \
+	NRPNLPW 1, $__delay % #80, $__delay / #80 \
+	NRPNLP 2,$vmsb }
+#macro VOCAL_CHANNEL BANK val:number { VER_DEV_DELAY_VAL_B #60,$val }
 #macro VOCAL_CHANNEL V val:number { VER_DEV_DELAY_VAL #61,$val }
 #macro VOCAL_CHANNEL P val:number { VER_DEV_DELAY_VAL #62,$val }
 #macro VOCAL_CHANNEL VIB_RATE val:number { VER_DEV_DELAY_VAL #64,$val }
@@ -245,6 +249,9 @@
 	}
 
 #macro VOCAL_CHANNEL LJ_VOCALOID label:string, en:string, params:string, phonLen, phonA, phonB, phonC, phonD  { \
+	\// meta text
+	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
+	__STORE {"Handles", "L0=\"", $label, "\",\"", $en, "\",0.0000000,", $params, ",0\n"} \
 	\// NRPNs (FIXME: they cannot be simply embedded at step 0.)
 	__SAVE_OPER_BEGIN \
 	NRPNM #50 NRPNLP #12,$phonLen NRPNLP #13,$phonA NRPNLP #14,$phonB NRPNLP #15,$phonC NRPNLP #16,$phonD NRPNLP #4F,#7F \
@@ -304,7 +311,6 @@
 	__LET { "__events", $__events + 1 } \
 	\// NRPNs. FIXME: how to calculate "note location"?
 	VER_DEV_DELAY_VAL#50,$key NRPNLP 3,$vel NRPNLP 4,$__current_note_gate NRPNLP 5,3 \
-	DEBUG $handle_uses \
 	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
 	\// FIXME: I reordered operations to work better with NSX-1, verify this still works on Vocaloid2 (which I don't have installed anymore...!)
@@ -318,7 +324,6 @@
 	\
 	__LET { "__events", $__events + 1 } \
 	\
-	DEBUG $handle_uses \
 	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
 	NON$key, $vel \
