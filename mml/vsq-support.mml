@@ -67,7 +67,7 @@
 #variable __delay:number = 0
 
 #macro VOCAL_CHANNEL VER_DEV_DELAY_VAL msb,vmsb { \
-	NRPN $msb,0 DTE $__version, $__device \
+	NRPNM $msb DTE $__version, $__device \
 	NRPNLPW 1, $__delay % #80, $__delay / #80 \
 	NRPNLP 2,$vmsb }
 #macro VOCAL_CHANNEL BANK val:number { VER_DEV_DELAY_VAL #60,$val }
@@ -77,7 +77,7 @@
 #macro VOCAL_CHANNEL VIB_DEPTH val:number { VER_DEV_DELAY_VAL #65,$val }
 // FIXME: what is Effect2, which occupies #66?
 #macro VOCAL_CHANNEL PITCH_BEND_SENSITIVITY val:number { VER_DEV_DELAY_VAL #67,$val }
-#macro VOCAL_CHANNEL @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTE $prog,0 }
+#macro VOCAL_CHANNEL @ prog:number, lang:number=0 { BANK $lang NRPN #53,2 DTEM $prog }
 
 // Buffer definitions
 #variable EntireText:buffer
@@ -158,6 +158,7 @@
 		,$OpeningBPList \
 		} \
 	TEXT $EntireText \
+	@ $Program, $Language \
 	__LET {"__timeline_position", $__tmp_position } \
 	}
 
@@ -195,7 +196,6 @@
 		"\nLanguage=", $Language, "\nProgram=", $Program, "\n" } \
 	__STORE {"Events", "0=ID#0000\n"} \
 	__STORE {"Defs", "[ID#0000]\nType=Singer\nIconHandle=h#0000\n"} \
-	@ $Program, $Language \
 	__LET { "__handle_defs", $__handle_defs + 1 } \
 	__LET { "__handle_uses", $__handle_uses + 1 } \
 	__LET { "__events", $__events + 1 } \
