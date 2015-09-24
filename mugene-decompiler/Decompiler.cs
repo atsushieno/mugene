@@ -68,15 +68,14 @@ namespace Commons.Music.Midi.Mml.Decompiler
 			var msgBlockByTime = new List<List<SmfMessage>> ();
 			int m = 0;
 			while (m < track.Messages.Count) {
-				bool checkTime = false;
 				var l = new List<SmfMessage> ();
 				msgBlockByTime.Add (l);
 				for (; m < track.Messages.Count; m++) {
-					if (checkTime && track.Messages [m].DeltaTime > 0)
-						break;
 					l.Add (track.Messages [m]);
-					checkTime = true;
+					if (track.Messages [m].DeltaTime > 0)
+						break;
 				}
+				m++;
 			}
 			var context = new ChannelContext ();
 			Out.WriteLine ("// -------- track {0} --------", trackNo);
@@ -98,7 +97,6 @@ namespace Commons.Music.Midi.Mml.Decompiler
 		void OutputTrackPart (int trackNo, ChannelContext context, List<SmfMessage> messages)
 		{
 			int m = 0;
-			int deltaTime = messages.LastOrDefault ().DeltaTime;
 			while (m < messages.Count) {
 				var evt = messages [m++].Event;
 				if (evt.EventType < SmfEvent.SysEx1 && context.Channel != evt.Channel) {
@@ -146,7 +144,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 							Out.Write (messages [m++].Event.Lsb.ToString ("X02"));
 							break;
 						} else {
-							Out.Write ("NRPN#");
+							Out.Write ("NRPNM#");
 							Out.Write (evt.Lsb.ToString ("X02"));
 						}
 						goto default;
@@ -287,7 +285,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 					break;
 				}
 			}
-			int r = messages.Max (_ => _.DeltaTime);
+			int r = messages.Last ().DeltaTime;
 			for (; r > Music.DeltaTimeSpec; r -= Music.DeltaTimeSpec)
 				Out.Write ("r1");
 			if (r > 0) {
@@ -296,6 +294,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 					Out.Write ("r" + b);
 				else
 					Out.Write ("r#" + r);
+				Out.Write (' ');
 			}
 		}
 		
