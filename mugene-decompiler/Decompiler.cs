@@ -142,24 +142,22 @@ namespace Commons.Music.Midi.Mml.Decompiler
 							Out.Write (evt.Lsb.ToString ("X02"));
 							Out.Write (",#");
 							Out.Write (messages [m++].Event.Lsb.ToString ("X02"));
-							break;
 						} else {
 							Out.Write ("NRPNM#");
 							Out.Write (evt.Lsb.ToString ("X02"));
 						}
-						goto default;
+						break;
 					case SmfCC.RpnMsb:
 						if (m < messages.Count && messages [m].Event.EventType == SmfEvent.CC && messages [m].Event.Msb == SmfCC.RpnLsb) {
 							Out.Write ("RPN#");
 							Out.Write (evt.Lsb.ToString ("X02"));
 							Out.Write (",#");
 							Out.Write (messages [m++].Event.Lsb.ToString ("X02"));
-							break;
 						} else {
 							Out.Write ("RPNM#");
 							Out.Write (evt.Lsb.ToString ("X02"));
 						}
-						goto default;
+						break;
 					case SmfCC.DteLsb:
 						Out.Write ("DTEL#");
 						Out.Write (evt.Lsb);
