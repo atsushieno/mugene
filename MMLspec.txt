@@ -110,8 +110,10 @@
 	variable binding:
 		__LET{"name", value} // give variable name as a string variable
 		__STORE{"name", values} // stores values appended to a buffer variable
-		__STORE_FORMAT{"name, value} // stores the value formatted *as an integer*,
-			// to a buffer variable.
+		__STORE_FORMAT{"name, format, values} // stores the values formatted *as a string*
+			//  along with format, into a buffer variable.
+		__FORMAT{"name, format, values} // stores the values formatted *as a string*
+			//  along with format, into a string variable.
 
 *** Operations over steps
 

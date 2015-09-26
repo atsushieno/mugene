@@ -11,12 +11,18 @@
 
 // They should go before primitive MIDI operation definitions
 #variable __channel:number = 0
-#variable __dummy:number
+#variable __dummy_step:number
 #variable __length:length = 4
 #macro CH val:number { __LET {"__channel", $val - 1} } // CH1-CH16 are valid.
-// note that __ERROR is undefined and it indeed is an error (literally).
-#macro ASSERT_STEP val:length { __LET {"__dummy", $__timeline_position - $val ? $__ERROR, $__dummy} }
 #macro DEBUG val:string { __PRINT {$val} }
+#variable __dummy_msg:string
+#macro ASSERT_STEP val:number,label:string { \
+	__LET {"__dummy_step", $__timeline_position - $val } \
+	__FORMAT { "__dummy_msg", \
+		"WARNING: step assertion failed. Label: {0}, expected position: {1}, actual: {2}.", \
+		$label, $val, $__dummy_step } \
+	DEBUG $__dummy_step ? $__dummy_msg, "" \
+	}
 
 // primitive variables used in primitive macro operations
 #variable __octave:number = 4

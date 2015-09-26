@@ -54,7 +54,12 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		public int IntValue {
-			get { return ResolvedValue is int ? (int) ResolvedValue : ResolvedValue is byte ? (byte) ResolvedValue : (int) (double) ResolvedValue; }
+			get {
+				return ResolvedValue is int ? (int) ResolvedValue :
+					ResolvedValue is byte ? (byte) ResolvedValue :
+					ResolvedValue is MmlLength ? ((MmlLength) ResolvedValue).GetSteps (BaseCount) :
+					(int) (double) ResolvedValue;
+			}
 		}
 
 		public double DoubleValue {
@@ -472,6 +477,7 @@ namespace Commons.Music.Midi.Mml
 			int storeIndex = -1;
 			List<MmlResolvedEvent> storeCurrentOutput = null, storeDummy = new List<MmlResolvedEvent> ();
 			StoredOperations currentStoredOperations = null;
+			bool is_string_format = false;
 
 			for (int listIndex = start; listIndex < start + count; listIndex++) {
 				var oper = list [listIndex];
@@ -520,6 +526,9 @@ namespace Commons.Music.Midi.Mml
 						sb.Append (oper.Arguments [i].StringValue);
 					break;
 					}
+				case "__FORMAT":
+					is_string_format = true;
+					goto case "__STORE_FORMAT";
 				case "__STORE_FORMAT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					oper.Arguments [1].Resolve (rctx, MmlDataType.String);
@@ -529,11 +538,19 @@ namespace Commons.Music.Midi.Mml
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
-					if (variable.Type != MmlDataType.Buffer)
-						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
-					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
+					if (is_string_format) {
+						if (variable.Type != MmlDataType.String)
+							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), location);
+					} else {
+						if (variable.Type != MmlDataType.Buffer)
+							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
+					}
 					try {
-						sb.AppendFormat (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.IntValue).ToArray ());
+						string v = string.Format (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.StringValue).ToArray ());
+						if (is_string_format)
+							rctx.Values [variable] = v;
+						else
+							((StringBuilder) rctx.EnsureDefaultResolvedVariable (variable)).Append (v);
 					} catch (FormatException ex) {
 						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), location);
 					}

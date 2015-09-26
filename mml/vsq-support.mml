@@ -13,8 +13,12 @@
 //	- write lyrics in raw Japanese (hiragana), it does not proceed timeline. They must be described only
 //	  after vibrato definitions (to not confuse lyric consumption by note operations).
 //	- write notes. Every note operation consumes one lyric.
-//	- You can apply vibrato to the next note by @V operation. Reference it by definition index.
-//	- Or you can also apply vibrato to every following note by @VV operation. (Reference by index too.)
+//    - if you write notes before lyrics, the compiler crashes.
+//      (macro processor doesn't have any decent error processing...)
+//	- You can apply vibrato to the next note by @V operation.
+//    Reference it by definition index.
+//	- Or you can also apply vibrato to every following note by
+//    @VV operation. (Reference by index too.)
 //	- BPList  operations are:
 //		- B : PitchBend
 //		- D : Dynamics
@@ -35,15 +39,13 @@
 //		- PITCH_BEND_SENSITIVITY : pitch bend sensitivity
 //		- @ : program change
 //
-// Implementation notes:
+// Implementation notes (users usually don't have to care):
 //
-//	- The primary operations are "L" and "n".
-//	  L defines a lyric handle, and n consumes a lyric to give a note.
-//	  output. Both outputs a couple of meta texts and NRPN operations.
-//	- Since both NRPNs from "L" and "n" should be actually unified to
-//	  generate one note operation by the time NRPN(50,7F)=(7F,-) appears,
-//	  this macro adds 1 step shifted (which should be almost harmess in
-//	  480 base count) to make them consistent.
+//	- The primary operations are "LJ" (or LBC/LBV for Bopomofo) and "n".
+//	  L* defines a lyric handle, and n consumes a lyric to give a note.
+//	  Both outputs a couple of meta text and NRPN operations.
+//	- Both NRPNs from "L" and "n" should be actually unified to
+//	  generate one note operation by the time NRPN(50,7F)=(7F,-) appears.
 //
 
 #basecount 1920
@@ -127,7 +129,7 @@
 	"[Mixer]", "\nMasterFeder=", $MasterFeder, "\nMasterPanpot=", $MasterPanpot, \
 	"\nMasterMute=", $MasterMute, "\nOutputMode=", $MasterOutputMode, \
 	"\nTracks=", $MasterTracks, "\n" } \
-	}
+	}  //  FIXME: Feder[0-*], Panpot[0-*], Mute[0-*], Solo[0-*] could go here too
 #macro VOCAL_CHANNEL VSQ_SETUP_DONE { r1 r1 r1 r1}
 
 #variable __tmp_position
