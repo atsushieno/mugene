@@ -563,8 +563,6 @@
 //	- n for anything else
 // FIXME: are んま-んも defined differently? Or are they different in Luka?
 
-// FIXME: Katakanas!
-
 // 長音
 #macro __あ label:string { LJ $label, "a", "0", 1, #61 }
 #macro __い label:string { LJ $label, "i", "0", 1, #69 }
@@ -589,9 +587,13 @@
 #macro う__ { }
 #macro え__ { }
 #macro お__ { }
-// complemental natural Japanese notation support
-#macro _は_ { わ }
-#macro _へ_ { え }
+
+// complemental natural Japanese notation support.
+// They are copy of わ and え (except for the labels).
+#macro _は_ { LJ "は", "w a", "64,0", 3, #77, #20, #61 }
+#macro _へ_ { LJ "え", "e", "0", 1, #65 }
+
+// FIXME: Katakanas!
 
 
 // Lyrics macro for Taiwanese (Bopomofos) ----
