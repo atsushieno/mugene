@@ -583,6 +583,12 @@
 #macro う_ { __keep_vowel "う" }
 #macro え_ { __keep_vowel "え" }
 #macro お_ { __keep_vowel "お" }
+// the same as ー_ (the same note holds), but with hiraganas for natural notation
+#macro あ__ { }
+#macro い__ { }
+#macro う__ { }
+#macro え__ { }
+#macro お__ { }
 // complemental natural Japanese notation support
 #macro _は_ { わ }
 #macro _へ_ { え }
