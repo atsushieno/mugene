@@ -650,7 +650,6 @@ namespace Commons.Music.Midi.Mml
 					var macroArgsBak = rctx.MacroArguments;
 					rctx.Values = ss.Values;
 					rctx.MacroArguments = ss.MacroArguments;
-					foreach (var v in rctx.Values.Keys) Console.Write ("### " + v.Name);
 					// adjust timeline_position (no need to update rctx.TimelinePosition here).
 					rctx.Values [(MmlSemanticVariable) source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
 					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count);
