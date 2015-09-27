@@ -815,7 +815,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
 			if (macro == null)
-				throw new MmlException (String.Format ("Macro {0} was not found", oper.Name), location);
+				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), location);
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
 			expansion_stack.Push (macro);
