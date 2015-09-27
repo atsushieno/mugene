@@ -1,9 +1,5 @@
 39	USE_NSX_ONE
 #define VOCAL_CHANNEL 39
-#include default-macro.mml
-#include nrpn-gs-xg.mml
-#include drum-part.mml
-#include vsq-support.mml
 #define DRUMTRACKS 10-11
 // ---- Master track ----
 0   GM_SYSTEM_ON VSQ_INITIALIZE_MASTER BEAT4,4
