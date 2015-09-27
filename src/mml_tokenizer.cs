@@ -476,6 +476,7 @@ namespace Commons.Music.Midi.Mml
 			return vs;
 		}
 
+		string previous_section;
 		int [] previous_range;
 
 		MmlSourceLineSet ProcessTrackLine (MmlLine line)
@@ -484,20 +485,26 @@ namespace Commons.Music.Midi.Mml
 				return null;
 			result.Lexer.SetCurrentInput (line);
 
-			string name = null;
-			if (result.Lexer.IsIdentifier (line.PeekChar (), true))
-				name = result.Lexer.ReadNewIdentifier ();
+			string section = null;
+			if (result.Lexer.IsIdentifier (line.PeekChar (), true)) {
+				section = result.Lexer.ReadNewIdentifier ();
+				result.Lexer.SkipWhitespaces (true);
+			}
 
 			int [] range;
-			if (result.Lexer.IsWhitespace (line.PeekChar ()))
+			if (result.Lexer.IsWhitespace (line.PeekChar ())) {
+				section = previous_section;
 				range = previous_range;
+			}
 			else
 				range = result.Lexer.ReadRange ().ToArray ();
 			if (range == null)
 				throw new MmlException ("Current line indicates no track number, and there was no indicated tracks previously.", line.Location);
+
+			previous_section = section;
 			previous_range = range;
 			result.Lexer.SkipWhitespaces (true);
-			var ts = new MmlTrackSource (name, range);
+			var ts = new MmlTrackSource (section, range);
 			ts.Lines.Add (line);
 			result.Tracks.Add (ts);
 			return ts;
