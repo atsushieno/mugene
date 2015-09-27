@@ -1,8 +1,15 @@
 #macro VIB_RATE val:number { NRPN #01,#08 DTE $val,0 }
 #macro VIB_DEPTH val:number { NRPN #01,#09 DTE $val,0 }
 #macro VIB_DELAY val:number { NRPN #01,#0A DTE $val,0 }
-#macro TVF_CUTOFF val:number { NRPN #01,#20 DTE $val,0 }
-#macro TVF_RESO val:number { NRPN #01,#21 DTE $val,0 }
+
+#variable __tvf_cutoff:number
+#macro TVF_CUTOFF val:number { __LET{"__tvf_cutoff", $val} NRPN #01,#20 DTEM$val }
+#macro TVF_CUTOFF+ val:number { TVF_CUTOFF $__tvf_cutoff + $val }
+#macro TVF_CUTOFF- val:number { TVF_CUTOFF $__tvf_cutoff - $val }
+#variable __tvf_reso:number
+#macro TVF_RESO val:number { __LET{"__tvf_reso", $val} NRPN #01,#21 DTEM$val }
+#macro TVF_RESO+ val:number { TVF_RESO $__tvf_reso + $val }
+#macro TVF_RESO- val:number { TVF_RESO $__tvf_reso - $val }
 
 #macro ENV_ATTACK val:number { NRPN #01,#63 DTE $val,0 }
 #macro ENV_DECAY val:number { NRPN #01,#64 DTE $val,0 }

@@ -9,7 +9,7 @@
 #macro	MOD { M0,40,8,4 }
 
 //---- [[ 00 : Control ]]-------------------------------------
-0	t140 BEAT4,4
+0	t140 BEAT4,4  r1r1
 A	r1
 	[r1]4  BEAT3,4 r2. BEAT4,4
 	[r1]12
@@ -18,7 +18,7 @@ B	[ [r1  BEAT7,8 r2.. BEAT4,4]2  BEAT3,4 r2. BEAT4,4 ]2
 C	[r1]16
 
 //---- [[ 01 : Bass ]]----------------------------------------
-1	CH_INIT1 @32 o2 V120 v80 l16 RSD40 CSD40 DSD10 q16
+1	CH_INIT1 @32 o2 V120 v80 l16 RSD40 CSD40 DSD10 q16  r1r1
 A	r1
 	b1b1b1b1>c4.<a4.
  	b1b1a1a1>d1d1
@@ -31,7 +31,7 @@ C	[e1 e1]4
 C	e1+1+1+1
 
 //---- [[ 02 : Acoustic Guitar ]]----------------------------
-2	CH_INIT2 @25 o4 V110 v80 l8 RSD40 CSD40 DSD10 q16
+2	CH_INIT2 @25 o4 V110 v80 l8 RSD40 CSD40 DSD10 q16  r1r1
 	ENV_RELEASE78
 A	HONef+ga>d<f+a>d<HOF
 	HON[<rf+b>f+bf+e<b>]4HOF  HONf+a>d<da>d<HOF
@@ -51,7 +51,7 @@ C	[
 
 
 //---- [[ 07 : Strings ]]----------------------------
-7	CH_INIT7 @50 o5 V50 v80 l8 RSD40 CSD60 DSD10 q16
+7	CH_INIT7 @50 o5 V50 v80 l8 RSD40 CSD60 DSD10 q16  r1r1
 A	r1
 	[r1]4  r2.
 	[r1]12

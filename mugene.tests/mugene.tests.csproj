@@ -39,6 +39,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntegratedTest.cs" />
+    <Compile Include="MmlCompilerTest.cs" />
+    <Compile Include="MmlTestUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\mugenelib.csproj">
       <Project>{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}</Project>
       <Name>mugenelib</Name>
