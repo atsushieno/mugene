@@ -119,15 +119,15 @@
 #macro SOFT val:number { CC#43,$val } // soft pedal
 #macro LEGATO val:number { CC#54,$val }
 #variable __reverb_send_depth:number
-#macro RSD val:number { __LET{"__reverb_send_depth", $val} CC5B,$val }
+#macro RSD val:number { __LET{"__reverb_send_depth", $val} CC#5B,$val }
 #macro RSD+ val:number { RSD $__reverb_send_depth + $val }
 #macro RSD- val:number { RSD $__reverb_send_depth - $val }
 #variable __chorus_send_depth:number
-#macro CSD val:number { __LET{"__chorus_send_depth", $val} CC5D,$val }
+#macro CSD val:number { __LET{"__chorus_send_depth", $val} CC#5D,$val }
 #macro CSD+ val:number { CSD $__chorus_send_depth + $val }
 #macro CSD- val:number { CSD $__chorus_send_depth - $val }
 #variable __delay_send_depth:number
-#macro DSD val:number { __LET{"__delay_send_depth", $val} CC5E,$val } // 5E is not always DSD though...
+#macro DSD val:number { __LET{"__delay_send_depth", $val} CC#5E,$val } // 5E is not always DSD though...
 #macro DSD+ val:number { DSD $__delay_send_depth + $val }
 #macro DSD- val:number { DSD $__delay_send_depth - $val }
 #macro NRPNM val:number { CC #63,$val }
