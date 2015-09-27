@@ -168,10 +168,7 @@ namespace Commons.Music.Midi.Mml
 	{
 		public FileStreamResolver ()
 		{
-			DefaultFiles = new List<string> ();
 		}
-
-		public IList<string> DefaultFiles { get; private set; }
 
 		public override TextReader Resolve (string uri)
 		{
@@ -485,25 +482,26 @@ namespace Commons.Music.Midi.Mml
 				return null;
 			result.Lexer.SetCurrentInput (line);
 
-			string section = null;
-			if (result.Lexer.IsIdentifier (line.PeekChar (), true)) {
-				section = result.Lexer.ReadNewIdentifier ();
+			string section = previous_section;
+			int [] range = previous_range;
+			if (result.Lexer.IsWhitespace (line.PeekChar ()))
 				result.Lexer.SkipWhitespaces (true);
+			else {
+				if (result.Lexer.IsIdentifier (line.PeekChar (), true)) {
+					section = result.Lexer.ReadNewIdentifier ();
+					result.Lexer.SkipWhitespaces (false);
+				}
+				if (result.Lexer.IsNumber (line.PeekChar ())) {
+					range = result.Lexer.ReadRange ().ToArray ();
+					result.Lexer.SkipWhitespaces (true);
+				}
 			}
-
-			int [] range;
-			if (result.Lexer.IsWhitespace (line.PeekChar ())) {
-				section = previous_section;
-				range = previous_range;
-			}
-			else
-				range = result.Lexer.ReadRange ().ToArray ();
 			if (range == null)
 				throw new MmlException ("Current line indicates no track number, and there was no indicated tracks previously.", line.Location);
 
 			previous_section = section;
 			previous_range = range;
-			result.Lexer.SkipWhitespaces (true);
+			result.Lexer.SkipWhitespaces (false);
 			var ts = new MmlTrackSource (section, range);
 			ts.Lines.Add (line);
 			result.Tracks.Add (ts);

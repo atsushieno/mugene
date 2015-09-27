@@ -33,10 +33,9 @@ namespace Commons.Music.Midi.Mml
 	{
 		public MmlCompiler ()
 		{
-			resolver = new FileStreamResolver ();
 		}
 
-		StreamResolver resolver;
+		StreamResolver resolver = new FileStreamResolver ();
 		bool verbose;
 
 		public StreamResolver Resolver {
@@ -143,15 +142,6 @@ Options:
 			if (explicitfilename != null)
 				outfilename = explicitfilename;
 			
-			var resolver = new FileStreamResolver ();
-			Resolver = resolver;
-			if (!noDefault) {
-				foreach (var fname in Util.DefaultIncludes) {
-					resolver.DefaultFiles.Add (fname);
-					inputFilenames.Add (fname);
-				}
-			}
-
 			// FIXME: stream resolver should be processed within the actual parsing phase.
 			// This makes it redundant to support #include
 			var inputs = new List<MmlInputSource> ();
@@ -161,12 +151,15 @@ Options:
 				metaWriter = SmfWriterExtension.VsqMetaTextSplitter;
 
 			using (var output = File.Create (outfilename))
-				Compile (inputs, metaWriter, output, disableRunningStatus);
+				Compile (noDefault, inputs, metaWriter, output, disableRunningStatus);
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 
-		public void Compile (IList<MmlInputSource> inputs, Func<bool, SmfMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
+		public void Compile (bool skipDefaultMmlFiles, IList<MmlInputSource> inputs, Func<bool, SmfMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
 		{
+			if (!skipDefaultMmlFiles)
+				inputs = Util.DefaultIncludes.Select (f => new MmlInputSource (f, Resolver.Resolve (f))).Concat (inputs).ToList ();
+
 			// input sources -> tokenizer sources
 			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs);
 
