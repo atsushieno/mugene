@@ -173,6 +173,8 @@
 	NOFF$key, $offvel \
 	NOP$step - $__current_note_gate }
 
+#macro & { __SYNC_NOFF_WITH_NEXT }
+
 // These + and - are nasty, but to be defined as macro, they had better be
 // formalized as below, without being treated specially by the parser.
 #macro c__= mod:number, KEYARGDEF { n $__octave * 12 + $__trans + $mod, KEYARGAPPLY }

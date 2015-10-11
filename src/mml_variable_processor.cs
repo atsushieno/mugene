@@ -596,6 +596,9 @@ namespace Commons.Music.Midi.Mml
 						chord.Add (mop);
 					recordNextAsChord = false;
 					break;
+				case "__SYNC_NOFF_WITH_NEXT":
+					recordNextAsChord = true;
+					break;
 				case "__ON_MIDI_NOTE_OFF":
 					// handle zero-length note
 					oper.ValidateArguments (rctx, 3, MmlDataType.Number, MmlDataType.Number, MmlDataType.Number);

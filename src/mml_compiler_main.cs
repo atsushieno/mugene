@@ -203,6 +203,7 @@ Options:
 			l.Add (new MmlPrimitiveOperation () { Name = "__FORMAT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__APPLY"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI"});
+			l.Add (new MmlPrimitiveOperation () { Name = "__SYNC_NOFF_WITH_NEXT"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__ON_MIDI_NOTE_OFF"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI_META"});
 			l.Add (new MmlPrimitiveOperation () { Name = "__SAVE_OPER_BEGIN"});

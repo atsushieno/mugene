@@ -44,10 +44,7 @@ C	[
 	HON [rcf>cgfc<f]2 HOF
 	]2
 	[HON regb>ed<bg  regb>f+e<be HOF]4
-#define XXXXX 1+1+1+1
-	HON e%8,XXXXXg%6,XXXXX-%8b%4,XXXXX-%14>e%3,XXXXX-%18f+XXXXX-%21HOF
-// this was originally tie ('&') specification, but it is N/A
-// in mugene yet (no idea how I can achieve...)
+	HON e%8&g%6&b%4&>e%3&f+&HOF
 
 
 //---- [[ 07 : Strings ]]----------------------------
