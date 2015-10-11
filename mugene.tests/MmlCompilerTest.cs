@@ -31,6 +31,13 @@ B	a1
 		{
 			MmlTestUtility.TestCompile ("SyncNoteOffWithNextAkaArpeggio", "A 1 o5c&d&e");
 		}
+
+		[Test]
+		public void Issue11 ()
+		{
+			MmlTestUtility.TestCompile ("Issue11", @"#macro 5 CRDA len:length=$__length { f0,,60>c0f$len< }
+5 CRDA8");
+		}
 	}
 }
 
