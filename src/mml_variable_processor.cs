@@ -37,6 +37,11 @@ namespace Commons.Music.Midi.Mml
 
 		public static Func<string,byte[]> StringToBytes { get; set; }
 
+		public static double LengthDotsToMultiplier (int dots)
+		{
+			return 2.0d - Math.Pow (0.5, dots);
+		}
+
 		public object ResolvedValue { get; set; }
 
 		public abstract void Resolve (MmlResolveContext ctx, MmlDataType type);

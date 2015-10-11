@@ -72,6 +72,12 @@ B	a1
 		{
 			MmlTestUtility.TestCompile ("LoopBreaksInAnotherLoop", @"1  [[ c4 :1 d :2 e :3 f :4 g  ]4 ]2");
 		}
+
+		[Test]
+		public void DotWithoutLength () // issue #9
+		{
+			MmlTestUtility.TestCompile ("LoopBreaksInAnotherLoop", @"1 c4.");
+		}
 	}
 }
 

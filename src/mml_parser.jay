@@ -373,6 +373,12 @@ NumberOrLengthConstant :
 		var d = (int) $2;
 		$$ = new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
 	}
+	| Dots
+	{
+		var d = (int) $1;
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr ("__length"));
+	}
+	;
 
 Dots :
 	Dot
