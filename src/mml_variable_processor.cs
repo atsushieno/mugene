@@ -689,7 +689,7 @@ namespace Commons.Music.Midi.Mml
 
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
-						if (loop.Breaks.ContainsKey (-1))
+						if (loop.Breaks.ContainsKey (-1) && loop.Breaks.Values.All (b => b.Source != listIndex))
 							throw new MmlException ("Default loop break is already defined in current loop", location);
 						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
@@ -700,7 +700,7 @@ namespace Commons.Music.Midi.Mml
 							if (x > 0 && num < 0)
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);
-							if (loop.Breaks.ContainsKey (num))
+							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex))
 								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), location);
 							// specified loop count is for human users. Here the number is for program, hence -1.
 							loop.Breaks.Add (num, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
