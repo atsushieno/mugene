@@ -78,6 +78,12 @@ B	a1
 		{
 			MmlTestUtility.TestCompile ("LoopBreaksInAnotherLoop", @"1 c4.");
 		}
+
+		[Test]
+		public void TimingOperator ()
+		{
+			MmlTestUtility.TestCompile ("TimingOperator", @"1 c4,,,2 ASSERT_STEP48");
+		}
 	}
 }
 

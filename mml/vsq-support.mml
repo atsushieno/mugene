@@ -330,11 +330,13 @@
 	\
 	__RESTORE_OPER $__handle_uses NRPNLP #7F,#7F \
 	__LET {"__handle_uses", $__handle_uses + 1 } \
+	NOP$timing \
 	NON$key, $vel \
 	NOP$__current_note_gate \
 	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \
 	NOFF$key, $offvel \
 	NOP$step - $__current_note_gate \
+	NOP0-$timing \
 	}
 
 

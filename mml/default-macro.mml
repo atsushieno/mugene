@@ -34,6 +34,7 @@
 #variable __trans_g:number
 #variable __trans_a:number
 #variable __trans_b:number
+#variable __timing:number = 0
 #variable __velocity:number = 100
 #variable __velocity_sense:number = 4
 #variable __gate_rel:number = 8
@@ -80,6 +81,7 @@
 #macro v val:number { __LET{"__velocity", $val} }
 #macro ( val:number=$__velocity_sense { __LET{"__velocity", $__velocity - $val} }
 #macro ) val:number=$__velocity_sense { __LET{"__velocity", $__velocity + $val} }
+#macro TIMING val:number { __LET{"__timing", $val} }
 #variable __expression:number
 #macro E val:number { __LET{"__expression", $val} CC#0B,$val }
 #macro E+ val:number { E $__expression + $val }
@@ -88,8 +90,8 @@
 #variable __tempo_tmp:number
 #macro TEMPO val:number { __LET{"__tempo", $val} __LET{"__tempo_tmp", 1000000 * {60 / $val}} __MIDI_META {#51, $__tempo_tmp / #10000, {$__tempo_tmp % #10000} / #100, $__tempo_tmp % #100} }
 #macro t val:number { TEMPO $val }
-#macro t+ val:number { t $__tempo + $val }
-#macro t- val:number { t $__tempo - $val }
+#macro t+ val:number { T $__tempo + $val }
+#macro t- val:number { T $__tempo - $val }
 #variable __modulation:number
 #macro M val:number { __LET{"__modulation", $val} CC1,$val }
 #macro M+ val:number { M $__modulation + $val }
@@ -161,17 +163,20 @@
 #macro < { __LET{"__octave", $__octave - 1} }
 
 // NoteOn/Off events
-#define KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, offvel:number=0
-#define KEYARGAPPLY $step, $gate, $vel, $offvel
+#define KEYARGDEF step:length=$__length, gate:length=%-1, vel:number=$__velocity, timing:number=$__timing, offvel:number=0
+#define KEYARGAPPLY $step, $gate, $vel, $timing, $offvel
 #macro n key:number, KEYARGDEF   { \
 	__LET{"__current_note_step", $gate + %1 ? $gate, $step}  \
 	__LET{"__current_note_gate", $__current_note_step * $__gate_rel * {1 / $__gate_rel_denom} - $__gate_abs} \
 	__LET{"__current_note_gate", $__current_note_gate \< 0 ? 0, $__current_note_gate } \
+	NOP$timing \
 	NON$key, $vel \
 	NOP$__current_note_gate \
 	__ON_MIDI_NOTE_OFF{$__current_note_gate, $key, $vel} \
 	NOFF$key, $offvel \
-	NOP$step - $__current_note_gate }
+	NOP$step - $__current_note_gate \
+	NOP0-$timing \
+	}
 
 #macro & { __SYNC_NOFF_WITH_NEXT }
 
