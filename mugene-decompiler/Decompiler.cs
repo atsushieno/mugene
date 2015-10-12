@@ -48,6 +48,10 @@ namespace Commons.Music.Midi.Mml.Decompiler
 		Encoding Encoding { get; set; }
 		TextWriter Out { get; set; }
 
+		int BaseCount {
+			get { return Music.DeltaTimeSpec * 4; }
+		}
+
 		void OutputPreprocessing (string s, params object [] args)
 		{
 			Out.WriteLine (string.Format (s, args));
@@ -57,7 +61,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 		{
 			if (Music.DeltaTimeSpec < 0)
 				throw new NotSupportedException (string.Format ("Timebase is {0}. Absolute timebase is not supported.", Music.DeltaTimeSpec));
-			OutputPreprocessing ("#basecount {0}", Music.DeltaTimeSpec);
+			OutputPreprocessing ("#basecount {0}", BaseCount);
 
 			for (int i = 0; i < Music.Tracks.Count; i++)
 				Decompile (i, Music.Tracks [i]);
@@ -284,11 +288,11 @@ namespace Commons.Music.Midi.Mml.Decompiler
 				}
 			}
 			int r = messages.Last ().DeltaTime;
-			for (; r > Music.DeltaTimeSpec; r -= Music.DeltaTimeSpec)
+			for (; r > BaseCount; r -= BaseCount)
 				Out.Write ("r1");
 			if (r > 0) {
-				int b = Music.DeltaTimeSpec / r;
-				if (b * r == Music.DeltaTimeSpec) // i.e. no remainder
+				int b = BaseCount / r;
+				if (b * r == BaseCount) // i.e. no remainder
 					Out.Write ("r" + b);
 				else
 					Out.Write ("r#" + r);
