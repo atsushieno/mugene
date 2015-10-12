@@ -8,6 +8,7 @@
 #macro	HOF { r%-1 H0 r%1 }
 #macro	MOD { M0,40,8,4 }
 
+
 //---- [[ 00 : Control ]]-------------------------------------
 0	t140 BEAT4,4  r1r1
 A	r1
@@ -30,6 +31,7 @@ B	@35 o2 ENV_DECAY84
 C	[e1 e1]4
 C	e1+1+1+1
 
+
 //---- [[ 02 : Acoustic Guitar ]]----------------------------
 2	CH_INIT2 @25 o4 V110 v80 l8 RSD40 CSD40 DSD10 q16  r1r1
 	ENV_RELEASE78
@@ -44,8 +46,7 @@ C	[
 	HON [rcf>cgfc<f]2 HOF
 	]2
 	[HON regb>ed<bg  regb>f+e<be HOF]4
-	HON e%8&g%6&b%4&>e%3&f+&HOF
-
+	HON e%8&g%6&b%4&>e%3&f+HOF
 
 //---- [[ 07 : Strings ]]----------------------------
 7	CH_INIT7 @50 o5 V50 v80 l8 RSD40 CSD60 DSD10 q16  r1r1
