@@ -61,6 +61,8 @@ namespace Commons.Music.Midi.Mml
 		}
 		
 		const string help = @"
+MML compiler mugene version {0}
+
 Usage: mugene [options] mml_files
 
 Options:
@@ -86,8 +88,10 @@ Options:
 
 		void CompileCore (string [] args)
 		{
+			string helpmsg = string.Format (help, GetType ().Assembly.GetName ().Version);
+
 			if (args == null || args.Length == 0)
-				throw new MmlException (help, null);
+				throw new MmlException (helpmsg, null);
 
 			// file names -> input sources
 			var inputFilenames = new List<string> ();
@@ -104,7 +108,6 @@ Options:
 					noDefault = true;
 					continue;
 				case "--vsq": // for convenience
-					// FIXME: this is causing some invalid output...
 					extension = ".vsq";
 					Util.DefaultIncludes.Add (Util.VsqInclude);
 					goto case "--nsx";
@@ -133,7 +136,7 @@ Options:
 						continue;
 					}
 					if (arg == "--help")
-						throw new MmlException (help, null);
+						throw new MmlException (helpmsg, null);
 					break;
 				}
 				outfilename = Path.ChangeExtension (arg, extension);

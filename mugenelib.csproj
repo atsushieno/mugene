@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -63,20 +63,6 @@
     <Compile Include="src\mml_parser.cs" />
     <Compile Include="src\mml_macro_expander.cs" />
     <Compile Include="src\mml_compiler_main.cs" />
+    <Compile Include="src\AssemblyInfo.cs" />
   </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile">
-          <BuildFilesVar />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar />
-          <AsmRefVar />
-          <ProjectRefVar />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
 </Project>
