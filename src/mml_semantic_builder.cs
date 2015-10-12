@@ -383,27 +383,19 @@ namespace Commons.Music.Midi.Mml
 
 		MmlSemanticVariable BuildVariableDeclaration (MmlVariableDefinition src)
 		{
-//Util.DebugWriter.WriteLine ("Compiling variable {0}, {1} token(s)", src.Name, src.DefaultValueTokens.Count);
 			var ret = new MmlSemanticVariable (src.Name, src.Type);
 
 			if (src.DefaultValueTokens.Count == 0)
 				return ret;
 
 			var stream = new TokenStream (src.DefaultValueTokens, src.Location);
-#if USE_OLD_PARSER
-			ret.DefaultValue = stream.ReadDefiniteValue ();
-			stream.End ();
-#else
 			ret.DefaultValue = new Parser.MmlParser (stream.Source).ParseExpression ();
-#endif
 
 			return ret;
 		}
 
 		MmlSemanticMacro BuildMacroOperationList (MmlMacroDefinition src)
 		{
-//Util.DebugWriter.WriteLine ("Compiling macro {0}, {1} args, {2} tokens", src.Name, src.Arguments.Count, src.Tokens.Count);
-//foreach (var ttt in src.Tokens) Util.DebugWriter.WriteLine ("{0} {1}", ttt.TokenType, ttt.Value);
 			var ret = new MmlSemanticMacro (src.Name, src.TargetTracks);
 
 			foreach (var arg in src.Arguments)
@@ -416,7 +408,6 @@ namespace Commons.Music.Midi.Mml
 
 		MmlSemanticTrack BuildTrackOperationList (MmlTrack src)
 		{
-//Util.DebugWriter.WriteLine ("Compiling track {0}", src.Number);
 			var ret = new MmlSemanticTrack (src.Number);
 			CompileOperationTokens (ret.Data, new TokenStream (src.Tokens, null));
 			return ret;
@@ -424,16 +415,7 @@ namespace Commons.Music.Midi.Mml
 
 		void CompileOperationTokens (List<MmlOperationUse> data, TokenStream stream)
 		{
-#if USE_OLD_PARSER
-			do {
-				var oper = stream.ReadOperationUse ();
-				if (oper == null)
-					break;
-				data.Add (oper);
-			} while (true);
-#else
 			data.AddRange (new Parser.MmlParser (stream.Source).ParseOperations ());
-#endif
 		}
 	}
 
@@ -450,227 +432,6 @@ namespace Commons.Music.Midi.Mml
 		public IList<MmlToken> Source { get; private set; }
 
 		public int Position { get; set; }
-
-#if USE_OLD_PARSER
-		public void End ()
-		{
-			if (Position < Source.Count)
-				throw new MmlException ("Extra tokens are found", Source [Position].Location);
-		}
-
-		bool IsIdentifier (MmlToken token)
-		{
-			switch (token.TokenType) {
-			case MmlTokenType.Identifier:
-			case MmlTokenType.Colon:
-			case MmlTokenType.Slash:
-				return true;
-			}
-			return false;
-		}
-
-		public MmlOperationUse ReadOperationUse ()
-		{
-			var t = PeekToken (false);
-			if (t == null)
-				return null;
-			if (!IsIdentifier (t))
-				throw new MmlException (String.Format ("Identifier is expected, but got {0}", t.TokenType), t.Location);
-
-			var name = (string) t.Value;
-			bool isPrimitive = name.StartsWith ("__", StringComparison.Ordinal);
-			var ret = new MmlOperationUse (name, t.Location);
-
-			ReadToken (); // consume identifier.
-
-			if (isPrimitive) {
-				ExpectToken (MmlTokenType.OpenCurly);
-				ReadToken ();
-			}
-
-			t = PeekToken (false);
-			if (t == null || IsIdentifier (t)) // next token may be an operation.
-				return ret;
-			do {
-				// for now it allows trailing comma. See key macros
-				if ((t = PeekToken ()) == null)
-					break;
-				if (isPrimitive && t.TokenType == MmlTokenType.CloseCurly)
-					break;
-
-				var v = PeekToken ().TokenType == MmlTokenType.Comma ? null : ReadAsValue ();
-				ret.Arguments.Add (v);
-				t = PeekToken (false);
-				if (t == null || t.TokenType != MmlTokenType.Comma)
-					break;
-				ReadToken ();
-			} while (true);
-
-			if (isPrimitive) {
-				if (PeekToken (false) == null)
-					throw new MmlException ("')' is missing at the end of primitive operation", DefinitionLocation);
-				ExpectToken (MmlTokenType.CloseCurly);
-				ReadToken ();
-			}
-
-			return ret;
-		}
-
-		// FIXME: consider operator precedence
-		public MmlValueExpr ReadAsValue ()
-		{
-			// FIXME: handle unary expression
-			var next = PeekToken (true);
-			switch (next.TokenType) {
-			case MmlTokenType.Minus:
-				ReadToken ();
-				return new MmlMultiplyExpr (ReadAsValue (), new MmlConstantExpr (MmlDataType.Number, -1));
-			case MmlTokenType.Percent:
-				ReadToken ();
-				bool negative = false;
-				if (PeekToken (true).TokenType == MmlTokenType.Minus) {
-					negative = true;
-					ReadToken ();
-				}
-				var lengthBody = ReadAsValue () as MmlConstantExpr;
-				if (lengthBody == null)
-					throw new MmlException ("Only constant number is valid as absolute step specification", DefinitionLocation);
-				return new MmlConstantExpr (MmlDataType.Length, new MmlLength ((negative ? -1 : 1) * (int) (double) MmlValueExpr.GetTypedValue (lengthBody.Value, MmlDataType.Number)) { IsValueByStep = true });
-			}
-
-			// get primary token
-			var primary = ReadPrimaryTokenValue ();
-
-			next = PeekToken ();
-			if (next == null)
-				return primary;
-
-			switch (next.TokenType) {
-			case MmlTokenType.Question:
-				ReadToken ();
-				var trueExpr = ReadAsValue ();
-				ExpectToken (MmlTokenType.Comma);
-				ReadToken ();
-				var falseExpr = ReadAsValue ();
-				return new MmlConditionalExpr (primary, trueExpr, falseExpr);
-			case MmlTokenType.Plus:
-				ReadToken ();
-				return new MmlAddExpr (primary, ReadAsValue ());
-			case MmlTokenType.Minus:
-				ReadToken ();
-				return new MmlSubtractExpr (primary, ReadAsValue ());
-			case MmlTokenType.Asterisk:
-				ReadToken ();
-				return new MmlMultiplyExpr (primary, ReadAsValue ());
-			case MmlTokenType.Slash:
-				ReadToken ();
-				return new MmlDivideExpr (primary, ReadAsValue ());
-			case MmlTokenType.Percent:
-				ReadToken ();
-				return new MmlModuloExpr (primary, ReadAsValue ());
-			}
-
-			return primary;
-		}
-
-		MmlValueExpr ReadPrimaryTokenValue ()
-		{
-			var t = ReadToken ();
-			switch (t.TokenType) {
-			default:
-			case MmlTokenType.Identifier:
-			case MmlTokenType.Comma:
-			case MmlTokenType.Question:
-			case MmlTokenType.Plus:
-			case MmlTokenType.Minus:
-			case MmlTokenType.Slash: // allowed as a macro name, but not valid for a value primary token anyways.
-			case MmlTokenType.Asterisk:
-			case MmlTokenType.KeywordString:
-			case MmlTokenType.KeywordNumber:
-				throw new MmlException (String.Format ("Unexpected token {0}", t.TokenType), t.Location);
-			case MmlTokenType.OpenCurly:
-				var pexpr = ReadAsValue ();
-				ExpectToken (MmlTokenType.CloseCurly);
-				ReadToken ();
-				return new MmlParenthesizedExpr (pexpr);
-			case MmlTokenType.Dollar:
-				t = ReadToken ();
-#if true
-				// variable reference
-				RejectNonIdentifier (t);
-				return new MmlVariableReferenceExpr ((string) t.Value);
-#else
-				{
-					int scope = 1;
-					while (t.TokenType == MmlToken.Dollar) {
-						t = ReadToken ();
-						scope++;
-						if (scope == 3)
-							break;
-					}
-					// variable reference
-					RejectNonIdentifier (t);
-					return new MmlVariableReferenceExpr ((string) t.Value, scope);
-				}
-#endif
-			case MmlTokenType.StringLiteral:
-				return new MmlConstantExpr (MmlDataType.String, t.Value);
-			case MmlTokenType.NumberLiteral:
-				int dots = 0;
-				MmlToken dot = null;
-				while ((dot = PeekToken (false)) != null && dot.TokenType == MmlTokenType.Period) {
-					dots++;
-					ReadToken ();
-				}
-				if (dots > 0)
-					return new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = dots });
-				return new MmlConstantExpr (MmlDataType.Number, t.Value);
-			default:
-				throw new MmlException (String.Format ("Unexpected token for constant: {0}", t.TokenType), t.Location);
-			}
-		}
-
-		public MmlToken PeekToken ()
-		{
-			return PeekToken (false);
-		}
-
-		public MmlToken PeekToken (bool required)
-		{
-			if (Position >= Source.Count) {
-				if (required)
-					throw new MmlException ("Insufficient mml token", DefinitionLocation);
-				return null;
-			}
-			return Source [Position];
-		}
-
-		public MmlToken ReadToken ()
-		{
-			if (Position >= Source.Count)
-				throw new MmlException ("Insufficient mml token", DefinitionLocation);
-			return Source [Position++];
-		}
-
-		public void ExpectToken (MmlTokenType type)
-		{
-			if (Position == Source.Count)
-				throw new MmlException ("Insufficient mml token", DefinitionLocation);
-			if (Source [Position].TokenType != type)
-				throw new MmlException (String.Format ("Expected token {0}, but got {1}", type, Source [Position].TokenType), Source [Position].Location);
-		}
-
-		void RejectNonIdentifier (MmlToken token)
-		{
-			switch (token.TokenType) {
-			case MmlTokenType.Identifier:
-			case MmlTokenType.Slash:
-				return;
-			default:
-				throw new MmlException (String.Format ("Identifier is expected, but got {0}", token.TokenType), token.Location);
-			}
-		}
-#endif
 	}
 
 	#endregion
