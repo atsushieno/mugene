@@ -1,4 +1,3 @@
-//#define LOOP_BY_RESULT
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -68,7 +67,6 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		public double DoubleValue {
-//			get { return ResolvedValue is double ? (double) ResolvedValue : (double) (int) ResolvedValue; }
 			get { return (double) GetTypedValue (ResolvedValue, MmlDataType.Number); }
 		}
 
@@ -139,11 +137,6 @@ namespace Commons.Music.Midi.Mml
 		}
 		void ResolveCore (MmlResolveContext ctx, MmlDataType type, bool excludeMacroArgs)
 		{
-//Util.DebugWriter.WriteLine ("Find {0} from: ", Name);
-//foreach (var arga in ctx.MacroArguments) Util.DebugWriter.Write ("{0} ", arga.Key.Name);
-//foreach (var variablea in ctx.SourceTree.Variables) Util.DebugWriter.Write ("{0} ", variablea.Name);
-//Util.DebugWriter.WriteLine ();
-
 			if (!excludeMacroArgs) { // reference to macro argument takes precedence
 				object _arg = ctx.MacroArguments [Name];
 				if (_arg != null) {
@@ -159,7 +152,6 @@ namespace Commons.Music.Midi.Mml
 				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), null);
 			var val = ctx.EnsureDefaultResolvedVariable (variable);
 			ResolvedValue = GetTypedValue (val, type);
-//Util.DebugWriter.WriteLine ("**** resolved value for {0} is {1}, of type {2}", this, ResolvedValue, type);
 		}
 	}
 
@@ -368,19 +360,6 @@ namespace Commons.Music.Midi.Mml
 		public readonly int Tick;
 	}
 
-	/*
-	public class LoopBreak
-	{
-		public LoopBreak ()
-		{
-			Events = new List<MmlResolvedEvent> ();
-		}
-
-		public LoopLocation Location { get; set; }
-		public List<MmlResolvedEvent> Events { get; private set; }
-	}
-	*/
-
 	public partial class MmlResolveContext
 	{
 		public MmlResolveContext (MmlSemanticTreeSet song, MmlResolveContext globalContext)
@@ -477,8 +456,6 @@ namespace Commons.Music.Midi.Mml
 
 		void ProcessOperations (MmlResolvedTrack track, MmlResolveContext rctx, List<MmlOperationUse> list, int start, int count)
 		{
-//Util.DebugWriter.WriteLine ("Resolve variables in track {0}", track.Number);
-
 			int storeIndex = -1;
 			List<MmlResolvedEvent> storeCurrentOutput = null, storeDummy = new List<MmlResolvedEvent> ();
 			StoredOperations currentStoredOperations = null;
@@ -487,19 +464,7 @@ namespace Commons.Music.Midi.Mml
 			for (int listIndex = start; listIndex < start + count; listIndex++) {
 				var oper = list [listIndex];
 
-//				var pop = MmlPrimitiveOperation.All.FirstOrDefault (o => o.Name == oper.Name);
-//				if (pop == null)
-//					throw new MmlException (String.Format ("INTERNAL ERROR: unresolved non-primitive operation: {0}", oper.Name), location);
-
 				switch (oper.Name) {
-					/*
-				case "__LOCATE":
-					locations.Push ((MmlLineInfo) ((MmlConstantExpr) oper.Arguments [0]).Value);
-					continue;
-				case "__UNLOCATE":
-					locations.Pop ();
-					continue;
-					*/
 				case "__PRINT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					DebugPrint.WriteLine (oper.Arguments [0].StringValue);
@@ -561,24 +526,6 @@ namespace Commons.Music.Midi.Mml
 					}
 					break;
 					}
-					/*
-				case "__MACRO_ARG_DEF":
-					oper.Arguments [0].Resolve (rctx, MmlDataType.Any);
-					var argdef = (MmlSemanticVariable) oper.Arguments [0].ResolvedValue;
-					oper.ValidateArguments (rctx, 2, MmlDataType.Any, argdef.Type); // it is rather to resolve argument value.
-					var argval = oper.Arguments [1];
-					rctx.MacroArguments.Add (new KeyValuePair<MmlSemanticVariable, object> (argdef,  argval.ResolvedValue));
-					break;
-				case "__MACRO_ARG_UNDEF":
-					oper.ValidateArguments (rctx, 1, MmlDataType.String);
-					var aname = oper.Arguments [0].StringValue;
-					// This could actually be Last(), but since there is broken loop expansion
-					// that involves macro arg definitions extraneously, Last() causes IOE
-					// as it tries to undefine "undeclared" arguments.
-					var argpair = rctx.MacroArguments.LastOrDefault (a => a.Key.Name == aname);
-					rctx.MacroArguments.Remove (argpair);
-					break;
-					*/
 				case "__APPLY":
 					var oa = oper.Arguments [0];
 					oa.Resolve (rctx, MmlDataType.String);
@@ -620,8 +567,6 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					var mmop = new MmlResolvedEvent ("META", rctx.TimelinePosition);
 					mmop.Arguments.Add (0xFF);
-					//if (oper.Arguments.Count != 1)
-					//	throw new MmlException (String.Format ("META operation argument count mismatch. Expected 1, got {0}", oper.Arguments.Count), location);
 					foreach (var arg in oper.Arguments)
 						mmop.Arguments.AddRange (arg.ByteArrayValue);
 					current_output.Add (mmop);
@@ -737,52 +682,37 @@ namespace Commons.Music.Midi.Mml
 					rctx.Loops.Pop ();
 					var outside = rctx.CurrentLoop;
 					current_output = outside != null ? outside.Events : track.Events;
+
 					// now expand loop.
 					// - verify that every loop break does not exceed the loop count
 					// - add sequence before the first break
 					// - add sequence for each break. If no explicit break, then use default.
-
 					foreach (var p in loop.Breaks) {
 						if (p.Key > loopCount)
 							throw new MmlException ("Loop break specified beyond the loop count", list [p.Value.Source].Location);
 					}
 
-#if !LOOP_BY_RESULT
 					rctx.Values = loop.SavedValues;
-#endif
+
 					int baseTicks;
 					int baseOutputEnd;
 					int tickOffset = 0;
 					if (loop.FirstBreakAt == null) { // w/o break
 						baseTicks = rctx.TimelinePosition - loop.BeginAt.Tick;
 						baseOutputEnd = loop.Events.Count;
-#if LOOP_BY_RESULT
-						for (int l = 0; l < loopCount; l++) {
-							foreach (var rop in loop.Events.Take (baseOutputEnd))
-								current_output.Add (new MmlResolvedEvent (rop, rop.Tick + tickOffset));
-							tickOffset += baseTicks;
-						}
-#else
 						rctx.TimelinePosition = loop.BeginAt.Tick;
 
 						// This range of commands actually adds extra argument definitions for loop operation, but it won't hurt.
 						for (int l = 0; l < loopCount; l++)
 							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, listIndex  - loop.BeginAt.Source - 1);
-#endif
 					} else { // w/ breaks
 						baseTicks = loop.FirstBreakAt.Tick - loop.BeginAt.Tick;
 						baseOutputEnd = loop.FirstBreakAt.Output;
 
-#if !LOOP_BY_RESULT
 						rctx.TimelinePosition = loop.BeginAt.Tick;
-#endif
+
 						for (int l = 0; l < loopCount; l++) {
-#if LOOP_BY_RESULT
-							foreach (var rop in loop.Events.Take (baseOutputEnd))
-								current_output.Add (new MmlResolvedEvent (rop, rop.Tick + tickOffset));
-#else
 							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, loop.FirstBreakAt.Source  - loop.BeginAt.Source - 1);
-#endif
 							tickOffset += baseTicks;
 							LoopLocation lb = null;
 							if (!loop.Breaks.TryGetValue (l, out lb)) {
@@ -797,13 +727,7 @@ namespace Commons.Music.Midi.Mml
 							if (!loop.EndLocations.TryGetValue (l, out elb))
 								elb = loop.EndLocations [-1];
 							int breakOffset = lb.Tick - loop.BeginAt.Tick + baseTicks;
-#if LOOP_BY_RESULT
-							foreach (var rop in loop.Events.Skip (lb.Output).Take (elb.Output - lb.Output))
-								current_output.Add (new MmlResolvedEvent (rop, loop.FirstBreakAt.Tick + rop.Tick - breakOffset + loop.BeginAt.Tick + tickOffset));
-							tickOffset += elb.Tick - lb.Tick;
-#else
 							ProcessOperations (track, rctx, list, lb.Source + 1, elb.Source - lb.Source - 1);
-#endif
 						}
 					}
 					break;
@@ -827,9 +751,6 @@ namespace Commons.Music.Midi.Mml
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
 			expansion_stack.Push (macro);
-			//foreach (var variable in macro.Arguments)
-			//	if (variable.DefaultValue == null)
-			//			variable.FillDefaultValue ();
 
 			if (cache_stack_num == arg_caches.Count)
 				arg_caches.Add (new Hashtable ());

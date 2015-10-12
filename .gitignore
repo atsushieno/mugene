@@ -3,4 +3,4 @@ bin/
 obj/
 samples/*.mid
 samples/*.vsq
-
+*.userprefs
