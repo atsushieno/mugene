@@ -215,10 +215,12 @@
 
 #macro r step:length=$__length { NOP{$step} }
 
-#comment
-// FIXME: they are temporarily disabled as they are now primitive operations.
 
-// general Loop syntax
+// ---- general Loop syntax ----
+#comment
+// FIXME: I want to define them as macro, but a macro cannot contain only one side (open/close) of a loop.
+// It is by design.
+
 #macro [ { __LOOP_BEGIN{} }
 #define LOOP_BREAK_ARG_DEF \
 	a:number, b:number, c:number, d:number, e:number, f:number, g:number, h:number
@@ -229,8 +231,8 @@
 // (it should be allowewd because / is not a primitive operation but an operator for
 // mul_div_expr.)
 #macro ] repeat:number { __LOOP_END{$repeat} }
-
 #endcomment
+
 
 // ---- common system exclusive ----
 #macro GM_SYSTEM_ON { __MIDI {#F0, #7E, #7F, #09, #01, #F7 } }
