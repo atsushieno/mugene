@@ -76,7 +76,7 @@ B	a1
 		[Test]
 		public void DotWithoutLength () // issue #9
 		{
-			MmlTestUtility.TestCompile ("LoopBreaksInAnotherLoop", @"1 c4.");
+			MmlTestUtility.TestCompile ("DotWithoutLength", @"1 c4.");
 		}
 
 		[Test]
