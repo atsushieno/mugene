@@ -15,9 +15,9 @@
 #macro ENV_DECAY val:number { NRPN #01,#64 DTE $val,0 }
 #macro ENV_RELEASE val:number { NRPN #01,#66 DTE $val,0 }
 
-#macro DRUM_PITCH note:number,val:number { NRPN #18,$note DTE $val,0 }
-#macro DRUM_LEVEL note:number,val:number { NRPN #1A,$note DTE $val,0 }
-#macro DRUM_PAN note:number,val:number { NRPN #1C,$note DTE $val,0 }
-#macro DRUM_RSD note:number,val:number { NRPN #1D,$note DTE $val,0 }
-#macro DRUM_CSD note:number,val:number { NRPN #1E,$note DTE $val,0 }
-#macro DRUM_DSD note:number,val:number { NRPN #1F,$note DTE $val,0 }
+#macro DRUM_PITCH note:number,val:number { NRPN #18,$note DTEM $val }
+#macro DRUM_LEVEL note:number,val:number { NRPN #1A,$note DTEM $val }
+#macro DRUM_PAN note:number,val:number { NRPN #1C,$note DTEM $val }
+#macro DRUM_RSD note:number,val:number { NRPN #1D,$note DTEM $val }
+#macro DRUM_CSD note:number,val:number { NRPN #1E,$note DTEM $val }
+#macro DRUM_DSD note:number,val:number { NRPN #1F,$note DTEM $val }
