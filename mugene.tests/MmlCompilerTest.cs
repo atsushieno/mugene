@@ -84,6 +84,14 @@ B	a1
 		{
 			MmlTestUtility.TestCompile ("TimingOperator", @"1 c4,,,2 ASSERT_STEP48");
 		}
+
+		[Test]
+		public void ChordExtraMacroArgs ()
+		{
+			MmlTestUtility.TestCompile ("ChordExtraMacroArgs", @"
+#macro CHORD_A { c0e0g }
+1  o5 l4 CHORD_A8 CHORD_A8 CHORD_A ASSERT_STEP96");
+		}
 	}
 }
 

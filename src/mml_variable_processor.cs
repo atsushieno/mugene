@@ -428,7 +428,7 @@ namespace Commons.Music.Midi.Mml
 				var tctx = new MmlResolveContext (source, global_context);
 				var list = track.Data;
 				current_output = rtrk.Events;
-				ProcessOperations (rtrk, tctx, list, 0, list.Count);
+				ProcessOperations (rtrk, tctx, list, 0, list.Count, null);
 				Sort (current_output);
 				foreach (var ev in current_output)
 					Util.DebugWriter.WriteLine ("{0} {1} {2}", ev.Tick, ev.Operation, ev.Arguments.Count);
@@ -454,7 +454,15 @@ namespace Commons.Music.Midi.Mml
 
 		MmlLineInfo location { get { return locations.Count > 0 ? locations.Peek () : null; } }
 
-		void ProcessOperations (MmlResolvedTrack track, MmlResolveContext rctx, List<MmlOperationUse> list, int start, int count)
+		// extraTailArgs is a list of arguments that are passed to the context macro call e.g.
+		//   #macro CHORD_A c0e0g
+		//   1   CHORD_A4 CHORD_A8 CHORD_A8
+		// In this case, 4, 8 and 8 are NOT passed to CHORD_A unless these extraTailArgs are passed
+		// and causes unexpected outputs.
+		// We can still define macros to take full arguments to the defined sequence of operators
+		// (in this case, to 'g'), but that is super annoying and basically impossible unless
+		// you know the macro definition details (which almost no one would know).
+		void ProcessOperations (MmlResolvedTrack track, MmlResolveContext rctx, List<MmlOperationUse> list, int start, int count, IEnumerable<MmlValueExpr> extraTailArgs)
 		{
 			int storeIndex = -1;
 			List<MmlResolvedEvent> storeCurrentOutput = null, storeDummy = new List<MmlResolvedEvent> ();
@@ -463,6 +471,7 @@ namespace Commons.Music.Midi.Mml
 
 			for (int listIndex = start; listIndex < start + count; listIndex++) {
 				var oper = list [listIndex];
+				var extraTailArgsIfApplied = listIndex == start + count - 1 ? extraTailArgs : null;
 
 				switch (oper.Name) {
 				case "__PRINT": {
@@ -535,7 +544,7 @@ namespace Commons.Music.Midi.Mml
 					var tmpop = new MmlOperationUse (apparg, oper.Location);
 					for (int x = 1; x < oper.Arguments.Count; x++)
 						tmpop.Arguments.Add (oper.Arguments [x]);
-					ProcessMacroCall (track, rctx, tmpop);
+					ProcessMacroCall (track, rctx, tmpop, extraTailArgsIfApplied);
 
 					break;
 				case "__MIDI":
@@ -605,7 +614,7 @@ namespace Commons.Music.Midi.Mml
 					rctx.MacroArguments = ss.MacroArguments;
 					// adjust timeline_position (no need to update rctx.TimelinePosition here).
 					rctx.Values [(MmlSemanticVariable) source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
-					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count);
+					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count, extraTailArgsIfApplied);
 					rctx.Values = valuesBak;
 					rctx.MacroArguments = macroArgsBak;
 					break;
@@ -704,7 +713,7 @@ namespace Commons.Music.Midi.Mml
 
 						// This range of commands actually adds extra argument definitions for loop operation, but it won't hurt.
 						for (int l = 0; l < loopCount; l++)
-							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, listIndex  - loop.BeginAt.Source - 1);
+							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, listIndex  - loop.BeginAt.Source - 1, extraTailArgsIfApplied);
 					} else { // w/ breaks
 						baseTicks = loop.FirstBreakAt.Tick - loop.BeginAt.Tick;
 						baseOutputEnd = loop.FirstBreakAt.Output;
@@ -712,7 +721,7 @@ namespace Commons.Music.Midi.Mml
 						rctx.TimelinePosition = loop.BeginAt.Tick;
 
 						for (int l = 0; l < loopCount; l++) {
-							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, loop.FirstBreakAt.Source  - loop.BeginAt.Source - 1);
+							ProcessOperations (track, rctx, list, loop.BeginAt.Source + 1, loop.FirstBreakAt.Source  - loop.BeginAt.Source - 1, extraTailArgsIfApplied);
 							tickOffset += baseTicks;
 							LoopLocation lb = null;
 							if (!loop.Breaks.TryGetValue (l, out lb)) {
@@ -727,12 +736,12 @@ namespace Commons.Music.Midi.Mml
 							if (!loop.EndLocations.TryGetValue (l, out elb))
 								elb = loop.EndLocations [-1];
 							int breakOffset = lb.Tick - loop.BeginAt.Tick + baseTicks;
-							ProcessOperations (track, rctx, list, lb.Source + 1, elb.Source - lb.Source - 1);
+							ProcessOperations (track, rctx, list, lb.Source + 1, elb.Source - lb.Source - 1, extraTailArgsIfApplied);
 						}
 					}
 					break;
 				default:
-					ProcessMacroCall (track, rctx, oper);
+					ProcessMacroCall (track, rctx, oper, extraTailArgsIfApplied);
 					break;
 				}
 			}
@@ -743,7 +752,7 @@ namespace Commons.Music.Midi.Mml
 		List<Hashtable> arg_caches = new List<Hashtable> ();
 		int cache_stack_num;
 
-		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper)
+		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper, IEnumerable<MmlValueExpr> extraTailArgs)
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
 			if (macro == null)
@@ -755,9 +764,10 @@ namespace Commons.Music.Midi.Mml
 			if (cache_stack_num == arg_caches.Count)
 				arg_caches.Add (new Hashtable ());
 			var args = arg_caches [cache_stack_num++];
+			var operUseArgs = extraTailArgs != null ? oper.Arguments.Concat (extraTailArgs).ToList () : oper.Arguments;
 			for (int i = 0; i < macro.Arguments.Count; i++) {
 				MmlSemanticVariable argdef = macro.Arguments [i];
-				MmlValueExpr arg = i < oper.Arguments.Count ? oper.Arguments [i] : null;
+				MmlValueExpr arg = i < operUseArgs.Count ? operUseArgs [i] : null;
 				if (arg == null)
 					arg = argdef.DefaultValue;
 				arg.Resolve (ctx, argdef.Type);
@@ -767,7 +777,8 @@ namespace Commons.Music.Midi.Mml
 			}
 			var argsBak = ctx.MacroArguments;
 			ctx.MacroArguments = args;
-			ProcessOperations (track, ctx, macro.Data, 0, macro.Data.Count);
+			var extraTailArgsToCall = macro.Arguments.Count < operUseArgs.Count ? operUseArgs.Skip (macro.Arguments.Count) : null;
+			ProcessOperations (track, ctx, macro.Data, 0, macro.Data.Count, extraTailArgsToCall);
 			ctx.MacroArguments = argsBak;
 			
 			expansion_stack.Pop ();

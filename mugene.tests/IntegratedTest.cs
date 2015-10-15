@@ -23,9 +23,12 @@ namespace Commons.Music.Midi.Mml.Tests
 				dir = parent;
 			}
 				
-			foreach (var file in Directory.GetFiles (Path.Combine (dir, "samples"), "*.mml"))
-				if (!IsBlacklisted (file))
+			foreach (var file in Directory.GetFiles (Path.Combine (dir, "samples"), "*.mml")) {
+				if (!IsBlacklisted (file)) {
+					Console.Error.WriteLine ("compiling {0} ...", file);
 					MmlTestUtility.TestCompile (file, File.ReadAllText (file));
+				}
+			}
 		}
 		
 		bool IsBlacklisted (string file)
