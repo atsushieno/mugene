@@ -14,7 +14,7 @@
 
 
 //---- [[ 00 : Control ]]------------------------------------
-0	BEAT4/4 t150 r1r1
+0	BEAT4,4 t150 r1r1
 A	[r1]16
 B	[r1]4
 C	[r1]16
@@ -162,8 +162,8 @@ E	@66 o6 V120 CSD40 DSD40
 	  r1  r1
 F	[r1]8
 	@104 o6 l16 ENV_DECAY89 CSD20 DSD60 M30
-	B0,100,0,4f4,1+4B100,0,2,2+8r2.  r4.efg-8e8d8<b8
-	  a>d<M_0,80,4,2b2..,2..+1  B0,-1200,2,2r1B0
+	B_0,100,0,4f4,1+4B_100,0,2,2+8r2.  r4.efg-8e8d8<b8
+	  a>d<M_0,80,4,2b2..,2..+1  B_0,-1200,2,2r1B0
 	rr<b>eg-ceg->c<eg-b>e<b>ce  <b>eg-b+2.  a1+  1
 	@3 V120 o6 RSD60 CSD60 DSD15 M0
 	<b0>g0b2e0g0>e2<  g-0>e0g-4.<g4.a4  b0>g-0b2<a0>e0a2<b0>g-0b4.<g4.e4
@@ -214,7 +214,7 @@ A 9	r4[ c4. ]4[ c+4 ]4d4d4e4[ e8. ]4[ e8 ]8
 A 39	DSD0[r16DSD+1]32[r1]6
 B 39	E_127,64,0,1+1+1+1,8 [r1]4
 C 9,39	[r1]16
-D 9	@126,4 o5 V120 E127 //ENV_DECAY74
+D 9	@126,4 o5 V120 E127 ENV_DECAY74
 	[c8.]42c8
 E 9	[r1]8
 F 9	[r1]24
@@ -232,7 +232,8 @@ B	[r1]4
 C	[r1]16
 D	[r1]7  RCYMg2+8TOMg8e8cc
 E	[r1]4
-	@124,5 V70 H100 TVF_RESO74
+	// @124,5
+	CC0,5 @124 V70 H100 TVF_RESO74
 	[r1]3  r2E_0,127,0,4(60[b12)10e12)10g-12)10]2
 F	E_127,0,0,1+1+1,16 [r1]4  H0[r1]4E127
 	[r1]16
@@ -318,14 +319,11 @@ G 11	[HB HE o8 HA HC HC HE  HA HD HC HE HA HD o8]4
 G 11	[HB HE OA8 HA HC OC8  HA HD OB8 HA HD OA8]3  HA HD HC HEo4,,70o4o4,,90
 
 
-
-#comment
-
-#macro CH_DRUMX val:number { GS_REG #40, $val, $15, 2 }
+#macro CH_DRUMX val:number { GS_REG #40, $val, #15, 2 }
 
 //---- [[ 13 : Rhythm FX ]]----------------------------------
 13	CH_INIT11 CH_DRUMX#1a @57 V110 v80 l16
-13	DRUM_REVERB75,60
+13	DRUM_RSD75,60
 A 13	[r1]16
 B 13	E_127,0,0,1+1+1+1,8
 B 13	[n75,8DRUM_PAN75,34n75,8,,60DRUM_PAN75,94n75,8,,40]10r4
