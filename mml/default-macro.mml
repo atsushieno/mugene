@@ -247,7 +247,7 @@
 #variable __work_step_start:number = 0
 
 #variable __work_repeat_time:number
-#define SPECTRA_ONESHOT_ARG_DEF sv:number, ev:number, sd:length, len:length, deltaLen:length
+#define SPECTRA_ONESHOT_ARG_DEF sv:number, ev:number, sd:length, len:length, deltaLen:length = %4
 #define SPECTRA_ONESHOT_ARG_USE $sv, $ev, $sd, $len, $deltaLen
 #macro SPECTRA_ONESHOT mabs:string, mrel:string, SPECTRA_ONESHOT_ARG_DEF { \
 	__LET {"__work_step_start", $__timeline_position} \
@@ -268,7 +268,7 @@
 #macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
 #macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BEND", "B+", SPECTRA_ONESHOT_ARG_USE } // FIXME: find out why it fails when "B" is used instead.
 
-#define SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number, delta:number, rt:number
+#define SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number = %4, delta:number, rt:number
 #define SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
 #macro SPECTRA_TRIANGLE mabs:string, mpos:string, mneg:string, SPECTRA_TRIANGLE_ARG_DEF { \
 	__LET {"__work_step_start", $__timeline_position} \
