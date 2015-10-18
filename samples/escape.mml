@@ -3,7 +3,7 @@
 #meta copyright "(C)1999 Composed and arranged by atsushieno"
 //--------------------------------------------------------------------
 
-#macro	CH_INIT ch:number { CH$ch E127 B0 P64 M0 H0 RSD0 CSD0 DSD0 v80 l8 BEND_CENT_MODE 24 }
+#macro	CH_INIT ch:number { CH$ch E127 B0 P64 M0 H0 RSD0 CSD0 DSD0 v80 l8 BEND_CENT_MODE 24 PITCH_BEND_SENSITIVITY24 }
 
 0-11	r1
 13	r1
@@ -155,7 +155,6 @@ C	[r1]8
 	c4e4f+4e8f+8  b4g4f+4e4   r1  r1
 D	[r1]8
 E	@66 o6 V120 CSD40 DSD40
-	// FIXME: either pitchbend or modulation causes shifted annoying notes...
 	e0,2.[B0r16B100r16]6B0a0,8.,110E_127,80,0,16r16E_80,127,0,8r8.
 	  M_0,120,0,4E_100,127,0,4b8+2,,100r8M0a8b8,16  r1  r1
 	f0,1[B0r16B200r16]8B0  a0,4,110E_127,80,0,8r8E_80,127,0,8r4

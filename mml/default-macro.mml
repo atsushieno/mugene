@@ -14,7 +14,7 @@
 #variable __dummy_step:number
 #variable __length:length = 4
 #macro CH val:number { __LET {"__channel", $val - 1} } // CH1-CH16 are valid.
-#macro DEBUG val:string { __PRINT {$val} }
+#macro DEBUG val { __PRINT {$val} }
 #variable __dummy_msg:string
 #macro ASSERT_STEP val:number,label:string { \
 	__LET {"__dummy_step", $__timeline_position - $val } \
@@ -115,7 +115,7 @@
 #macro BEND_CENT_MODE val:number { __LET{"__pitchbend_cent_mode", $val} }
 #macro BEND val:number { \
 	__LET{"__bend", $val} \
-	__LET{"__pitchbend_bare_value", $__pitchbend_cent_mode ? 100 * 8192 / $__pitchbend_cent_mode / $val, $val } \
+	__LET{"__pitchbend_bare_value", $__pitchbend_cent_mode ? $val / 100 * 8192 / $__pitchbend_cent_mode, $val } \
 	PITCH $__pitchbend_bare_value + 8192 \
 	}
 #macro B val:number { BEND$val }
