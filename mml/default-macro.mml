@@ -110,7 +110,14 @@
 #macro H val:number { CC#40,$val } // dumper pedal
 #macro @ prg:number,bmsb:number=0,blsb:number=0 { CC0,$bmsb CC#20,$blsb PROGRAM$prg }
 #variable __bend:number = 0
-#macro BEND val:number { __LET{"__bend", $val} PITCH $val+8192 }
+#variable __pitchbend_cent_mode:number = 0
+#variable __pitchbend_bare_value:number = 0
+#macro BEND_CENT_MODE val:number { __LET{"__pitchbend_cent_mode", $val} }
+#macro BEND val:number { \
+	__LET{"__bend", $val} \
+	__LET{"__pitchbend_bare_value", $__pitchbend_cent_mode ? 100 * 8192 / $__pitchbend_cent_mode / $val, $val } \
+	PITCH $__pitchbend_bare_value + 8192 \
+	}
 #macro B val:number { BEND$val }
 #macro B+ val:number { BEND $__bend + $val }
 #macro B- val:number { BEND $__bend - $val }
@@ -258,6 +265,7 @@
 	__LET {"__timeline_position", $__timeline_position + $deltaLen} \
 	__APPLY {$mrel, {$ev - $sv} / $__work_repeat_time } \
 	] $__work_repeat_time \
+	__APPLY {$mabs, $ev} \
 	__LET {"__timeline_position", $__work_step_start}  \
 	}
 
@@ -266,7 +274,7 @@
 #macro E_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "E", "E+", SPECTRA_ONESHOT_ARG_USE }
 #macro t_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "t", "t+", SPECTRA_ONESHOT_ARG_USE }
 #macro M_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "M", "M+", SPECTRA_ONESHOT_ARG_USE }
-#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "BEND", "B+", SPECTRA_ONESHOT_ARG_USE } // FIXME: find out why it fails when "B" is used instead.
+#macro B_ SPECTRA_ONESHOT_ARG_DEF { SPECTRA_ONESHOT "B", "B+", SPECTRA_ONESHOT_ARG_USE }
 
 #define SPECTRA_TRIANGLE_ARG_DEF sv:number, ev:number, sd:number, ed:number, ts:number, es:number = %4, delta:number, rt:number
 #define SPECTRA_TRIANGLE_ARG_USE $sv, $ev, $sd, $ed, $ts, $es, $delta, $rt
