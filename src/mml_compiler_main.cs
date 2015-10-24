@@ -72,6 +72,10 @@ Options:
 			Vocaloid VSQ mode on.
 			Changes extension to .vsq and encoding to ShiftJIS,
 			and uses VSQ metadata mode.
+  --uvsq
+			Vocaloid VSQ mode on.
+			and uses VSQ metadata mode.
+			No changes on encoding, to support Bopomofo.
   --verbose
 			prints debugging aid.
   --use-vsq-metadata
@@ -115,6 +119,12 @@ Options:
 					useVsqMetadata = true;
 					disableRunningStatus = true;
 					MmlValueExpr.StringToBytes = s => Encoding.GetEncoding (932).GetBytes (s);
+					continue;
+				case "--uvsq": // for convenience
+					extension = ".vsq";
+					Util.DefaultIncludes.Add (Util.VsqInclude);
+					useVsqMetadata = true;
+					disableRunningStatus = true;
 					continue;
 				case "--verbose":
 					verbose = true;

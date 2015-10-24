@@ -236,6 +236,11 @@
 	DEFINE_SINGER \
 	}
 
+// Lyrics operators.
+// The actual macros for letters are defined later (they are bunch).
+
+// Japanese (Kana) and Bopomofo (Taiwanese) are defined so far.
+
 #define HANDLE_DEFS_COND {$__handle_defs \> 10000 ? "[h#{0:D08}]\n", "[h#{0:D04}]\n"}
 #define HANDLE_USES_COND {$__handle_uses \> 10000 ? "h#{0:D08}\n", "h#{0:D04}\n"}
 #variable tmp_phonLen, phonA, phonB, phonC
@@ -263,7 +268,27 @@
 	__LET{"__handle_defs", $__handle_defs + 1} \
 	__LET{"__prev_vowel", $phonD ? $phonD, $phonC ? $phonC, $phonB ? $phonB, $phonA } \
 	 }
-// lyric macros are defined later (they are bunch).
+
+#variable __bopomofo_consonant_label:string = ""
+#variable __bopomofo_consonant_ipa:string = ""
+
+#macro LBC label:string, consonant:string { \
+	__LET {"__bopomofo_consonant_label", $label } \
+	__LET {"__bopomofo_consonant_ipa", $consonant } \
+	}
+#macro VOCAL_CHANNEL LBV label:string, ipa:string { \
+	\// meta text
+	__STORE_FORMAT {"Handles", HANDLE_DEFS_COND, $__handle_defs } \
+	__STORE {"Handles", "L0=\"", $__bopomofo_consonant_label, $label, "\",\"", $__bopomofo_consonant_ipa, $ipa, "\",0.0000000,", "0", ",0\n"} \
+	__SAVE_OPER_BEGIN \
+	NRPNM #50 NRPNLP #12,0 NRPNLP #4F,#7F \
+	__SAVE_OPER_END $__handle_defs \
+	__LET{"__handle_defs", $__handle_defs + 1} \
+	__LET{"__bopomofo_consonant_label", ""} \
+	__LET{"__bopomofo_consonant_ipa", ""} \
+	 }
+
+
 
 // Vibrato operations ----
 #variable vibrato:number = 0
@@ -599,11 +624,6 @@
 
 
 // Lyrics macro for Taiwanese (Bopomofos) ----
-
-#variable __bopomofo_consonant:string = ""
-
-#macro LBC label:string, consonant:string { __LET {"__bopomofo_consonant", $consonant } }
-#macro LBV label:string, vowel:string { } // FIXME: implement!!!
 
 #macro ㄅ { LBC "ㄅ", "p" }
 #macro ㄆ { LBC "ㄆ", "p_h" }
