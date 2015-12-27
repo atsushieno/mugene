@@ -158,18 +158,24 @@ namespace Commons.Music.Midi.Mml
 	public abstract class StreamResolver
 	{
 		public abstract TextReader Resolve (string uri);
-
-		public abstract void PushInclude (string file);
 		
-		public abstract void PopInclude ();
+		Stack<string> includes = new Stack<string> ();
+
+		public virtual void PushInclude (string file)
+		{
+			if (includes.Contains (file))
+				throw new InvalidOperationException (string.Format ("File {0} is already being processed. Recursive inclusion is prohibited.", file));
+			includes.Push (file);
+		}
+
+		public virtual void PopInclude ()
+		{
+			includes.Pop ();
+		}
 	}
 
 	public class FileStreamResolver : StreamResolver
 	{
-		public FileStreamResolver ()
-		{
-		}
-
 		public override TextReader Resolve (string uri)
 		{
 			if (File.Exists (uri))
@@ -179,20 +185,6 @@ namespace Commons.Music.Midi.Mml
 				return File.OpenText (commonPath);
 			else
 				return File.OpenText (uri);
-		}
-		
-		Stack<string> includes = new Stack<string> ();
-
-		public override void PushInclude (string file)
-		{
-			if (includes.Contains (file))
-				throw new InvalidOperationException (string.Format ("File {0} is already being processed. Recursive inclusion is prohibited.", file));
-			includes.Push (file);
-		}
-
-		public override void PopInclude ()
-		{
-			includes.Pop ();
 		}
 	}
 
