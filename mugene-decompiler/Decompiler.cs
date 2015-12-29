@@ -135,8 +135,22 @@ namespace Commons.Music.Midi.Mml.Decompiler
 						if (m < messages.Count && messages [m].Event.EventType == SmfEvent.Program) {
 							Out.Write ("@");
 							Out.Write (messages [m++].Event.Msb);
-							Out.Write (',');
-							Out.Write (evt.Lsb);
+							if (evt.Lsb != 0) {
+								Out.Write (',');
+								Out.Write (evt.Lsb);
+							}
+							break;
+						}
+						else if (m + 1 < messages.Count && messages [m].Event.EventType == SmfEvent.CC && messages [m].Event.Msb == SmfCC.BankSelectLsb && messages [m + 1].Event.EventType == SmfEvent.Program) {
+							var lsb = messages [m++].Event.Lsb;
+							Out.Write ("@");
+							Out.Write (messages [m++].Event.Msb);
+							if (evt.Lsb != 0 || lsb != 0) {
+								Out.Write (',');
+								Out.Write (evt.Lsb);
+								Out.Write (',');
+								Out.Write (lsb);
+							}
 							break;
 						}
 						goto default;
