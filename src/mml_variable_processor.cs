@@ -655,7 +655,7 @@ namespace Commons.Music.Midi.Mml
 					} else {
 						for (int x = 0; x < oper.Arguments.Count; x++) {
 							var numexpr = oper.Arguments [x];
-							var num = numexpr.IntValue - 1;
+							var num = numexpr.IntValue - 1; // "1st. loop" for musicians == 0th iteration in code.
 							if (x > 0 && num < 0)
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);

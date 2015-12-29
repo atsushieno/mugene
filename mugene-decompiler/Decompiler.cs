@@ -76,7 +76,7 @@ namespace Commons.Music.Midi.Mml.Decompiler
 				msgBlockByTime.Add (l);
 				for (; m < track.Messages.Count; m++) {
 					l.Add (track.Messages [m]);
-					if (track.Messages [m].DeltaTime > 0)
+					if (m + 1 < track.Messages.Count && track.Messages [m + 1].DeltaTime > 0)
 						break;
 				}
 				m++;
@@ -100,6 +100,18 @@ namespace Commons.Music.Midi.Mml.Decompiler
 
 		void OutputTrackPart (int trackNo, ChannelContext context, List<SmfMessage> messages)
 		{
+			int r = messages.First ().DeltaTime;
+			for (; r > BaseCount; r -= BaseCount)
+				Out.Write ("r1");
+			if (r > 0) {
+				int b = BaseCount / r;
+				if (b * r == BaseCount) // i.e. no remainder
+					Out.Write ("r" + b);
+				else
+					Out.Write ("r#" + r);
+				Out.Write (' ');
+			}
+			
 			int m = 0;
 			while (m < messages.Count) {
 				var evt = messages [m++].Event;
@@ -277,26 +289,15 @@ namespace Commons.Music.Midi.Mml.Decompiler
 				case SmfEvent.NoteOn:
 					if (evt.Lsb == 0)
 						goto case SmfEvent.NoteOff;
-					Out.Write ("NON{0},0,{1} ", evt.Msb, evt.Lsb);
+					Out.Write ("NON#{0:X02},0,{1} ", evt.Msb, evt.Lsb);
 					break;
 				case SmfEvent.NoteOff:
 					if (evt.Lsb == 0) // usually
-						Out.Write ("NOFF{0} ", evt.Msb);
+						Out.Write ("NOFF#{0:X02} ", evt.Msb);
 					else
-						Out.Write ("NOFF{0},0,{1} ", evt.Msb, evt.Lsb);
+						Out.Write ("NOFF#{0:X02},0,{1} ", evt.Msb, evt.Lsb);
 					break;
 				}
-			}
-			int r = messages.Last ().DeltaTime;
-			for (; r > BaseCount; r -= BaseCount)
-				Out.Write ("r1");
-			if (r > 0) {
-				int b = BaseCount / r;
-				if (b * r == BaseCount) // i.e. no remainder
-					Out.Write ("r" + b);
-				else
-					Out.Write ("r#" + r);
-				Out.Write (' ');
 			}
 		}
 		
