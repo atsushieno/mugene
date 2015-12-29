@@ -788,30 +788,27 @@ namespace Commons.Music.Midi.Mml
 
 		void Sort (List<MmlResolvedEvent> l)
 		{
-			var idxl = new List<int> (l.Count);
-			idxl.Add (0);
+			var msgBlockByTime = new Dictionary<int,List<MmlResolvedEvent>> ();
+			int m = 0;
 			int prev = 0;
-			for (int i = 0; i < l.Count; i++) {
-				if (l [i].Tick != prev) {
-					idxl.Add (i);
-					prev = l [i].Tick;
+			while (m < l.Count) {
+				var e = l [m];
+				List<MmlResolvedEvent> pl;
+				if (!msgBlockByTime.TryGetValue (l [m].Tick, out pl)) {
+					pl = new List<MmlResolvedEvent> ();
+					msgBlockByTime.Add (e.Tick, pl);
 				}
+				for (; m < l.Count; m++) {
+					pl.Add (l [m]);
+					if (m + 1 < l.Count && l [m + 1].Tick != prev)
+						break;
+				}
+				m++;
 			}
-			if (idxl.Count == 1)
-				return; // no need to sort.
-
-			idxl.Sort (delegate (int i1, int i2) {
-				return l [i1].Tick - l [i2].Tick;
-				});
-
-			// now build a new event list based on the sorted blocks.
-			var l2 = new List<MmlResolvedEvent> (l.Count);
-			int idx;
-			for (int i = 0; i < idxl.Count; i++)
-				for (idx = idxl [i], prev = l [idx].Tick; idx < l.Count && l [idx].Tick == prev; idx++)
-					l2.Add (l [idx]);
+			
 			l.Clear ();
-			l.AddRange (l2);
+			foreach (var sl in msgBlockByTime.OrderBy (kvp => kvp.Key).Select (kvp => kvp.Value))
+				l.AddRange (sl);
 		}
 	}
 
