@@ -670,7 +670,7 @@ namespace Commons.Music.Midi.Mml
 #if !UNHACK_LOOP
 				case "]":
 #endif
-					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
+					oper.ValidateArguments (rctx, 0, MmlDataType.Number);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
 						throw new MmlException ("Loop has not started", location);
