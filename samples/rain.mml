@@ -1,7 +1,3 @@
-#meta title		"Rain"
-#meta copyright	"(C)2000 composed and arranged by atsushieno"
-#meta text		"MML compiler mugene sample song #1"
-
 #macro	CH_INIT ch:number { CH$ch E127 B0 P64 M0 H0 RSD0 CSD0 DSD0 v80 l8 q16 }
 #macro	HON { H100 }
 #macro	HON { H100 }
@@ -61,3 +57,9 @@ C	[g0b0>d0e0f+1+1<  a0b0>c0e0f1,1+1a1<]2 // f1&a1
 	// fadeout: make use of "spectra" operation (E_)
 	e0g0b0>d0e1+1<  E_127,0,1,1+1+1+1+1,8 e0f+0g0b0>d1+1<
 	e0g0b0>d0e1+1+1+1<
+
+//--------------------------------------------------------------------
+#meta title		"Rain"
+#meta copyright	"(C)2000 composed and arranged by atsushieno"
+#meta text		"MML compiler mugene sample song #1"
+//--------------------------------------------------------------------

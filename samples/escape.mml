@@ -1,8 +1,3 @@
-//--------------------------------------------------------------------
-#meta title		"Escape from Lunatic Reign"
-#meta copyright "(C)1999 Composed and arranged by atsushieno"
-//--------------------------------------------------------------------
-
 #macro	CH_INIT ch:number { CH$ch E127 B0 P64 M0 H0 RSD0 CSD0 DSD0 v80 l8 BEND_CENT_MODE 24 PITCH_BEND_SENSITIVITY24 }
 
 0-11	r1
@@ -347,4 +342,8 @@ G 13	[n75,8DRUM_PAN75,34n75,8,,60DRUM_PAN75,94n75,8,,40]10r4
 39	DEBUG $__timeline_position
 
 
-//-----------------------------------------------------------------------------
+//--------------------------------------------------------------------
+#meta title		"Escape from Lunatic Reign"
+#meta copyright "(C)1999 Composed and arranged by atsushieno"
+#meta text		"MML compiler mugene sample song #2"
+//--------------------------------------------------------------------
