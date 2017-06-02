@@ -168,7 +168,7 @@ Options:
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 
-		public void Compile (bool skipDefaultMmlFiles, IList<MmlInputSource> inputs, Func<bool, SmfMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
+		public void Compile (bool skipDefaultMmlFiles, IList<MmlInputSource> inputs, Func<bool, MidiMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
 		{
 			if (!skipDefaultMmlFiles)
 				inputs = Util.DefaultIncludes.Select (f => new MmlInputSource (f, Resolver.Resolve (f))).Concat (inputs).ToList ();
