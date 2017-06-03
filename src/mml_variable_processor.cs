@@ -450,10 +450,6 @@ namespace Commons.Music.Midi.Mml
 			public Hashtable MacroArguments { get; set; }
 		}
 
-		Stack<MmlLineInfo> locations = new Stack<MmlLineInfo> ();
-
-		MmlLineInfo location { get { return locations.Count > 0 ? locations.Peek () : null; } }
-
 		// extraTailArgs is a list of arguments that are passed to the context macro call e.g.
 		//   #macro CHORD_A c0e0g
 		//   1   CHORD_A4 CHORD_A8 CHORD_A8
@@ -484,7 +480,7 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					oper.Arguments [1].Resolve (rctx, variable.Type);
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
 					if (name == "__timeline_position")
@@ -497,9 +493,9 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					if (variable.Type != MmlDataType.Buffer)
-						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
+						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
 					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
 					for (int i = 1; i < oper.Arguments.Count; i++)
 						sb.Append (oper.Arguments [i].StringValue);
@@ -516,13 +512,13 @@ namespace Commons.Music.Midi.Mml
 					string format = oper.Arguments [1].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					if (is_string_format) {
 						if (variable.Type != MmlDataType.String)
-							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), location);
+							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), oper.Location);
 					} else {
 						if (variable.Type != MmlDataType.Buffer)
-							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
+							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
 					}
 					try {
 						string v = string.Format (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.StringValue).ToArray ());
@@ -531,7 +527,7 @@ namespace Commons.Music.Midi.Mml
 						else
 							((StringBuilder) rctx.EnsureDefaultResolvedVariable (variable)).Append (v);
 					} catch (FormatException ex) {
-						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), location);
+						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), oper.Location);
 					}
 					break;
 					}
@@ -639,7 +635,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", location);
+						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", oper.Location);
 					if (loop.FirstBreakAt == null)
 						loop.FirstBreakAt = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					foreach (var cl in loop.CurrentBreaks)
@@ -649,7 +645,7 @@ namespace Commons.Music.Midi.Mml
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
 						if (loop.Breaks.ContainsKey (-1) && loop.Breaks.Values.All (b => b.Source != listIndex))
-							throw new MmlException ("Default loop break is already defined in current loop", location);
+							throw new MmlException ("Default loop break is already defined in current loop", oper.Location);
 						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
 					} else {
@@ -660,7 +656,7 @@ namespace Commons.Music.Midi.Mml
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);
 							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex))
-								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), location);
+								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), oper.Location);
 							// specified loop count is for human users. Here the number is for program, hence -1.
 							loop.Breaks.Add (num, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						}
@@ -673,7 +669,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, 0, MmlDataType.Number);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						throw new MmlException ("Loop has not started", location);
+						throw new MmlException ("Loop has not started", oper.Location);
 					foreach (var cl in loop.CurrentBreaks)
 						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					int loopCount;
@@ -685,7 +681,7 @@ namespace Commons.Music.Midi.Mml
 						loopCount = oper.Arguments [0].IntValue;
 						break;
 					default:
-						throw new MmlException ("Arguments at loop end exceeded", location);
+						throw new MmlException ("Arguments at loop end exceeded", oper.Location);
 					}
 					
 					rctx.Loops.Pop ();
@@ -756,7 +752,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
 			if (macro == null)
-				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), location);
+				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), oper.Location);
 			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
 			expansion_stack.Push (macro);
