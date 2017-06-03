@@ -362,7 +362,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			var metaTrack = new MmlSemanticTrack (0);
 			foreach (var p in token_set.MetaTexts) {
-				var use = new MmlOperationUse ("__MIDI_META", null);
+				var use = new MmlOperationUse (MmlPrimitiveOperation.MidiMeta.Name, null);
 				use.Arguments.Add (new MmlConstantExpr (MmlDataType.Number, p.Key));
 				use.Arguments.Add (new MmlConstantExpr (MmlDataType.String, p.Value));
 				metaTrack.Data.Add (use);

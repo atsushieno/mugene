@@ -204,36 +204,38 @@ Options:
 	{
 		public static IList<MmlPrimitiveOperation> All { get; private set; }
 
+		public static readonly MmlPrimitiveOperation Print = new MmlPrimitiveOperation() { Name = "__PRINT" };
+		public static readonly MmlPrimitiveOperation Let = new MmlPrimitiveOperation() { Name = "__LET" };
+		public static readonly MmlPrimitiveOperation Store = new MmlPrimitiveOperation() { Name = "__STORE" };
+		public static readonly MmlPrimitiveOperation StoreFormat = new MmlPrimitiveOperation() { Name = "__STORE_FORMAT" };
+		public static readonly MmlPrimitiveOperation Format = new MmlPrimitiveOperation() { Name = "__FORMAT" };
+		public static readonly MmlPrimitiveOperation Apply = new MmlPrimitiveOperation() { Name = "__APPLY" };
+		public static readonly MmlPrimitiveOperation Midi = new MmlPrimitiveOperation() { Name = "__MIDI" };
+		public static readonly MmlPrimitiveOperation SyncNoteOffWithNext = new MmlPrimitiveOperation() { Name = "__SYNC_NOFF_WITH_NEXT" };
+		public static readonly MmlPrimitiveOperation OnMidiNoteOff = new MmlPrimitiveOperation() { Name = "__ON_MIDI_NOTE_OFF" };
+		public static readonly MmlPrimitiveOperation MidiMeta = new MmlPrimitiveOperation() { Name = "__MIDI_META" };
+		public static readonly MmlPrimitiveOperation SaveOperationBegin = new MmlPrimitiveOperation() { Name = "__SAVE_OPER_BEGIN" };
+		public static readonly MmlPrimitiveOperation SaveOperationEnd = new MmlPrimitiveOperation() { Name = "__SAVE_OPER_END" };
+		public static readonly MmlPrimitiveOperation RestoreOperation = new MmlPrimitiveOperation() { Name = "__RESTORE_OPER" };
+		public static readonly MmlPrimitiveOperation LoopBegin = new MmlPrimitiveOperation() { Name = "__LOOP_BEGIN" };
+		public static readonly MmlPrimitiveOperation LoopBreak = new MmlPrimitiveOperation() { Name = "__LOOP_BREAK" };
+		public static readonly MmlPrimitiveOperation LoopEnd = new MmlPrimitiveOperation() { Name = "__LOOP_END" };
+#if !UNHACK_LOOP
+		public static readonly MmlPrimitiveOperation LoopBegin2 = new MmlPrimitiveOperation() { Name = "[" };
+		public static readonly MmlPrimitiveOperation LoopBreak2 = new MmlPrimitiveOperation() { Name = ":" };
+		public static readonly MmlPrimitiveOperation LoopBreak3 = new MmlPrimitiveOperation() { Name = "/" };
+		public static readonly MmlPrimitiveOperation LoopEnd2 = new MmlPrimitiveOperation() { Name = "]" };
+#endif
+
 		static MmlPrimitiveOperation ()
 		{
-			var l = new List<MmlPrimitiveOperation> ();
-			//l.Add (new MmlPrimitiveOperation () { Name = "__LOCATE"});
-			//l.Add (new MmlPrimitiveOperation () { Name = "__UNLOCATE"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__PRINT"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__LET"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__STORE"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__STORE_FORMAT"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__FORMAT"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__APPLY"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__SYNC_NOFF_WITH_NEXT"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__ON_MIDI_NOTE_OFF"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__MIDI_META"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__SAVE_OPER_BEGIN"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__SAVE_OPER_END"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__RESTORE_OPER"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_BEGIN"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_BREAK"});
-			l.Add (new MmlPrimitiveOperation () { Name = "__LOOP_END"});
+			All = new MmlPrimitiveOperation [] {
+				Print, Let, Store, StoreFormat, Format, Apply, Midi, SyncNoteOffWithNext, OnMidiNoteOff,
+				MidiMeta, SaveOperationBegin, SaveOperationEnd, RestoreOperation, LoopBegin, LoopBreak, LoopEnd,
 #if !UNHACK_LOOP
-			l.Add (new MmlPrimitiveOperation () { Name = "["});
-			l.Add (new MmlPrimitiveOperation () { Name = ":"});
-			l.Add (new MmlPrimitiveOperation () { Name = "/"});
-			l.Add (new MmlPrimitiveOperation () { Name = "]"});
+				LoopBegin2, LoopBreak2, LoopBreak3, LoopEnd2
 #endif
-//			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_DEF"}); // internal use
-//			l.Add (new MmlPrimitiveOperation () { Name = "__MACRO_ARG_UNDEF"}); // internal use
-			All = l;
+				}.ToList ();
 		}
 
 		public string Name { get; set; }
