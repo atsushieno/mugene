@@ -381,14 +381,6 @@ namespace Commons.Music.Midi.Mml
 		public Dictionary<MmlSemanticVariable,object> Values { get; internal set; }
 		public Stack<Loop> Loops { get; private set; }
 
-		public int StoreIndex { get; set; } = -1;
-		public IList<MmlResolvedEvent> StoreCurrentOutput { get; set; }
-		public IList<MmlResolvedEvent> StoreDummy { get; set; } = new List<MmlResolvedEvent> ();
-		public StoredOperations CurrentStoredOperations { get; set; }
-		public IList<MmlResolvedEvent> CurrentOutput { get; set; } = new List<MmlResolvedEvent> ();
-
-		public Stack<MmlSemanticMacro> MacroExpansionStack = new Stack<MmlSemanticMacro> ();
-
 		public Loop CurrentLoop {
 			get { return Loops.Count > 0 ? Loops.Peek () : null; }
 		}
@@ -423,6 +415,7 @@ namespace Commons.Music.Midi.Mml
 		MmlSemanticTreeSet source;
 		MmlResolveContext global_context;
 		MmlResolvedMusic result;
+		List<MmlResolvedEvent> current_output;
 		TextWriter DebugPrint = Console.Out;
 
 		void Generate ()
@@ -434,13 +427,32 @@ namespace Commons.Music.Midi.Mml
 				result.Tracks.Add (rtrk);
 				var tctx = new MmlResolveContext (source, global_context);
 				var list = track.Data;
-				tctx.CurrentOutput = rtrk.Events;
+				current_output = rtrk.Events;
 				ProcessOperations (rtrk, tctx, list, 0, list.Count, null);
-				Sort (tctx.CurrentOutput);
-				foreach (var ev in tctx.CurrentOutput)
+				Sort (current_output);
+				foreach (var ev in current_output)
 					Util.DebugWriter.WriteLine ("{0} {1} {2}", ev.Tick, ev.Operation, ev.Arguments.Count);
 			}
 		}
+
+		List<MmlResolvedEvent> chord = new List<MmlResolvedEvent> ();
+		bool recordNextAsChord;
+		Dictionary<int,StoredOperations> stored_operations = new Dictionary<int,StoredOperations> ();
+
+		class StoredOperations
+		{
+			public StoredOperations ()
+			{
+			}
+			
+			public List<MmlOperationUse> Operations { get; set; }
+			public Dictionary<MmlSemanticVariable,object> Values { get; set; }
+			public Hashtable MacroArguments { get; set; }
+		}
+
+		Stack<MmlLineInfo> locations = new Stack<MmlLineInfo> ();
+
+		MmlLineInfo location { get { return locations.Count > 0 ? locations.Peek () : null; } }
 
 		// extraTailArgs is a list of arguments that are passed to the context macro call e.g.
 		//   #macro CHORD_A c0e0g
@@ -452,10 +464,10 @@ namespace Commons.Music.Midi.Mml
 		// you know the macro definition details (which almost no one would know).
 		void ProcessOperations (MmlResolvedTrack track, MmlResolveContext rctx, List<MmlOperationUse> list, int start, int count, IEnumerable<MmlValueExpr> extraTailArgs)
 		{
+			int storeIndex = -1;
+			List<MmlResolvedEvent> storeCurrentOutput = null, storeDummy = new List<MmlResolvedEvent> ();
+			StoredOperations currentStoredOperations = null;
 			bool is_string_format = false;
-			bool recordNextAsChord = false;
-			List<MmlResolvedEvent> chord = new List<MmlResolvedEvent>();
-			Dictionary<int, StoredOperations> stored_operations = new Dictionary<int, StoredOperations>();
 
 			for (int listIndex = start; listIndex < start + count; listIndex++) {
 				var oper = list [listIndex];
@@ -472,7 +484,7 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					oper.Arguments [1].Resolve (rctx, variable.Type);
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
 					if (name == "__timeline_position")
@@ -485,9 +497,9 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (variable.Type != MmlDataType.Buffer)
-						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
+						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
 					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
 					for (int i = 1; i < oper.Arguments.Count; i++)
 						sb.Append (oper.Arguments [i].StringValue);
@@ -504,13 +516,13 @@ namespace Commons.Music.Midi.Mml
 					string format = oper.Arguments [1].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables [name];
 					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
+						throw new MmlException (String.Format ("Target variable not found: {0}", name), location);
 					if (is_string_format) {
 						if (variable.Type != MmlDataType.String)
-							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), oper.Location);
+							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), location);
 					} else {
 						if (variable.Type != MmlDataType.Buffer)
-							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
+							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), location);
 					}
 					try {
 						string v = string.Format (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.StringValue).ToArray ());
@@ -519,7 +531,7 @@ namespace Commons.Music.Midi.Mml
 						else
 							((StringBuilder) rctx.EnsureDefaultResolvedVariable (variable)).Append (v);
 					} catch (FormatException ex) {
-						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), oper.Location);
+						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), location);
 					}
 					break;
 					}
@@ -540,7 +552,7 @@ namespace Commons.Music.Midi.Mml
 					var mop = new MmlResolvedEvent ("MIDI", rctx.TimelinePosition);
 					foreach (var arg in oper.Arguments)
 						mop.Arguments.Add (arg.ByteValue);
-					rctx.CurrentOutput.Add (mop);
+					current_output.Add (mop);
 					if (recordNextAsChord)
 						chord.Add (mop);
 					recordNextAsChord = false;
@@ -566,29 +578,29 @@ namespace Commons.Music.Midi.Mml
 					mmop.Arguments.Add (0xFF);
 					foreach (var arg in oper.Arguments)
 						mmop.Arguments.AddRange (arg.ByteArrayValue);
-					rctx.CurrentOutput.Add (mmop);
+					current_output.Add (mmop);
 					break;
 				case "__SAVE_OPER_BEGIN":
 					oper.ValidateArguments (rctx, 0);
-					if (rctx.StoreIndex >= 0)
+					if (storeIndex >= 0)
 						throw new MmlException ("__SAVE_OPER_BEGIN works only within a simple list", oper.Location);
-					rctx.StoreIndex = listIndex + 1;
-					rctx.StoreCurrentOutput = rctx.CurrentOutput;
-					rctx.CurrentOutput = rctx.StoreDummy;
-					rctx.CurrentStoredOperations = new StoredOperations ();
-					rctx.CurrentStoredOperations.Values = new Dictionary<MmlSemanticVariable, object> (rctx.Values);
-					rctx.CurrentStoredOperations.MacroArguments = (Hashtable) rctx.MacroArguments.Clone ();
+					storeIndex = listIndex + 1;
+					storeCurrentOutput = current_output;
+					current_output = storeDummy;
+					currentStoredOperations = new StoredOperations ();
+					currentStoredOperations.Values = new Dictionary<MmlSemanticVariable, object> (rctx.Values);
+					currentStoredOperations.MacroArguments = (Hashtable) rctx.MacroArguments.Clone ();
 					break;
 				case "__SAVE_OPER_END": {
 					oper.ValidateArguments (rctx, 1, MmlDataType.Number);
 					int bufIdx = oper.Arguments [0].IntValue;
-					stored_operations [bufIdx] = rctx.CurrentStoredOperations;
-					rctx.CurrentStoredOperations.Operations =
-						new List<MmlOperationUse> (list.Skip (rctx.StoreIndex).Take (listIndex - rctx.StoreIndex - 1));
-					rctx.CurrentOutput = rctx.StoreCurrentOutput;
-					rctx.StoreDummy.Clear ();
-					rctx.StoreIndex = -1;
-					rctx.CurrentStoredOperations = null;
+					stored_operations [bufIdx] = currentStoredOperations;
+					currentStoredOperations.Operations =
+						new List<MmlOperationUse> (list.Skip (storeIndex).Take (listIndex - storeIndex - 1));
+					current_output = storeCurrentOutput;
+					storeDummy.Clear ();
+					storeIndex = -1;
+					currentStoredOperations = null;
 					// FIXME: might be better to restore variables
 					break;
 					}
@@ -612,12 +624,12 @@ namespace Commons.Music.Midi.Mml
 				case "[":
 #endif
 					oper.ValidateArguments (rctx, 0);
-					var loop = new Loop (rctx) { BeginAt= new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition) };
+					var loop = new Loop (rctx) { BeginAt= new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition) };
 					rctx.Values = new Dictionary<MmlSemanticVariable,object> (loop.SavedValues.Count);
 					foreach (var p in loop.SavedValues)
 						rctx.Values.Add (p.Key, p.Value);
 					rctx.Loops.Push (loop);
-					rctx.CurrentOutput = loop.Events;
+					current_output = loop.Events;
 					break;
 				case "__LOOP_BREAK":
 #if !UNHACK_LOOP
@@ -627,18 +639,18 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", oper.Location);
+						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", location);
 					if (loop.FirstBreakAt == null)
-						loop.FirstBreakAt = new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition);
+						loop.FirstBreakAt = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					foreach (var cl in loop.CurrentBreaks)
-						loop.EndLocations [cl] = new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition);
+						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					loop.CurrentBreaks.Clear ();
 
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
 						if (loop.Breaks.ContainsKey (-1) && loop.Breaks.Values.All (b => b.Source != listIndex))
-							throw new MmlException ("Default loop break is already defined in current loop", oper.Location);
-						loop.Breaks.Add (-1, new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition));
+							throw new MmlException ("Default loop break is already defined in current loop", location);
+						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
 					} else {
 						for (int x = 0; x < oper.Arguments.Count; x++) {
@@ -648,9 +660,9 @@ namespace Commons.Music.Midi.Mml
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);
 							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex))
-								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), oper.Location);
+								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), location);
 							// specified loop count is for human users. Here the number is for program, hence -1.
-							loop.Breaks.Add (num, new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition));
+							loop.Breaks.Add (num, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						}
 					}
 					break;
@@ -661,9 +673,9 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, 0, MmlDataType.Number);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						throw new MmlException ("Loop has not started", oper.Location);
+						throw new MmlException ("Loop has not started", location);
 					foreach (var cl in loop.CurrentBreaks)
-						loop.EndLocations [cl] = new LoopLocation (listIndex, rctx.CurrentOutput.Count, rctx.TimelinePosition);
+						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					int loopCount;
 					switch (oper.Arguments.Count) {
 					case 0:
@@ -673,12 +685,12 @@ namespace Commons.Music.Midi.Mml
 						loopCount = oper.Arguments [0].IntValue;
 						break;
 					default:
-						throw new MmlException ("Arguments at loop end exceeded", oper.Location);
+						throw new MmlException ("Arguments at loop end exceeded", location);
 					}
 					
 					rctx.Loops.Pop ();
 					var outside = rctx.CurrentLoop;
-					rctx.CurrentOutput = outside != null ? outside.Events : track.Events;
+					current_output = outside != null ? outside.Events : track.Events;
 
 					// now expand loop.
 					// - verify that every loop break does not exceed the loop count
@@ -735,6 +747,8 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 		
+		Stack<MmlSemanticMacro> expansion_stack = new  Stack<MmlSemanticMacro> ();
+
 		List<Hashtable> arg_caches = new List<Hashtable> ();
 		int cache_stack_num;
 
@@ -742,10 +756,10 @@ namespace Commons.Music.Midi.Mml
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
 			if (macro == null)
-				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), oper.Location);
-			if (ctx.MacroExpansionStack.Contains (macro))
+				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), location);
+			if (expansion_stack.Contains (macro))
 				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
-			ctx.MacroExpansionStack.Push (macro);
+			expansion_stack.Push (macro);
 
 			if (cache_stack_num == arg_caches.Count)
 				arg_caches.Add (new Hashtable ());
@@ -767,12 +781,12 @@ namespace Commons.Music.Midi.Mml
 			ProcessOperations (track, ctx, macro.Data, 0, macro.Data.Count, extraTailArgsToCall);
 			ctx.MacroArguments = argsBak;
 			
-			ctx.MacroExpansionStack.Pop ();
+			expansion_stack.Pop ();
 			args.Clear ();
 			--cache_stack_num;
 		}
 
-		void Sort (IList<MmlResolvedEvent> l)
+		void Sort (List<MmlResolvedEvent> l)
 		{
 			var msgBlockByTime = new Dictionary<int,List<MmlResolvedEvent>> ();
 			int m = 0;
@@ -793,21 +807,10 @@ namespace Commons.Music.Midi.Mml
 			}
 			
 			l.Clear ();
-			foreach (var s in msgBlockByTime.OrderBy (kvp => kvp.Key).SelectMany (kvp => kvp.Value))
-				l.Add (s);
+			foreach (var sl in msgBlockByTime.OrderBy (kvp => kvp.Key).Select (kvp => kvp.Value))
+				l.AddRange (sl);
 		}
 	}
 
 	#endregion
-
-	public class StoredOperations
-	{
-		public StoredOperations()
-		{
-		}
-
-		public List<MmlOperationUse> Operations { get; set; }
-		public Dictionary<MmlSemanticVariable, object> Values { get; set; }
-		public Hashtable MacroArguments { get; set; }
-	}
 }
