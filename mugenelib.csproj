@@ -46,16 +46,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="src\mml_parser.jay" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
     <Reference Include="System" />
+    <Reference Include="Commons.Music.Midi">
+      <HintPath>packages\managed-midi.1.0.0.3\lib\net45\Commons.Music.Midi.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\SMF.cs" />
     <Compile Include="src\mml_variable_processor.cs" />
     <Compile Include="src\mml_tokenizer.cs" />
     <Compile Include="src\mml_smf_generator.cs" />

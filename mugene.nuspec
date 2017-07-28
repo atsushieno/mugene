@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>mugene</id>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <authors>Atsushi Eno</authors>
     <owners>Atsushi Eno</owners>
     <licenseUrl>https://github.com/atsushieno/mugene/LICENSE</licenseUrl>
