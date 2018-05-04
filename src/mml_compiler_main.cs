@@ -168,13 +168,33 @@ Options:
 			Console.WriteLine ("Written SMF file ... {0}", outfilename);
 		}
 
+		public class MmlCompilerOptions
+		{
+			public bool SkipDefaultMmlFiles { get; set; }
+			public bool DisableRunningStatus { get; set; }
+			public bool UseVsqMetadata { get; set; }
+			public Func<bool, MidiMessage, Stream, int> MetaWriter { get; set; }
+		}
+
 		public void Compile (bool skipDefaultMmlFiles, IList<MmlInputSource> inputs, Func<bool, MidiMessage, Stream, int> metaWriter, Stream output, bool disableRunningStatus)
 		{
+			var music = Compile (skipDefaultMmlFiles, inputs.ToArray ());
+			music.Save (output, disableRunningStatus, metaWriter);
+		}
+
+		public MidiMusic Compile (bool skipDefaultMmlFiles, params string [] mmlParts)
+		{
+			var sources = mmlParts.Select (mml => new MmlInputSource ("<string>", new StringReader (mml)));
+			return Compile (skipDefaultMmlFiles, sources);
+		}
+
+		public MidiMusic Compile (bool skipDefaultMmlFiles, IEnumerable<MmlInputSource> inputs)
+		{
 			if (!skipDefaultMmlFiles)
-				inputs = Util.DefaultIncludes.Select (f => new MmlInputSource (f, Resolver.Resolve (f))).Concat (inputs).ToList ();
+				inputs = Util.DefaultIncludes.Select (f => new MmlInputSource (f, Resolver.Resolve (f))).Concat (inputs);
 
 			// input sources -> tokenizer sources
-			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs);
+			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs.ToArray ());
 
 			// tokenizer sources -> token streams
 			var tokens = MmlTokenizer.Tokenize (tokenizerSources);
@@ -191,12 +211,7 @@ Options:
 			// raw events -> SMF
 			var smf = MmlSmfGenerator.Generate (resolved);
 
-			// output
-			var w = new SmfWriter (output);
-			w.DisableRunningStatus = disableRunningStatus;
-			if (metaWriter != null)
-				w.MetaEventWriter = metaWriter;
-			w.WriteMusic (smf);
+			return smf;
 		}
 	}
 
@@ -310,6 +325,24 @@ Options:
 		public MmlException (string message, MmlLineInfo location, Exception innerException)
 			: base (FormatMessage (message, location), innerException)
 		{
+		}
+	}
+
+	public static class SmfExtensions
+	{
+		public static void Save (this MidiMusic music, Stream output, bool disableRunningStatus = false, Func<bool, MidiMessage, Stream, int> metaWriter = null)
+		{
+			var writer = new SmfWriter (output) { DisableRunningStatus = disableRunningStatus };
+			if (metaWriter != null)
+				writer.MetaEventWriter = metaWriter;
+			writer.WriteMusic (music);
+		}
+
+		public static byte [] ToBytes (this MidiMusic music, bool disableRunningStatus = false, Func<bool, MidiMessage, Stream, int> metaWriter = null)
+		{
+			var ms = new MemoryStream ();
+			Save (music, ms, disableRunningStatus, metaWriter);
+			return ms.ToArray ();
 		}
 	}
 }

@@ -357,7 +357,7 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlInputSourceReader
 	{
-		public static MmlTokenizerSource Parse (MmlCompiler compiler, IList<MmlInputSource> inputs)
+		public static MmlTokenizerSource Parse (MmlCompiler compiler, IEnumerable<MmlInputSource> inputs)
 		{
 			var r = new MmlInputSourceReader (compiler);
 			r.Process (inputs);
@@ -391,20 +391,22 @@ namespace Commons.Music.Midi.Mml
 				return TrimComments (s, idx3 + 1); // skip this literal. There still may be another literal to care.
 		}
 
-		public void Process (IList<MmlInputSource> inputs)
+		public void Process (IEnumerable<MmlInputSource> inputs)
 		{
 			result = new MmlTokenizerSource ();
 			DoProcess (inputs);
 		}
 
-		void DoProcess (IList<MmlInputSource> inputs)
+		void DoProcess (IEnumerable<MmlInputSource> inputs)
 		{
-			for (int i = 0; i < inputs.Count; i++) {
+			var inputList = inputs.ToList ();
+
+			for (int i = 0; i < inputList.Count; i++) {
 				int line = 0;
 				string s = String.Empty;
 				MmlSourceLineSet ls = null;
 				// inputs could grow up.
-				var input = inputs [i];
+				var input = inputList [i];
 				bool continued = false;
 				while (true) {
 					s = input.Reader.ReadLine ();

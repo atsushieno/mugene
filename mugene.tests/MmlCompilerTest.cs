@@ -96,6 +96,15 @@ B	a1
 #macro CHORD_A { c0e0g }
 1  o5 l4 CHORD_A8 CHORD_A8 CHORD_A ASSERT_STEP96");
 		}
+
+		[Test]
+		public void EvenSimplerCompilation ()
+		{
+			var bytes = new MmlCompiler ().Compile (false, "1   v120 o4 @0 c4e4g4>c4").ToBytes ();
+			var result = string.Concat (bytes.Select (b => b.ToString ("X")));
+			Console.WriteLine(result);
+			Assert.AreEqual ("00C000903078308030009034783080340090377830803700903C7830803C00FF2F0", result.Substring (40), "MIDI bytes");
+		}
 	}
 }
 
