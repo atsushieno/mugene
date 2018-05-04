@@ -1,1 +1,1 @@
-jay/jay -tc < jay/skeleton.cs src/mml_parser.jay > src/mml_parser.cs
+wine jay/jay.exe -tc < jay/skeleton.cs mugenelib/src/mml_parser.jay > mugenelib/src/mml_parser.cs

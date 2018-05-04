@@ -1,0 +1,15 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework> 
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\mugene\*.cs" />
+    <PackageReference Include="managed-midi" Version="1.1.0" />
+    <ProjectReference Include="..\..\mugenelib\mugenelib.csproj" />
+  </ItemGroup>
+
+</Project>
+

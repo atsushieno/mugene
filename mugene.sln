@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugenelib", "mugenelib.csproj", "{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugenelib", "mugenelib\mugenelib.csproj", "{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene-decompiler", "mugene-decompiler\mugene-decompiler.csproj", "{782350E4-8F50-456B-A5C6-2A9565751B3E}"
 EndProject

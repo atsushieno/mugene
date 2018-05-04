@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Commons.Music.Midi.Mml.Tests</RootNamespace>
     <AssemblyName>mugene.tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <ReleaseVersion>0.7</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -51,7 +51,7 @@
     <Compile Include="MmlTestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mugenelib.csproj">
+    <ProjectReference Include="..\mugenelib\mugenelib.csproj">
       <Project>{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}</Project>
       <Name>mugenelib</Name>
     </ProjectReference>
