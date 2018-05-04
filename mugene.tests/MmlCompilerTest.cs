@@ -40,31 +40,35 @@ B	a1
 		}
 
 		[Test]
-		[ExpectedException (typeof (MmlException))]
 		public void UnexpectedLoopBreak ()
 		{
-			MmlTestUtility.TestCompile ("UnexpectedLoopBreak", @"1  c4 :1 d");
+			Assert.Throws<MmlException> (delegate {
+				MmlTestUtility.TestCompile("UnexpectedLoopBreak", @"1  c4 :1 d");
+			});
 		}
 
 		[Test]
-		[ExpectedException (typeof (MmlException))]
 		public void UnexpectedLoopClose ()
 		{
-			MmlTestUtility.TestCompile ("UnexpectedLoopClose", @"1  c4 ]2");
+			Assert.Throws<MmlException>(delegate {
+				MmlTestUtility.TestCompile("UnexpectedLoopClose", @"1  c4 ]2");
+			});
 		}
 
 		[Test]
-		[ExpectedException (typeof (MmlException))]
 		public void MissingLoopClose ()
 		{
-			MmlTestUtility.TestCompile ("MissingLoopClose", @"1  [ c4 ");
+			Assert.Throws<MmlException> (delegate {
+				MmlTestUtility.TestCompile("MissingLoopClose", @"1  [ c4 ");
+			});
 		}
 
 		[Test]
-		[ExpectedException (typeof (MmlException))]
 		public void LoopBreaksBeyondLoopCount ()
 		{
-			MmlTestUtility.TestCompile ("LoopBreaksBeyondLoopCount", @"1  [ c4 :1 d :2 e :3 f :4 g  ]2");
+			Assert.Throws<MmlException> (delegate {
+				MmlTestUtility.TestCompile("LoopBreaksBeyondLoopCount", @"1  [ c4 :1 d :2 e :3 f :4 g  ]2");
+			});
 		}
 
 		[Test]

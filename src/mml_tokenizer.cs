@@ -157,7 +157,15 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract class StreamResolver
 	{
-		public abstract TextReader Resolve (string uri);
+		public virtual TextReader Resolve (string file)
+		{
+			var ret = OnResolve (file);
+			if (ret == null)
+				throw new IOException ($"MML stream {file} could not be resolved.");
+			return ret;
+		}
+
+		protected internal abstract TextReader OnResolve (string file);
 		
 		Stack<string> includes = new Stack<string> ();
 
@@ -174,17 +182,46 @@ namespace Commons.Music.Midi.Mml
 		}
 	}
 
-	public class FileStreamResolver : StreamResolver
+	public class MergeStreamResolver : StreamResolver
 	{
-		public override TextReader Resolve (string uri)
+		StreamResolver [] resolvers;
+
+		public MergeStreamResolver (params StreamResolver [] resolvers)
 		{
-			if (File.Exists (uri))
-				return File.OpenText (uri);
-			string commonPath = Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", uri);
+			this.resolvers = resolvers;
+		}
+
+		protected internal override TextReader OnResolve (string file)
+		{
+			foreach (var r in resolvers) {
+				var ret = r.OnResolve (file);
+				if (ret != null)
+					return ret;
+			}
+			return null;
+		}
+	}
+
+	public class ManifestResourceStreamResolver : StreamResolver
+	{
+		protected internal override TextReader OnResolve (string file)
+		{
+			var res = GetType ().Assembly.GetManifestResourceStream (file);
+			return res == null ? null : new StreamReader (res);
+		}
+	}
+
+	public class LocalFileStreamResolver : StreamResolver
+	{
+		protected internal override TextReader OnResolve (string file)
+		{
+			if (File.Exists (file))
+				return File.OpenText (file);
+			string commonPath = Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", file);
 			if (File.Exists (commonPath))
 				return File.OpenText (commonPath);
 			else
-				return File.OpenText (uri);
+				return null;
 		}
 	}
 

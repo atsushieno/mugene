@@ -35,7 +35,7 @@ namespace Commons.Music.Midi.Mml
 		{
 		}
 
-		StreamResolver resolver = new FileStreamResolver ();
+		StreamResolver resolver = new MergeStreamResolver (new LocalFileStreamResolver (), new ManifestResourceStreamResolver ());
 		bool verbose;
 
 		public StreamResolver Resolver {

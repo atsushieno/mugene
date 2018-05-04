@@ -8,7 +8,7 @@
     <ProjectGuid>{8D80C66C-C7E4-472F-AF36-C73558A3C1A2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>mugenelib</AssemblyName>
-    <ReleaseVersion>0.5</ReleaseVersion>
+    <ReleaseVersion>0.7</ReleaseVersion>
     <RootNamespace>mugenelib</RootNamespace>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -30,29 +30,17 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="mml\default-macro.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\drum-part.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\gs-sysex.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\nrpn-gs-xg.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mml\vsq-support.mml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="src\mml_parser.jay" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
     <Reference Include="System" />
+    <Reference Include="alsa-sharp">
+      <HintPath>packages\managed-midi.1.1.0\lib\net45\alsa-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="Commons.Music.Midi">
-      <HintPath>packages\managed-midi.1.0.0.3\lib\net45\Commons.Music.Midi.dll</HintPath>
+      <HintPath>packages\managed-midi.1.1.0\lib\net45\Commons.Music.Midi.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -67,5 +55,27 @@
     <Compile Include="src\mml_macro_expander.cs" />
     <Compile Include="src\mml_compiler_main.cs" />
     <Compile Include="src\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="mml\default-macro.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>default-macro.mml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="mml\drum-part.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>drum-part.mml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="mml\gs-sysex.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>gs-sysex.mml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="mml\nrpn-gs-xg.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>nrpn-gs-xg.mml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="mml\vsq-support.mml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>vsq-support.mml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
