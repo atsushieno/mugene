@@ -29,6 +29,8 @@
     <file src="mugene/bin/Debug/mml/gs-sysex.mml" target="lib/net45/mml" />
     <file src="mugene/bin/Debug/mml/nrpn-gs-xg.mml" target="lib/net45/mml" />
     <file src="mugene/bin/Debug/mml/vsq-support.mml" target="lib/net45/mml" />
+    <file src="mugenelib/bin/Debug/netstandard2.0/mugenelib.dll" target="lib/netstandard2.0" />
+    <file src="mugenelib/bin/Debug/netstandard2.0/mugenelib.pdb" target="lib/netstandard2.0" />
   </files>
 </package>
 
