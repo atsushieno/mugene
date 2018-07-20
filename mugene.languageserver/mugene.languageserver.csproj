@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ReleaseVersion>0.7</ReleaseVersion>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\mugenelib\mugenelib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="LanguageServerProtocol" Version="2.0.2" />
+  </ItemGroup>
+</Project>

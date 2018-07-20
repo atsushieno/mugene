@@ -1,0 +1,17 @@
+{
+	"name": "lsp-sample",
+	"description": "Example implementation of a language server in node.",
+	"version": "0.0.1",
+	"author": "atsushieno",
+	"license": "MIT",
+	"engines": {
+		"node": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/atsushieno/mugene"
+	},
+	"scripts": {
+		"compile": "nuget restore ../../mugene.sln && msbuild ../../mugene.sln"
+	}
+}
