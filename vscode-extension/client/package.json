@@ -20,14 +20,15 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "languages": [{
+      "id": "mugene",
+      "extensions": [ ".mugene" ],
+      "aliases": ["Mugene", "mugene"],
+      "mimetypes": ["text/x-mugene"]
+    }],
     "configuration": {
       "type": "object",
       "title": "Mugene LSP configuration",
-      "languages": [{
-        "id": "mugene",
-        "extensions": [ ".mugene" ],
-        "aliases": ["Mugene", "mugene"]
-      }],
       "properties": {
         "mugeneLSP.maxNumberOfProblems": {
           "scope": "resource",
