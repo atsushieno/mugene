@@ -12,14 +12,6 @@ using LanguageServer.Parameters.Workspace;
 
 namespace Commons.Music.Midi.Mml
 {
-	public class MugeneLanguageService
-	{
-		public static void Main ()
-		{
-			new MugeneServiceConnection (Console.OpenStandardInput (), Console.OpenStandardOutput ()).Listen ().Wait ();
-		}
-	}
-
 	public class MugeneServiceConnection : ServiceConnection {
 		public MugeneServiceConnection (Stream input, Stream output)
 			: base (input, output)

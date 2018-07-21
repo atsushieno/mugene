@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene", "mugene\mugene.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver", "mugene.languageserver\mugene.languageserver.csproj", "{A8C9FF2D-927B-4ACF-8407-3595DA234E96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tool", "mugene.languageserver.tool\mugene.languageserver.tool.csproj", "{83388180-C66E-4B3B-BC25-2321B37CF4DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{A8C9FF2D-927B-4ACF-8407-3595DA234E96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8C9FF2D-927B-4ACF-8407-3595DA234E96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8C9FF2D-927B-4ACF-8407-3595DA234E96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = mugene\mugene.csproj

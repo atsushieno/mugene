@@ -13,7 +13,7 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-lan
 export function activate(context: ExtensionContext) {
 
 	// The server is implemented in C#
-	let serverCommand = context.asAbsolutePath(path.join('server', 'SampleServer.exe'));
+	let serverCommand = context.asAbsolutePath(path.join('server', 'mugene.languageserver.tool.exe'));
 	let commandOptions = { stdio: 'pipe' };
 	
 	// If the extension is launched in debug mode then the debug server options are used
