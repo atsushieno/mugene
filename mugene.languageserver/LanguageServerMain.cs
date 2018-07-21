@@ -167,7 +167,7 @@ namespace Commons.Music.Midi.Mml
 					location = new Location { Uri = p.textDocument.uri, range = ToRange (macro.Location, null) }
 				});
 			}
-			foreach (var variable in semantic_tree.Variables.Where (v => p.textDocument.uri.LocalPath == v.Location.File)) {
+			foreach (var variable in semantic_tree.Variables.Values.Where (v => p.textDocument.uri.LocalPath == v.Location.File)) {
 				results.Add (new SymbolInformation {
 					kind = SymbolKind.Variable,
 					name = variable.Name,

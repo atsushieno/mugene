@@ -9,10 +9,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize></Optimize>
     <WarningLevel></WarningLevel>
-    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="managed-midi" Version="1.1.0" />
+    <PackageReference Include="managed-midi" Version="1.2.1" />
     <EmbeddedResource Include="mml/*.mml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>%(Filename)%(Extension)</LogicalName>
