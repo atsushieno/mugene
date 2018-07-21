@@ -1,17 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework> 
-    <ReleaseVersion>0.7</ReleaseVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize></Optimize>
-    <WarningLevel></WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="managed-midi" Version="1.2.1" />
+    <PackageReference Include="managed-midi" Version="1.2.2" />
     <EmbeddedResource Include="mml/*.mml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>%(Filename)%(Extension)</LogicalName>
@@ -19,4 +12,3 @@
   </ItemGroup>
 
 </Project>
-

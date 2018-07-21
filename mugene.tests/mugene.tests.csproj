@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Commons.Music.Midi.Mml.Tests</RootNamespace>
     <AssemblyName>mugene.tests</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <ReleaseVersion>0.7</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,15 +41,6 @@
     <Reference Include="Commons.Music.Midi">
       <HintPath>..\packages\managed-midi.1.2.1\lib\net45\Commons.Music.Midi.dll</HintPath>
     </Reference>
-    <Reference Include="Matarillo.IO">
-      <HintPath>..\packages\Matarillo.IO.1.0.0\lib\netstandard1.1\Matarillo.IO.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="LanguageServer">
-      <HintPath>..\packages\LanguageServerProtocol.2.0.2\lib\netstandard1.3\LanguageServer.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -68,6 +59,10 @@
     <ProjectReference Include="..\mugene.languageserver\mugene.languageserver.csproj">
       <Project>{A8C9FF2D-927B-4ACF-8407-3595DA234E96}</Project>
       <Name>mugene.languageserver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\external\Private.LanguageServer.csproj">
+      <Project>{EC564FE9-F001-416D-9FA8-513047B4BB7E}</Project>
+      <Name>Private.LanguageServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
