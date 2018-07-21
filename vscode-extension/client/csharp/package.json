@@ -1,7 +1,7 @@
 {
-	"name": "lsp-sample",
+	"name": "mugene-lsp-managed",
 	"description": "Example implementation of a language server in node.",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"author": "atsushieno",
 	"license": "MIT",
 	"engines": {
@@ -12,6 +12,6 @@
 		"url": "https://github.com/atsushieno/mugene"
 	},
 	"scripts": {
-		"compile": "cd ../.. && dotnet restore && dotnet build mugene.languageserver/mugene.languageserver.csproj && cd vscode-extension/server/mugene.languageserver.tool/ && msbuild"
+		"compile": "cd ../../../ && dotnet restore && dotnet build mugene.languageserver/mugene.languageserver.csproj && cd vscode-extension/client/csharp/ && msbuild"
 	}
 }
