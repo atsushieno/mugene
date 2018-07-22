@@ -23,7 +23,7 @@
     "languages": [{
       "id": "mugene",
       "extensions": [ ".mugene" ],
-      "aliases": ["Mugene", "mugene"],
+      "aliases": ["mugene", "Mugene"],
       "mimetypes": ["text/x-mugene"]
     }],
     "configuration": {

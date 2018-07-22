@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver", "mu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Private.LanguageServer", "external\Private.LanguageServer.csproj", "{EC564FE9-F001-416D-9FA8-513047B4BB7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tests", "mugene.languageserver.tests\mugene.languageserver.tests.csproj", "{158126F2-50A9-4C95-83D8-746F34340CEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tool", "vscode-extension\client\csharp\mugene.languageserver.tool.csproj", "{83388180-C66E-4B3B-BC25-2321B37CF4DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,14 @@ Global
 		{EC564FE9-F001-416D-9FA8-513047B4BB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC564FE9-F001-416D-9FA8-513047B4BB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC564FE9-F001-416D-9FA8-513047B4BB7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{158126F2-50A9-4C95-83D8-746F34340CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{158126F2-50A9-4C95-83D8-746F34340CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{158126F2-50A9-4C95-83D8-746F34340CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{158126F2-50A9-4C95-83D8-746F34340CEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83388180-C66E-4B3B-BC25-2321B37CF4DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = mugene\mugene.csproj

@@ -27,7 +27,8 @@ namespace Commons.Music.Midi.Mml
 
 		IEnumerable<MmlInputSource> GetInputs ()
 		{
-			yield break;
+			foreach (var buffer in buffers)
+				yield return new MmlInputSource (buffer.Key, new StringReader (buffer.Value.ToString ()));
 		}
 
 		public void Compile ()
@@ -37,14 +38,28 @@ namespace Commons.Music.Midi.Mml
 			semantic_tree = compiler.BuildSemanticTree (tokens);
 		}
 
+		protected override VoidResult<ResponseError> Shutdown ()
+		{
+			return VoidResult<ResponseError>.Success ();
+		}
+
 		#endregion
 
 		#region editor buffer and text document change receivers
 
 		Dictionary<string, StringBuilder> buffers = new Dictionary<string, StringBuilder> ();
 
+		void EnsureDocumentOpened (Uri uri, string text)
+		{
+			if (buffers.All (a => !FileMatches (uri, a.Key)))
+				buffers [uri.LocalPath] = new StringBuilder (text ?? File.ReadAllText (uri.LocalPath));
+		}
+
 		protected override void DidOpenTextDocument (DidOpenTextDocumentParams @params)
 		{
+			var p = @params;
+			//Console.Error.WriteLine ("DidOpenTextDocument:::" + p.textDocument.uri.LocalPath);
+			EnsureDocumentOpened (p.textDocument.uri, p.textDocument.text);
 		}
 
 		static StringBuilder Replace (StringBuilder sb, Range range, string text)
@@ -118,6 +133,7 @@ namespace Commons.Music.Midi.Mml
 
 		protected override void DidCloseTextDocument (DidCloseTextDocumentParams @params)
 		{
+			buffers.Remove (@params.textDocument.uri.LocalPath);
 		}
 
 		#endregion
@@ -129,9 +145,9 @@ namespace Commons.Music.Midi.Mml
 			return Result<InitializeResult, ResponseError<InitializeErrorData>>.Success (
 				new InitializeResult () {
 					capabilities = new ServerCapabilities () {
-						definitionProvider = true,
+						//definitionProvider = true,
 						documentSymbolProvider = true,
-						hoverProvider = true,
+						//hoverProvider = true,
 					}
 				});
 		}
@@ -145,13 +161,33 @@ namespace Commons.Music.Midi.Mml
 
 		static Range ToRange (MmlLineInfo start, MmlLineInfo end) => new Range { start = ToPosition (start), end = ToPosition (end) };
 
+		string last_rel, last_full;
+		string last_matched;
+		bool FileMatches (Uri uri, string file)
+		{
+			if (file == null)
+				return false;
+			if (!object.ReferenceEquals (last_rel, file)) { // object comparison
+				last_rel = file;
+				last_full = Path.GetFullPath (file);
+				if (last_full == uri.LocalPath) // string comparison
+					last_matched = file;
+			}
+			return object.ReferenceEquals (last_matched, file); // object comparison
+		}
+
 		protected override Result<SymbolInformation [], ResponseError> DocumentSymbols (DocumentSymbolParams @params)
 		{
 			var p = @params;
+			EnsureDocumentOpened (p.textDocument.uri, null);
 			Compile ();
 			var results = new List<SymbolInformation> ();
-			// FIXME: location should not be the first data location.
-			foreach (var macro in semantic_tree.Macros.Where (m => p.textDocument.uri.LocalPath == m.Location.File)) {
+			if (p.textDocument == null)
+				throw new Exception ("textDocument");
+			if (p.textDocument.uri == null)
+				throw new Exception ("textDocument.uri");
+
+			foreach (var macro in semantic_tree.Macros.Where (m => FileMatches (p.textDocument.uri, m.Location.File))) {
 				results.Add (new SymbolInformation {
 					kind = SymbolKind.Function,
 					name = macro.Name,
@@ -159,7 +195,7 @@ namespace Commons.Music.Midi.Mml
 					location = new Location { Uri = p.textDocument.uri, range = ToRange (macro.Location, null) }
 				});
 			}
-			foreach (var variable in semantic_tree.Variables.Values.Where (v => p.textDocument.uri.LocalPath == v.Location.File)) {
+			foreach (var variable in semantic_tree.Variables.Values.Where (v => FileMatches (p.textDocument.uri, v.Location?.File))) {
 				results.Add (new SymbolInformation {
 					kind = SymbolKind.Variable,
 					name = variable.Name,
@@ -167,12 +203,10 @@ namespace Commons.Music.Midi.Mml
 					location = new Location { Uri = p.textDocument.uri, range = ToRange (variable.Location, null) }
 				});
 			}
+			//Console.Error.WriteLine ("DocumentSymbols for " + p.textDocument.uri.LocalPath);
+			//foreach (var item in results)
+			//	Console.Error.WriteLine ($"RESULT: {item.location} {item.kind} {item.name}");
 			return Result<SymbolInformation [], ResponseError>.Success (results.ToArray ());
-		}
-
-		protected override Result<Hover, ResponseError> Hover (TextDocumentPositionParams @params)
-		{
-			return base.Hover (@params);
 		}
 
 		#endregion

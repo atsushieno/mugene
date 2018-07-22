@@ -23,8 +23,8 @@ export function activate(context: ExtensionContext) {
 			run : { command: serverCommand, options: commandOptions },
 			debug: { command: serverCommand, options: commandOptions }
 		} : {
-			run : { command: 'mono', args: [serverCommand], options: commandOptions },
-			debug: { command: 'mono', args: [serverCommand], options: commandOptions }
+			run : { command: 'mono', args: ["--debug", serverCommand], options: commandOptions },
+			debug: { command: 'mono', args: ["--debug", serverCommand], options: commandOptions }
 		}
 	
 	// Options to control the language client
