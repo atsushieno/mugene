@@ -20,6 +20,8 @@ namespace Commons.Music.Midi.Mml
 
 
 		#region compiler object model
+		// FIXME: compiler should have one.
+		string project_directory = Directory.GetCurrentDirectory ();
 		MmlTokenSet tokens;
 		MmlSemanticTreeSet semantic_tree;
 
@@ -38,8 +40,14 @@ namespace Commons.Music.Midi.Mml
 			semantic_tree = compiler.BuildSemanticTree (tokens);
 		}
 
+		protected override void Exit ()
+		{
+			// FIXME: This isn't called.
+		}
+
 		protected override VoidResult<ResponseError> Shutdown ()
 		{
+			// FIXME: This isn't either. WTF?
 			return VoidResult<ResponseError>.Success ();
 		}
 
@@ -142,11 +150,16 @@ namespace Commons.Music.Midi.Mml
 
 		protected override Result<InitializeResult, ResponseError<InitializeErrorData>> Initialize (InitializeParams @params)
 		{
+			var p = @params;
+			if (p.rootUri != null)
+				EnsureDocumentOpened (p.rootUri, null);
+
 			return Result<InitializeResult, ResponseError<InitializeErrorData>>.Success (
 				new InitializeResult () {
 					capabilities = new ServerCapabilities () {
 						//definitionProvider = true,
 						documentSymbolProvider = true,
+						workspaceSymbolProvider = true,
 						//hoverProvider = true,
 					}
 				});
@@ -157,7 +170,8 @@ namespace Commons.Music.Midi.Mml
 			return base.GotoDefinition (@params);
 		}
 
-		static Position ToPosition (MmlLineInfo li) => li == null ? null : new Position { line = li.LineNumber, character = li.LinePosition };
+		// our comipler line number != LSP expected line number
+		static Position ToPosition (MmlLineInfo li) => li == null ? null : new Position { line = li.LineNumber - 1, character = li.LinePosition };
 
 		static Range ToRange (MmlLineInfo start, MmlLineInfo end) => new Range { start = ToPosition (start), end = ToPosition (end) };
 
@@ -176,36 +190,54 @@ namespace Commons.Music.Midi.Mml
 			return object.ReferenceEquals (last_matched, file); // object comparison
 		}
 
+		void AddSymbols (List<SymbolInformation> list, Func<MmlSemanticMacro, bool> macroFilter, Func<MmlSemanticVariable, bool> variableFilter)
+		{
+			foreach (var macro in semantic_tree.Macros.Where (m => macroFilter (m))) {
+				list.Add (new SymbolInformation {
+					kind = SymbolKind.Function,
+					containerName = macro.Location.File, // FIXME: specifying full path still doesn't open default macros...
+					name = macro.Name,
+					// FIXME: last location should be of an end of the token.
+					location = new Location { Uri = GetUri (macro.Location.File), range = ToRange (macro.Location, macro.Data.Last ().Location) }
+				});
+			}
+			foreach (var variable in semantic_tree.Variables.Values.Where (v => variableFilter (v) && v.Location != null)) {
+				list.Add (new SymbolInformation {
+					kind = SymbolKind.Variable,
+					containerName = variable.Location.File, // FIXME: specifying full path still doesn't open default macros...
+					name = variable.Name,
+					// FIXME: last location should be of an end of the token.
+					location = new Location { Uri = GetUri (variable.Location.File), range = ToRange (variable.Location, variable.Location) }
+				});
+			}
+		}
+
+		Dictionary<string, Uri> uri_cache = new Dictionary<string, Uri> ();
+
+		Uri GetUri (string filepath)
+		{
+			if (uri_cache.TryGetValue (filepath, out var uri))
+			    return uri;
+			uri_cache [filepath] = new Uri (Path.Combine (project_directory, filepath));
+			return GetUri (filepath);
+		}
+
+		protected override Result<SymbolInformation [], ResponseError> Symbol (WorkspaceSymbolParams @params)
+		{
+			var p = @params;
+			Compile ();
+			var results = new List<SymbolInformation> ();
+			AddSymbols (results, m => m.Name.Contains (p.query), v => v.Name.Contains (p.query));
+			return Result<SymbolInformation [], ResponseError>.Success (results.ToArray ());
+		}
+
 		protected override Result<SymbolInformation [], ResponseError> DocumentSymbols (DocumentSymbolParams @params)
 		{
 			var p = @params;
 			EnsureDocumentOpened (p.textDocument.uri, null);
 			Compile ();
 			var results = new List<SymbolInformation> ();
-			if (p.textDocument == null)
-				throw new Exception ("textDocument");
-			if (p.textDocument.uri == null)
-				throw new Exception ("textDocument.uri");
-
-			foreach (var macro in semantic_tree.Macros.Where (m => FileMatches (p.textDocument.uri, m.Location.File))) {
-				results.Add (new SymbolInformation {
-					kind = SymbolKind.Function,
-					name = macro.Name,
-					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = p.textDocument.uri, range = ToRange (macro.Location, null) }
-				});
-			}
-			foreach (var variable in semantic_tree.Variables.Values.Where (v => FileMatches (p.textDocument.uri, v.Location?.File))) {
-				results.Add (new SymbolInformation {
-					kind = SymbolKind.Variable,
-					name = variable.Name,
-					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = p.textDocument.uri, range = ToRange (variable.Location, null) }
-				});
-			}
-			//Console.Error.WriteLine ("DocumentSymbols for " + p.textDocument.uri.LocalPath);
-			//foreach (var item in results)
-			//	Console.Error.WriteLine ($"RESULT: {item.location} {item.kind} {item.name}");
+			AddSymbols (results, m => FileMatches (p.textDocument.uri, m.Location.File), v => FileMatches (p.textDocument.uri, v.Location?.File));
 			return Result<SymbolInformation [], ResponseError>.Success (results.ToArray ());
 		}
 
