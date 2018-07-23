@@ -16,13 +16,13 @@ namespace Commons.Music.Midi.Mml
 			BaseCount = 192;
 			Tracks = new List<MmlSemanticTrack> ();
 			Macros = new List<MmlSemanticMacro> ();
-			Variables = new Hashtable ();
+			Variables = new Dictionary<string, MmlSemanticVariable> ();
 		}
 
 		public int BaseCount { get; set; }
 		public List<MmlSemanticTrack> Tracks { get; private set; }
 		public List<MmlSemanticMacro> Macros { get; private set; }
-		public Hashtable Variables { get; private set; }
+		public Dictionary<string,MmlSemanticVariable> Variables { get; private set; }
 	}
 
 	public partial class MmlSemanticTrack
@@ -39,14 +39,16 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlSemanticMacro
 	{
-		public MmlSemanticMacro (string name, IList<int> targetTracks)
+		public MmlSemanticMacro (MmlLineInfo location, string name, IList<int> targetTracks)
 		{
+			Location = location;
 			Name = name;
 			TargetTracks = targetTracks;
 			Arguments = new List<MmlSemanticVariable> ();
 			Data = new List<MmlOperationUse> ();
 		}
 
+		public MmlLineInfo Location { get; private set; }
 		public string Name { get; private set; }
 		public IList<int> TargetTracks { get; private set; }
 		public List<MmlSemanticVariable> Arguments { get; private set; }
@@ -55,12 +57,14 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlSemanticVariable
 	{
-		public MmlSemanticVariable (string name, MmlDataType type)
+		public MmlSemanticVariable (MmlLineInfo location, string name, MmlDataType type)
 		{
+			Location = location;
 			Name = name;
 			Type = type;
 		}
 
+		public MmlLineInfo Location { get; private set; }
 		public string Name { get; private set; }
 		public MmlDataType Type { get; private set; }
 		public MmlValueExpr DefaultValue { get; set; }
@@ -347,7 +351,7 @@ namespace Commons.Music.Midi.Mml
 			return b.result;
 		}
 
-		public MmlSemanticTreeBuilder (MmlTokenSet tokenSet)
+		MmlSemanticTreeBuilder (MmlTokenSet tokenSet)
 		{
 			if (tokenSet == null)
 				throw new ArgumentNullException ("tokenSet");
@@ -383,7 +387,7 @@ namespace Commons.Music.Midi.Mml
 
 		MmlSemanticVariable BuildVariableDeclaration (MmlVariableDefinition src)
 		{
-			var ret = new MmlSemanticVariable (src.Name, src.Type);
+			var ret = new MmlSemanticVariable (src.Location, src.Name, src.Type);
 
 			if (src.DefaultValueTokens.Count == 0)
 				return ret;
@@ -396,7 +400,7 @@ namespace Commons.Music.Midi.Mml
 
 		MmlSemanticMacro BuildMacroOperationList (MmlMacroDefinition src)
 		{
-			var ret = new MmlSemanticMacro (src.Name, src.TargetTracks);
+			var ret = new MmlSemanticMacro (src.Location, src.Name, src.TargetTracks);
 
 			foreach (var arg in src.Arguments)
 				ret.Arguments.Add (BuildVariableDeclaration (arg));
@@ -432,6 +436,14 @@ namespace Commons.Music.Midi.Mml
 		public IList<MmlToken> Source { get; private set; }
 
 		public int Position { get; set; }
+	}
+
+	static class DictionaryExtensions 
+	{
+		public static V Get<K, V> (this Dictionary<K, V> dic, K key)
+		{
+			return dic.TryGetValue (key, out var ret) ? ret : default (V);
+		}
 	}
 
 	#endregion

@@ -1,0 +1,6 @@
+[submodule "external/LanguageServerProtocol"]
+	path = external/LanguageServerProtocol
+	url = https://github.com/matarillo/LanguageServerProtocol.git
+[submodule "external/ProtocolReader"]
+	path = external/ProtocolReader
+	url = https://github.com/matarillo/ProtocolReader.git

@@ -478,7 +478,7 @@ namespace Commons.Music.Midi.Mml
 				case "__LET": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					string name = oper.Arguments [0].StringValue;
-					var variable = (MmlSemanticVariable) source.Variables [name];
+					var variable = (MmlSemanticVariable) source.Variables.Get (name);
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					oper.Arguments [1].Resolve (rctx, variable.Type);
@@ -491,7 +491,7 @@ namespace Commons.Music.Midi.Mml
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
-					var variable = (MmlSemanticVariable) source.Variables [name];
+					var variable = (MmlSemanticVariable) source.Variables.Get (name);
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					if (variable.Type != MmlDataType.Buffer)
@@ -510,7 +510,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
 					string format = oper.Arguments [1].StringValue;
-					var variable = (MmlSemanticVariable) source.Variables [name];
+					var variable = (MmlSemanticVariable)source.Variables.Get (name);
 					if (variable == null)
 						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
 					if (is_string_format) {
@@ -609,7 +609,7 @@ namespace Commons.Music.Midi.Mml
 					rctx.Values = ss.Values;
 					rctx.MacroArguments = ss.MacroArguments;
 					// adjust timeline_position (no need to update rctx.TimelinePosition here).
-					rctx.Values [(MmlSemanticVariable) source.Variables ["__timeline_position"]] = rctx.TimelinePosition;
+					rctx.Values [(MmlSemanticVariable) source.Variables.Get ("__timeline_position")] = rctx.TimelinePosition;
 					ProcessOperations (track, rctx, ss.Operations, 0, ss.Operations.Count, extraTailArgsIfApplied);
 					rctx.Values = valuesBak;
 					rctx.MacroArguments = macroArgsBak;

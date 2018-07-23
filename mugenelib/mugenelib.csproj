@@ -1,11 +1,11 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework> 
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ReleaseVersion>0.7</ReleaseVersion>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="managed-midi" Version="1.1.0" />
+    <PackageReference Include="managed-midi" Version="1.2.2" />
     <EmbeddedResource Include="mml/*.mml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>%(Filename)%(Extension)</LogicalName>
@@ -13,4 +13,3 @@
   </ItemGroup>
 
 </Project>
-

@@ -1,0 +1,23 @@
+{
+	"name": "vscode-language-mugene",
+	"description": "language server for mugene MML compiler",
+	"author": "atsushieno",
+	"license": "MIT",
+	"version": "0.1.0",
+	"publisher": "atsushieno",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/atsushieno/mugene"
+	},
+	"scripts": {
+		"postinstall": "cd client && npm install && cd ..",
+		"compile": "tsc -p client/tsconfig.json && cd client/csharp && npm run compile && cd ../..",
+		"compile:client": "tsc -p client/tsconfig.json",
+		"watch:client": "tsc -w -p client/tsconfig.json"
+	},
+	"devDependencies": {
+		"@types/mocha": "^5.2.0",
+		"@types/node": "^8.0.0",
+		"typescript": "^2.8.3"
+	}
+}

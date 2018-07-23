@@ -190,6 +190,12 @@ Options:
 
 		public MidiMusic Compile (bool skipDefaultMmlFiles, IEnumerable<MmlInputSource> inputs)
 		{
+			return GenerateMusic (BuildSemanticTree (TokenizeInputs (skipDefaultMmlFiles, inputs)));
+		}
+
+		// used by language server and compiler.
+		public MmlTokenSet TokenizeInputs (bool skipDefaultMmlFiles, IEnumerable<MmlInputSource> inputs)
+		{
 			if (!skipDefaultMmlFiles)
 				inputs = Util.DefaultIncludes.Select (f => new MmlInputSource (f, Resolver.Resolve (f))).Concat (inputs);
 
@@ -197,11 +203,18 @@ Options:
 			var tokenizerSources = MmlInputSourceReader.Parse (this, inputs.ToArray ());
 
 			// tokenizer sources -> token streams
-			var tokens = MmlTokenizer.Tokenize (tokenizerSources);
+			return MmlTokenizer.Tokenize (tokenizerSources);
+		}
 
+		// used by language server and compiler.
+		public MmlSemanticTreeSet BuildSemanticTree (MmlTokenSet tokens)
+		{
 			// token streams -> semantic trees
-			var tree = MmlSemanticTreeBuilder.Compile (tokens);
+			return MmlSemanticTreeBuilder.Compile (tokens);
+		}
 
+		public MidiMusic GenerateMusic (MmlSemanticTreeSet tree)
+		{
 			// semantic trees -> simplified streams
 			MmlMacroExpander.Expand (tree);
 
