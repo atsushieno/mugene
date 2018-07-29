@@ -682,7 +682,7 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlToken CreateParsedToken ()
 		{
-			return new MmlToken () { TokenType = CurrentToken, Value = this.Value, Location = Line.Location.Clone () };
+			return new MmlToken () { TokenType = CurrentToken, Value = this.Value, Location = current_location };
 		}
 		public virtual bool IsWhitespace (int ch)
 		{
@@ -898,10 +898,13 @@ namespace Commons.Music.Midi.Mml
 //Util.DebugWriter.WriteLine ("TOKEN: {0} : Value: {1}", CurrentToken, Value);
 			return ret;
 		}
+
+		MmlLineInfo current_location;
 		
 		bool _advance ()
 		{
 			SkipWhitespaces ();
+			current_location = Line.Location.Clone ();
 			int ch_ = Line.PeekChar ();
 			if (ch_ < 0)
 				return false;
@@ -1297,6 +1300,7 @@ namespace Commons.Music.Midi.Mml
 			source.Lexer.SetCurrentInput (src);
 
 			int [] range = null;
+			var location = source.Lexer.Line.Location.Clone ();
 			var ch = source.Lexer.Line.PeekChar ();
 			if (ch == '#' || source.Lexer.IsNumber ((char) ch)) {
 				range = source.Lexer.ReadRange ().ToArray ();
@@ -1309,7 +1313,7 @@ namespace Commons.Music.Midi.Mml
 
 			src.ParsedName = identifier;
 
-			var m = new MmlMacroDefinition (identifier, range, src.Lines [0].Location);
+			var m = new MmlMacroDefinition (identifier, range, location);
 			source.CurrentMacroDefinition = m;
 			if (m.Tokens.Count == 0) {
 				// get args

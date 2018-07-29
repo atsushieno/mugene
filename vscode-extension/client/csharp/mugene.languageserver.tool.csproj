@@ -47,4 +47,8 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="CopyMml" AfterTargets="Build">
+    <Exec Condition="'$(OS)' != 'Windows'" Command="cp $(MSBuildThisFileDirectory)..\..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
+    <Exec Condition="'$(OS)' == 'Windows'" Command="copy $(MSBuildThisFileDirectory)..\..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
+  </Target>
 </Project>

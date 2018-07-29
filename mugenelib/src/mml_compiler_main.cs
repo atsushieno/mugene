@@ -38,6 +38,8 @@ namespace Commons.Music.Midi.Mml
 		StreamResolver resolver = new MergeStreamResolver (new LocalFileStreamResolver (), new ManifestResourceStreamResolver ());
 		bool verbose;
 
+		public static IList<string> DefaultIncludes => Util.DefaultIncludes;
+
 		public StreamResolver Resolver {
 			get { return resolver; }
 			set {

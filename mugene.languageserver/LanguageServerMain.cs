@@ -33,9 +33,11 @@ namespace Commons.Music.Midi.Mml
 				yield return new MmlInputSource (buffer.Key, new StringReader (buffer.Value.ToString ()));
 		}
 
+		MmlCompiler CreateCompiler () => new MmlCompiler ();
+
 		public void Compile ()
 		{
-			var compiler = new MmlCompiler ();
+			var compiler = CreateCompiler ();
 			tokens = compiler.TokenizeInputs (SkipDefaultMmlFiles, GetInputs ());
 			semantic_tree = compiler.BuildSemanticTree (tokens);
 		}
@@ -157,7 +159,7 @@ namespace Commons.Music.Midi.Mml
 			return Result<InitializeResult, ResponseError<InitializeErrorData>>.Success (
 				new InitializeResult () {
 					capabilities = new ServerCapabilities () {
-						//definitionProvider = true,
+						definitionProvider = true,
 						documentSymbolProvider = true,
 						workspaceSymbolProvider = true,
 						//hoverProvider = true,
@@ -165,13 +167,59 @@ namespace Commons.Music.Midi.Mml
 				});
 		}
 
+		MmlToken FindToken (Uri uri, Position pos, MmlTokenType typeFilter = default (MmlTokenType))
+		{
+			using (
+				var log = TextWriter.Null) {//File.CreateText ("/home/atsushi/Desktop/log.txt")) {
+				log.WriteLine ($"[FindToken] SEARCH POINT: {uri.LocalPath} ({pos.line}, {pos.character})");
+				foreach (var t in tokens.Macros.SelectMany (m => m.Tokens).Concat (tokens.Tracks.SelectMany (t => t.Tokens))) {
+					if (typeFilter != default (MmlTokenType) && t.TokenType != typeFilter)
+						continue;
+					log.WriteLine ($"[FindToken] - vs. {t.Location.File} ({t.Location.LineNumber}, {t.Location.LinePosition} - {t.Value}) ::: {FileMatches (uri, t.Location.File)}/{t.Location.LineNumber - 1 == pos.line}/{t.Location.LinePosition - 1 <= pos.character}/{pos.character < t.Location.LinePosition - 1 + t.Value?.ToString ()?.Length}");
+					if (FileMatches (uri, t.Location.File)
+					    && t.Location.LineNumber - 1 == pos.line
+					    && t.Location.LinePosition - 1 <= pos.character
+					    && pos.character < t.Location.LinePosition - 1 + t.Value?.ToString ()?.Length) {
+						log.WriteLine ($"[FindToken] FOUND: {t.TokenType}: {t.Value} ({t.Location.LineNumber}, {t.Location.LinePosition})");
+						return t;
+					}
+				}
+			}
+			return null;
+		}
+
 		protected override Result<ArrayOrObject<Location, Location>, ResponseError> GotoDefinition (TextDocumentPositionParams @params)
 		{
-			return base.GotoDefinition (@params);
+			Compile ();
+
+			var p = @params;
+			var result = new ArrayOrObject<Location, Location> ();
+			var token = FindToken (p.textDocument.uri, p.position, MmlTokenType.Identifier);
+			if (token == null)
+				return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (new Location [0]); // empty
+
+			var name = token.Value.ToString ();
+
+			var m = semantic_tree.Macros.FirstOrDefault (_ => _.Name == name);
+			if (m != null) {
+				var loc = new Location {
+					Uri = GetUri (m.Location.File, true),
+					range = new Range {
+						start = new Position { line = m.Location.LineNumber - 1, character = m.Location.LinePosition - 1 },
+						end = new Position { line = m.Location.LineNumber - 1, character = m.Location.LinePosition - 1 + m.Name.Length }
+					}
+				};
+				using (var log = TextWriter.Null)// File.AppendText ("/home/atsushi/Desktop/log.txt"))
+
+					log.WriteLine ($"-> {loc.Uri.LocalPath} ({loc.range.start.line}, {loc.range.start.character})");
+				return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (loc);
+			}
+
+			return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (new Location [0]);
 		}
 
 		// our comipler line number != LSP expected line number
-		static Position ToPosition (MmlLineInfo li) => li == null ? null : new Position { line = li.LineNumber - 1, character = li.LinePosition };
+		static Position ToPosition (MmlLineInfo li) => li == null ? null : new Position { line = li.LineNumber - 1, character = li.LinePosition - 1 };
 
 		static Range ToRange (MmlLineInfo start, MmlLineInfo end) => new Range { start = ToPosition (start), end = ToPosition (end) };
 
@@ -198,7 +246,7 @@ namespace Commons.Music.Midi.Mml
 					containerName = macro.Location.File, // FIXME: specifying full path still doesn't open default macros...
 					name = macro.Name,
 					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = GetUri (macro.Location.File), range = ToRange (macro.Location, macro.Data.Last ().Location) }
+					location = new Location { Uri = GetUri (macro.Location.File, true), range = ToRange (macro.Location, macro.Data.Last ().Location) }
 				});
 			}
 			foreach (var variable in semantic_tree.Variables.Values.Where (v => variableFilter (v) && v.Location != null)) {
@@ -207,18 +255,22 @@ namespace Commons.Music.Midi.Mml
 					containerName = variable.Location.File, // FIXME: specifying full path still doesn't open default macros...
 					name = variable.Name,
 					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = GetUri (variable.Location.File), range = ToRange (variable.Location, variable.Location) }
+					location = new Location { Uri = GetUri (variable.Location.File, true), range = ToRange (variable.Location, variable.Location) }
 				});
 			}
 		}
 
 		Dictionary<string, Uri> uri_cache = new Dictionary<string, Uri> ();
 
-		Uri GetUri (string filepath)
+		Uri GetUri (string filepath, bool absoluteRequired = false)
 		{
 			if (uri_cache.TryGetValue (filepath, out var uri))
 			    return uri;
-			uri_cache [filepath] = new Uri (Path.Combine (project_directory, filepath));
+			uri_cache [filepath] = new Uri ("file://" + Path.Combine (project_directory, filepath));
+			if (absoluteRequired)
+				filepath = Path.IsPathRooted (filepath) ? filepath :
+					       MmlCompiler.DefaultIncludes.Contains (filepath) ? Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", filepath) :
+					       Path.GetFullPath (filepath);
 			return GetUri (filepath);
 		}
 
