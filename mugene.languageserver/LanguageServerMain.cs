@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using LanguageServer;
 using LanguageServer.Json;
 using LanguageServer.Parameters;
@@ -47,12 +48,13 @@ namespace Commons.Music.Midi.Mml
 			// FIXME: This isn't called.
 		}
 
+
 		protected override VoidResult<ResponseError> Shutdown ()
 		{
-			// FIXME: This isn't either. WTF?
+			// WORKAROUND: Language Server does not receive an exit notification.
+			Task.Delay (1000).ContinueWith (_ => Environment.Exit (0));
 			return VoidResult<ResponseError>.Success ();
 		}
-
 		#endregion
 
 		#region editor buffer and text document change receivers
