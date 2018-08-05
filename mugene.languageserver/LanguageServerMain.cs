@@ -171,8 +171,7 @@ namespace Commons.Music.Midi.Mml
 
 		MmlToken FindToken (Uri uri, Position pos, MmlTokenType typeFilter = default (MmlTokenType))
 		{
-			using (
-				var log = TextWriter.Null) {//File.CreateText ("/home/atsushi/Desktop/log.txt")) {
+			using (var log = TextWriter.Null) {//File.CreateText ("/home/atsushi/Desktop/log.txt")) {
 				log.WriteLine ($"[FindToken] SEARCH POINT: {uri.LocalPath} ({pos.line}, {pos.character})");
 				foreach (var t in tokens.Macros.SelectMany (m => m.Tokens).Concat (tokens.Tracks.SelectMany (t => t.Tokens))) {
 					if (typeFilter != default (MmlTokenType) && t.TokenType != typeFilter)
@@ -205,15 +204,14 @@ namespace Commons.Music.Midi.Mml
 			var m = semantic_tree.Macros.FirstOrDefault (_ => _.Name == name);
 			if (m != null) {
 				var loc = new Location {
-					Uri = GetUri (m.Location.File, true),
+					uri = GetUri (m.Location.File, true),
 					range = new Range {
 						start = new Position { line = m.Location.LineNumber - 1, character = m.Location.LinePosition - 1 },
 						end = new Position { line = m.Location.LineNumber - 1, character = m.Location.LinePosition - 1 + m.Name.Length }
 					}
 				};
-				using (var log = TextWriter.Null)// File.AppendText ("/home/atsushi/Desktop/log.txt"))
-
-					log.WriteLine ($"-> {loc.Uri.LocalPath} ({loc.range.start.line}, {loc.range.start.character})");
+				using (var log = TextWriter.Null)//File.AppendText ("/home/atsushi/Desktop/log.txt"))
+					log.WriteLine ($"-> {loc.uri} ({loc.range.start.line}, {loc.range.start.character})");
 				return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (loc);
 			}
 
@@ -248,7 +246,7 @@ namespace Commons.Music.Midi.Mml
 					containerName = macro.Location.File, // FIXME: specifying full path still doesn't open default macros...
 					name = macro.Name,
 					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = GetUri (macro.Location.File, true), range = ToRange (macro.Location, macro.Data.Last ().Location) }
+					location = new Location { uri = GetUri (macro.Location.File, true), range = ToRange (macro.Location, macro.Data.Last ().Location) }
 				});
 			}
 			foreach (var variable in semantic_tree.Variables.Values.Where (v => variableFilter (v) && v.Location != null)) {
@@ -257,7 +255,7 @@ namespace Commons.Music.Midi.Mml
 					containerName = variable.Location.File, // FIXME: specifying full path still doesn't open default macros...
 					name = variable.Name,
 					// FIXME: last location should be of an end of the token.
-					location = new Location { Uri = GetUri (variable.Location.File, true), range = ToRange (variable.Location, variable.Location) }
+					location = new Location { uri = GetUri (variable.Location.File, true), range = ToRange (variable.Location, variable.Location) }
 				});
 			}
 		}
