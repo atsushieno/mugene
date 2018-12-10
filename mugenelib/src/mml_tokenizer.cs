@@ -1350,7 +1350,7 @@ namespace Commons.Music.Midi.Mml
 				// FIXME: possibly use MmlToken.Colon?
 				source.Lexer.SkipWhitespaces ();
 				if (source.Lexer.Line.PeekChar () != ':') {
-					arg.Type = MmlDataType.Number;
+					arg.Type = MmlDataType.Any;
 					if (!source.Lexer.Advance () && isVariable)
 						return;
 					continue;
