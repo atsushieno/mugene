@@ -47,10 +47,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="alsa-sharp">
-      <HintPath>..\packages\managed-midi.1.2.1\lib\net45\alsa-sharp.dll</HintPath>
+      <HintPath>..\packages\managed-midi.1.3.3\lib\net45\alsa-sharp.dll</HintPath>
     </Reference>
     <Reference Include="Commons.Music.Midi">
-      <HintPath>..\packages\managed-midi.1.2.1\lib\net45\Commons.Music.Midi.dll</HintPath>
+      <HintPath>..\packages\managed-midi.1.3.3\lib\net45\Commons.Music.Midi.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
