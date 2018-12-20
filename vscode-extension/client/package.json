@@ -1,7 +1,7 @@
 {
-  "name": "mugene-lsp",
+  "name": "mugene",
   "description": "VSCode part of a language server",
-  "author": "Microsoft Corporation",
+  "author": "Atsushi Eno",
   "license": "MIT",
   "version": "0.1.0",
   "publisher": "atsushieno",
@@ -16,16 +16,27 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:mugene"
+    "onLanguage:mugene",
+    "onCommand:mugene.compile"
   ],
   "main": "./out/src/extension",
   "contributes": {
-    "languages": [{
-      "id": "mugene",
-      "extensions": [ ".mugene" ],
-      "aliases": ["mugene", "Mugene"],
-      "mimetypes": ["text/x-mugene"]
-    }],
+    "languages": [
+      {
+        "id": "mugene",
+        "extensions": [
+          ".mugene",
+          ".mml"
+        ],
+        "aliases": [
+          "mugene",
+          "Mugene"
+        ],
+        "mimetypes": [
+          "text/x-mugene"
+        ]
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Mugene LSP configuration",
@@ -48,11 +59,17 @@
           "description": "Traces the communication between VSCode and the language server."
         }
       }
-    }
+    },
+    "commands": [{
+      "command": "mugene.compile",
+      "title": "Compile Mugene MML",
+      "category": "mugene"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
+    "prebuild": "mkdir -p ./out/tools/mugene/ && cp -R ../../mugene/bin/Debug/* ./out/tools/mugene/",
     "watch": "tsc -w -p ./",
     "update-vscode": "node ./node_modules/vscode/bin/install",
     "postinstall": "node ./node_modules/vscode/bin/install"
