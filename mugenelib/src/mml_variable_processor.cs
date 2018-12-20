@@ -579,7 +579,7 @@ namespace Commons.Music.Midi.Mml
 				case "__SAVE_OPER_BEGIN":
 					oper.ValidateArguments (rctx, 0);
 					if (storeIndex >= 0)
-						throw new MmlException ("__SAVE_OPER_BEGIN works only within a simple list", oper.Location);
+						throw new MmlException ("__SAVE_OPER_BEGIN works only within a simple list without nested uses", oper.Location);
 					storeIndex = listIndex + 1;
 					storeCurrentOutput = current_output;
 					current_output = storeDummy;
