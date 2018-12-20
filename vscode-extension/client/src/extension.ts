@@ -86,7 +86,7 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	let arg = (os.platform() === 'win32') ? "" : mugeneExePath;
 		
 	var proc = child_process.spawn (mugeneCommand, [arg, uri.fsPath], {shell: true});
-	proc.on("exit", (code, signal) => {
+	proc.on("exit", (code, _) => {
 		if (code == 0) {
 		    vscode.window.showInformationMessage("mugene successfully finished");
 		} else {
@@ -95,7 +95,7 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	});
 }
 
-function processDocument (document: vscode.TextDocument) : Promise<string> {
+function processDocument (_: vscode.TextDocument) : Promise<string> {
     // process vexflow
     return Promise.resolve ("done");
 }
@@ -103,7 +103,7 @@ function processDocument (document: vscode.TextDocument) : Promise<string> {
 
 export function activate(context: ExtensionContext) {
 	activateCompiler(context)
-	//activatePreview(context)
+	activatePreview(context)
 	activateLSP(context)
 }
 

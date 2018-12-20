@@ -11,9 +11,11 @@
 	},
 	"scripts": {
 		"postinstall": "cd client && npm install && cd ..",
-		"compile": "tsc -p client/tsconfig.json && cd client/csharp && npm run compile && cd ../..",
-		"compile:client": "tsc -p client/tsconfig.json",
-		"watch:client": "tsc -w -p client/tsconfig.json"
+		"compile": "npm run compile:client && npm run compile:server",
+		"compile:client": "npm run prebuild && tsc -p client/tsconfig.json",
+		"compile:server": "cd client/csharp && npm run compile && cd ../..",
+		"prebuild": "mkdir -p ./client/out/tools/mugene/ && cp -R ../mugene/bin/Debug/* ./client/out/tools/mugene/",
+		"watch:client": "npm run prebuild && tsc -w -p client/tsconfig.json"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.0",

@@ -69,7 +69,6 @@
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
-    "prebuild": "mkdir -p ./out/tools/mugene/ && cp -R ../../mugene/bin/Debug/* ./out/tools/mugene/",
     "watch": "tsc -w -p ./",
     "update-vscode": "node ./node_modules/vscode/bin/install",
     "postinstall": "node ./node_modules/vscode/bin/install"
