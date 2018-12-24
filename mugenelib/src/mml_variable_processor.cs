@@ -420,7 +420,6 @@ namespace Commons.Music.Midi.Mml
 		MmlResolveContext global_context;
 		MmlResolvedMusic result;
 		List<MmlResolvedEvent> current_output;
-		TextWriter DebugPrint = Console.Out;
 
 		void Generate ()
 		{
@@ -476,7 +475,7 @@ namespace Commons.Music.Midi.Mml
 				switch (oper.Name) {
 				case "__PRINT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
-					DebugPrint.WriteLine (oper.Arguments [0].StringValue);
+					Util.Report (MmlDiagnosticVerbosity.Information, oper.Location, oper.Arguments [0].StringValue);
 					break;
 					}
 				case "__LET": {

@@ -201,7 +201,7 @@ Options:
 
 			using (var output = File.Create (outfilename))
 				Compile (noDefault, inputs, metaWriter, output, disableRunningStatus);
-			Console.WriteLine ("Written SMF file ... {0}", outfilename);
+			Util.Report (MmlDiagnosticVerbosity.Information, null, "Written SMF file ... {0}", outfilename);
 		}
 
 		public class MmlCompilerOptions

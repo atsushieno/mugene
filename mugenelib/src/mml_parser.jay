@@ -206,8 +206,6 @@ OperationUse :
 	ArgumentsOptCurly
 	{
 		var i = (MmlToken) $1;
-		if (yacc_verbose_flag > 0)
-			Console.WriteLine ("NOW at : " + i.Location);
 		var o = new MmlOperationUse ((string) i.Value, i.Location);
 		foreach (MmlValueExpr a in (IEnumerable<MmlValueExpr>) $3)
 			o.Arguments.Add (a == skipped_argument ? null : a);
