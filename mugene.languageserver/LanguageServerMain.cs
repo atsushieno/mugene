@@ -34,7 +34,28 @@ namespace Commons.Music.Midi.Mml
 				yield return new MmlInputSource (buffer.Key, new StringReader (buffer.Value.ToString ()));
 		}
 
-		MmlCompiler CreateCompiler () => new MmlCompiler ();
+		MmlCompiler CreateCompiler () => new MmlCompiler () { Report = ReportOnLS };
+
+		DiagnosticSeverity ToDiagnosticSeverity (MmlDiagnosticVerbosity v)
+		{
+			switch (v) {
+			case MmlDiagnosticVerbosity.Error: return DiagnosticSeverity.Error;
+			case MmlDiagnosticVerbosity.Warning: return DiagnosticSeverity.Warning;
+			default: return DiagnosticSeverity.Information;
+			}
+		}
+
+		void ReportOnLS (MmlDiagnosticVerbosity verbosity, MmlLineInfo location, string format, object [] args)
+		{
+			var pos = new Position { line = (int) location?.LineNumber, character = (int) location?.LinePosition };
+			this.Proxy.TextDocument.PublishDiagnostics (new PublishDiagnosticsParams {
+				uri = new Uri (location?.File),
+				diagnostics = new Diagnostic [] { new Diagnostic { severity = ToDiagnosticSeverity (verbosity),
+					source = location?.File,
+					message = args.Any () ? string.Format (format, args) : format,
+		    			range = new Range { start = pos, end = pos } } }
+			});
+		}
 
 		public void Compile ()
 		{

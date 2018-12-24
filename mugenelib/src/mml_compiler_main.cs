@@ -40,6 +40,7 @@ namespace Commons.Music.Midi.Mml
 	{
 		public MmlCompiler ()
 		{
+			Report = new MmlDiagnosticReporter (ReportOnConsole);
 		}
 
 		StreamResolver resolver = new MergeStreamResolver (new LocalFileStreamResolver (), new ManifestResourceStreamResolver ());
@@ -56,7 +57,7 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public MmlDiagnosticReporter Report => ReportOnConsole;
+		public MmlDiagnosticReporter Report { get; set; }
 
 		public TextWriter DebugWriter { get; set; } = TextWriter.Null;
 
