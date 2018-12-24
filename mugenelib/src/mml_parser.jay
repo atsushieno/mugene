@@ -330,25 +330,27 @@ UnaryExpr :
 	NumberOrLengthConstant
 	| Minus NumberOrLengthConstant
 	{
-		$$ = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, -1), (MmlValueExpr) $2);
+        var expr = (MmlValueExpr) $2;
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (expr.Location, MmlDataType.Number, -1), expr);
 	}
 	| Caret NumberOrLengthConstant
 	{
-		$$ = new MmlAddExpr (new MmlVariableReferenceExpr (input.Location, "__length"), (MmlValueExpr) $2);
+        var expr = (MmlValueExpr) $2;
+		$$ = new MmlAddExpr (new MmlVariableReferenceExpr (expr.Location, "__length"), expr);
 	}
 
 VariableReference :
 	Dollar CanBeIdentifier
 	{
 		var i = (MmlToken) $2;
-		$$ = new MmlVariableReferenceExpr (input.Location, (string) i.Value);
+		$$ = new MmlVariableReferenceExpr (i.Location, (string) i.Value);
 	}
 
 StringConstant :
 	StringLiteral
 	{
 		var t = (MmlToken) $1;
-		$$ = new MmlConstantExpr (input.Location, MmlDataType.String, (string) t.Value);
+		$$ = new MmlConstantExpr (t.Location, MmlDataType.String, (string) t.Value);
 	}
 
 StepConstant :
@@ -356,26 +358,26 @@ StepConstant :
 	{
 		var n = (MmlToken) $2;
 		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
-		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
+		$$ = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 	| Percent Minus NumberLiteral
 	{
 		var n = (MmlToken) $3;
 		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
-		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
+		$$ = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 
 NumberOrLengthConstant :
 	NumberLiteral
 	{
 		var t = (MmlToken) $1;
-		$$ = new MmlConstantExpr (input.Location, MmlDataType.Number, t.Value);
+		$$ = new MmlConstantExpr (t.Location, MmlDataType.Number, t.Value);
 	}
 	| NumberLiteral Dots
 	{
 		var t = (MmlToken) $1;
 		var d = (int) $2;
-		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+		$$ = new MmlConstantExpr (t.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
 	}
 	| Dots
 	{

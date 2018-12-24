@@ -149,7 +149,7 @@ namespace Commons.Music.Midi.Mml
 				}
 			}
 
-			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables [Name];
+			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables.Get (Name);
 			if (variable == null)
 				Util.Report (MmlDiagnosticVerbosity.Error, Location, "Cannot resolve variable '{0}'", Name);
 			else {
