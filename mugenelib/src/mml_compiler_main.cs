@@ -27,7 +27,37 @@ namespace Commons.Music.Midi.Mml
 		public static IList<string> DefaultIncludes {
 			get { return default_includes; }
 		}
+
+		public static bool ContinueOnError { get; set; } = false;
+
+		static readonly MmlDiagnosticReporter reportConsole = (verbosity, location, message, args) => {
+			string kind = verbosity == MmlDiagnosticVerbosity.Error ? "error" : verbosity == MmlDiagnosticVerbosity.Warning ? "warning" : "information";
+			string loc = location != null ? string.Format ("{0} ({1}, {2})", location.File, location.LineNumber, location.LinePosition) : null;
+			string output = string.Format ("{0} : {1}: {2}", loc, kind, string.Format (message, args));
+			switch (verbosity) {
+			case MmlDiagnosticVerbosity.Information:
+				DebugWriter.WriteLine (output);
+				break;
+			default:
+				if (ContinueOnError)
+					Console.Error.WriteLine (output);
+				else
+					throw new MmlException (output, null);
+				break;
+			}
+		};
+
+		public static MmlDiagnosticReporter Report { get; set; } = reportConsole;
 	}
+
+	public enum MmlDiagnosticVerbosity
+	{
+		Error,
+		Warning,
+		Information,
+	}
+
+	public delegate void MmlDiagnosticReporter (MmlDiagnosticVerbosity verbosity, MmlLineInfo location, string format, params object [] args);
 
 	public class MmlCompiler
 	{
@@ -96,8 +126,10 @@ Options:
 		{
 			string helpmsg = string.Format (help, GetType ().Assembly.GetName ().Version);
 
-			if (args == null || args.Length == 0)
-				throw new MmlException (helpmsg, null);
+			if (args == null || args.Length == 0) {
+				Util.Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
+				return;
+			}
 
 			// file names -> input sources
 			var inputFilenames = new List<string> ();
@@ -147,8 +179,10 @@ Options:
 						explicitfilename = arg.Substring (9);
 						continue;
 					}
-					if (arg == "--help")
-						throw new MmlException (helpmsg, null);
+					if (arg == "--help") {
+						Util.Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
+						return;
+					}
 					break;
 				}
 				outfilename = Path.ChangeExtension (arg, extension);

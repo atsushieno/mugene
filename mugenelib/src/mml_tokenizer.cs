@@ -535,8 +535,10 @@ namespace Commons.Music.Midi.Mml
 					result.Lexer.SkipWhitespaces (true);
 				}
 			}
-			if (range == null)
-				throw new MmlException ("Current line indicates no track number, and there was no indicated tracks previously.", line.Location);
+			if (range == null) {
+				Util.Report (MmlDiagnosticVerbosity.Error, line.Location, "Current line indicates no track number, and there was no indicated tracks previously.");
+				return null;
+			}
 
 			previous_section = section;
 			previous_range = range;
@@ -977,7 +979,8 @@ namespace Commons.Music.Midi.Mml
 					}
 					return true;
 				default:
-					throw new MmlException (String.Format ("Unexpected escaped token: '\\{0}'", (char) ch_), Line.Location);
+					Util.Report (MmlDiagnosticVerbosity.Error, Line.Location, String.Format ("Unexpected escaped token: '\\{0}'", (char) ch_));
+					return false;
 				}
 			case '$':
 				ConsumeAsToken (MmlTokenType.Dollar);
@@ -1240,7 +1243,7 @@ namespace Commons.Music.Midi.Mml
 						source.Lexer.SkipWhitespaces ();
 					}
 					if (source.Lexer.Advance ())
-						throw new MmlException ("Extra conditional tokens", source.Lexer.Line.Location);
+						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
 					source.Lexer.NewIdentifierMode = false;
 					break;
 				case "track":
@@ -1249,10 +1252,11 @@ namespace Commons.Music.Midi.Mml
 					result.Conditional.Tracks.AddRange (tracks);
 					source.Lexer.SkipWhitespaces ();
 					if (source.Lexer.Advance ())
-						throw new MmlException ("Extra conditional tokens", source.Lexer.Line.Location);
+						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
 					break;
 				default:
-					throw new MmlException (String.Format ("Unexpected compilation condition type '{0}'", category), source.Lexer.Line.Location);
+					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Unexpected compilation condition type '{0}'", category));
+					break;
 				}
 				break;
 			case "meta":
@@ -1268,7 +1272,8 @@ namespace Commons.Music.Midi.Mml
 				case "text":
 					break;
 				default:
-					throw new MmlException (String.Format ("Invalid #meta directive argument: {0}", identifier), source.Lexer.Line.Location);
+					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Invalid #meta directive argument: {0}", identifier));
+					break;
 				}
 				result.MetaTexts.Add (new MmlMetaTextToken { TypeLocation = typeLoc, MetaType = meta_map [identifier], TextLocation = textLoc, Text = text });
 				source.Lexer.NewIdentifierMode = false;
@@ -1278,7 +1283,7 @@ namespace Commons.Music.Midi.Mml
 				identifier = source.Lexer.ReadNewIdentifier ();
 				source.Lexer.SkipWhitespaces (true);
 				if (aliases.ContainsKey (identifier))
-					Console.WriteLine ("Warning: overwriting definition {0}, redefined at {1}", identifier, source.Lexer.Line.Location);
+					Util.Report ( MmlDiagnosticVerbosity.Warning, source.Lexer.Line.Location, "Warning: overwriting definition {0}, redefined at {1}", identifier);
 				aliases [identifier] = source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition);
 				source.Lexer.NewIdentifierMode = false;
 				break;
@@ -1368,8 +1373,10 @@ namespace Commons.Music.Midi.Mml
 				source.Lexer.Line.ReadChar ();
 
 				source.Lexer.NewIdentifierMode = false;
-				if (!source.Lexer.Advance ())
-					throw source.Lexer.LexerError ("type name is expected after ':' in macro argument definition");
+				if (!source.Lexer.Advance ()) {
+					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "type name is expected after ':' in macro argument definition");
+					return;
+				}
 				switch (source.Lexer.CurrentToken) {
 				case MmlTokenType.KeywordNumber:
 				case MmlTokenType.KeywordString:
@@ -1377,7 +1384,8 @@ namespace Commons.Music.Midi.Mml
 				case MmlTokenType.KeywordBuffer:
 					break;
 				default:
-					throw new MmlException (String.Format ("Data type name is expected, but got {0}", source.Lexer.CurrentToken), source.Lexer.Line.Location);
+					Util.Report ( MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Data type name is expected, but got {0}", source.Lexer.CurrentToken);
+					return;
 				}
 				arg.Type = (MmlDataType) source.Lexer.Value;
 				source.Lexer.SkipWhitespaces ();
@@ -1393,7 +1401,8 @@ namespace Commons.Music.Midi.Mml
 					if (!source.Lexer.Advance ()) {
 						if (isVariable)
 							return;
-						throw source.Lexer.LexerError ("Incomplete argument default value definition");
+						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Incomplete argument default value definition");
+						return;
 					}
 					switch (source.Lexer.CurrentToken) {
 					case MmlTokenType.Comma:

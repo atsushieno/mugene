@@ -14,8 +14,10 @@ namespace Commons.Music.Midi.Mml
 		public void ValidateArguments (MmlResolveContext ctx, int minParams, params MmlDataType [] types)
 		{
 			if (Arguments.Count != types.Length) {
-				if (Arguments.Count < minParams || minParams < 0)
-					throw new MmlException ("Insufficient argument(s)", Location);
+				if (Arguments.Count < minParams || minParams < 0) {
+					Util.Report (MmlDiagnosticVerbosity.Error, Location, "Insufficient argument(s)");
+					return;
+				}
 			}
 			for (int i = 0; i < Arguments.Count; i++) {
 				var arg = Arguments [i];
@@ -105,7 +107,8 @@ namespace Commons.Music.Midi.Mml
 					break; // error
 				return new MmlLength (denom);
 			}
-			throw new MmlException (String.Format ("Invalid value {0} for the expected data type {1}", value, type), location);
+			Util.Report ( MmlDiagnosticVerbosity.Error, location, "Invalid value {0} for the expected data type {1}", value, type);
+			return null;
 		}
 	}
 
@@ -128,8 +131,9 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (Scope == 3) {
 				if (ctx.GlobalContext == null)
-					throw new MmlException (String.Format ("Global variable '{0}' cannot be resolved at this compilation phase", Name), null);
-				ResolveCore (ctx.GlobalContext, type, true);
+					Util.Report ( MmlDiagnosticVerbosity.Error, null, "Global variable '{0}' cannot be resolved at this compilation phase", Name);
+				else
+					ResolveCore (ctx.GlobalContext, type, true);
 			}
 			else
 				ResolveCore (ctx, type, Scope > 1);
@@ -147,9 +151,11 @@ namespace Commons.Music.Midi.Mml
 
 			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables [Name];
 			if (variable == null)
-				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), Location);
-			var val = ctx.EnsureDefaultResolvedVariable (variable);
-			ResolvedValue = GetTypedValue (val, type, Location);
+				Util.Report (MmlDiagnosticVerbosity.Error, Location, "Cannot resolve variable '{0}'", Name);
+			else {
+				var val = ctx.EnsureDefaultResolvedVariable (variable);
+				ResolvedValue = GetTypedValue (val, type, Location);
+			}
 		}
 	}
 
@@ -477,8 +483,10 @@ namespace Commons.Music.Midi.Mml
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables.Get (name);
-					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
+					if (variable == null) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						break;
+					}
 					oper.Arguments [1].Resolve (rctx, variable.Type);
 					rctx.Values [variable] = oper.Arguments [1].ResolvedValue;
 					if (name == "__timeline_position")
@@ -490,10 +498,14 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables.Get (name);
-					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
-					if (variable.Type != MmlDataType.Buffer)
-						throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
+					if (variable == null) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						break;
+					}
+					if (variable.Type != MmlDataType.Buffer) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
+						break;
+					}
 					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
 					for (int i = 1; i < oper.Arguments.Count; i++)
 						sb.Append (oper.Arguments [i].StringValue);
@@ -509,14 +521,20 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					string format = oper.Arguments [1].StringValue;
 					var variable = (MmlSemanticVariable)source.Variables.Get (name);
-					if (variable == null)
-						throw new MmlException (String.Format ("Target variable not found: {0}", name), oper.Location);
+					if (variable == null) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						break;
+					}
 					if (is_string_format) {
-						if (variable.Type != MmlDataType.String)
-							throw new MmlException (String.Format ("Target variable is not a string: {0}", name), oper.Location);
+						if (variable.Type != MmlDataType.String) {
+							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a string: {0}", name);
+							break;
+						}
 					} else {
-						if (variable.Type != MmlDataType.Buffer)
-							throw new MmlException (String.Format ("Target variable is not a buffer: {0}", name), oper.Location);
+						if (variable.Type != MmlDataType.Buffer) {
+							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
+							break;
+						}
 					}
 					try {
 						string v = string.Format (format, (object []) (from x in oper.Arguments.Skip (2) select (object) x.StringValue).ToArray ());
@@ -525,7 +543,8 @@ namespace Commons.Music.Midi.Mml
 						else
 							((StringBuilder) rctx.EnsureDefaultResolvedVariable (variable)).Append (v);
 					} catch (FormatException ex) {
-						throw new MmlException (String.Format ("Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message), oper.Location);
+						Util.Report ( MmlDiagnosticVerbosity.Error, oper.Location, "Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message);
+						break;
 					}
 					break;
 					}
@@ -576,8 +595,10 @@ namespace Commons.Music.Midi.Mml
 					break;
 				case "__SAVE_OPER_BEGIN":
 					oper.ValidateArguments (rctx, 0);
-					if (storeIndex >= 0)
-						throw new MmlException ("__SAVE_OPER_BEGIN works only within a simple list without nested uses", oper.Location);
+					if (storeIndex >= 0) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "__SAVE_OPER_BEGIN works only within a simple list without nested uses");
+						break;
+					}
 					storeIndex = listIndex + 1;
 					storeCurrentOutput = current_output;
 					current_output = storeDummy;
@@ -633,7 +654,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						throw new MmlException ("Loop break operation must be inside a pair of loop start and end", oper.Location);
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop break operation must be inside a pair of loop start and end");
 					if (loop.FirstBreakAt == null)
 						loop.FirstBreakAt = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					foreach (var cl in loop.CurrentBreaks)
@@ -643,7 +664,7 @@ namespace Commons.Music.Midi.Mml
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
 						if (loop.Breaks.ContainsKey (-1) && loop.Breaks.Values.All (b => b.Source != listIndex))
-							throw new MmlException ("Default loop break is already defined in current loop", oper.Location);
+							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Default loop break is already defined in current loop");
 						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
 					} else {
@@ -653,8 +674,10 @@ namespace Commons.Music.Midi.Mml
 							if (x > 0 && num < 0)
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);
-							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex))
-								throw new MmlException (String.Format ("Loop section {0} was already defined in current loop", num), oper.Location);
+							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex)) {
+								Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop section {0} was already defined in current loop", num);
+								break;
+							}
 							// specified loop count is for human users. Here the number is for program, hence -1.
 							loop.Breaks.Add (num, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						}
@@ -666,11 +689,13 @@ namespace Commons.Music.Midi.Mml
 #endif
 					oper.ValidateArguments (rctx, 0, MmlDataType.Number);
 					loop = rctx.CurrentLoop;
-					if (loop == null)
-						throw new MmlException ("Loop has not started", oper.Location);
+					if (loop == null) {
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop has not started");
+						break;
+					}
 					foreach (var cl in loop.CurrentBreaks)
 						loop.EndLocations [cl] = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
-					int loopCount;
+					int loopCount = 0;
 					switch (oper.Arguments.Count) {
 					case 0:
 						loopCount = 2;
@@ -679,7 +704,8 @@ namespace Commons.Music.Midi.Mml
 						loopCount = oper.Arguments [0].IntValue;
 						break;
 					default:
-						throw new MmlException ("Arguments at loop end exceeded", oper.Location);
+						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Arguments at loop end exceeded");
+						break;
 					}
 					
 					rctx.Loops.Pop ();
@@ -691,8 +717,10 @@ namespace Commons.Music.Midi.Mml
 					// - add sequence before the first break
 					// - add sequence for each break. If no explicit break, then use default.
 					foreach (var p in loop.Breaks) {
-						if (p.Key > loopCount)
-							throw new MmlException ("Loop break specified beyond the loop count", list [p.Value.Source].Location);
+						if (p.Key > loopCount) {
+							Util.Report (MmlDiagnosticVerbosity.Error, list [p.Value.Source].Location, "Loop break specified beyond the loop count");
+							loop.Breaks.Clear ();
+						}
 					}
 
 					rctx.Values = loop.SavedValues;
@@ -721,8 +749,10 @@ namespace Commons.Music.Midi.Mml
 							if (!loop.Breaks.TryGetValue (l, out lb)) {
 								if (l + 1 == loopCount)
 									break; // this is to break the loop at the last iteration.
-								if (!loop.Breaks.TryGetValue (-1, out lb))
-									throw new MmlException (String.Format ("No corresponding loop break specification for iteration at {0} from the innermost loop", l + 1), list [loop.BeginAt.Source].Location);
+								if (!loop.Breaks.TryGetValue (-1, out lb)) {
+									Util.Report (MmlDiagnosticVerbosity.Error, list [loop.BeginAt.Source].Location, "No corresponding loop break specification for iteration at {0} from the innermost loop", l + 1);
+									loop.Breaks.Clear ();
+								}
 							}
 							if (lb == null) // final break
 								break;
@@ -749,10 +779,14 @@ namespace Commons.Music.Midi.Mml
 		void ProcessMacroCall (MmlResolvedTrack track, MmlResolveContext ctx, MmlOperationUse oper, IEnumerable<MmlValueExpr> extraTailArgs)
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
-			if (macro == null)
-				throw new MmlException (String.Format ("Macro {0} was not found. {1}", oper.Name, oper.Location), oper.Location);
-			if (expansion_stack.Contains (macro))
-				throw new MmlException (String.Format ("Illegally recursive macro reference to {0} is found", macro.Name), null);
+			if (macro == null) {
+				Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Macro {0} was not found", oper.Name);
+				return;
+			}
+			if (expansion_stack.Contains (macro)) {
+				Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Illegally recursive macro reference to {0} is found", macro.Name);
+				return;
+			}
 			expansion_stack.Push (macro);
 
 			if (cache_stack_num == arg_caches.Count)
@@ -766,7 +800,7 @@ namespace Commons.Music.Midi.Mml
 					arg = argdef.DefaultValue;
 				arg.Resolve (ctx, argdef.Type);
 				if (args.Contains (argdef.Name))
-					throw new MmlException (String.Format ("Argument name must be identical to all other argument names. Argument '{0}' in '{1}' macro", argdef.Name, oper.Name), oper.Location);
+					Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Argument name must be identical to all other argument names. Argument '{0}' in '{1}' macro", argdef.Name, oper.Name);
 				args.Add (argdef.Name, new KeyValuePair<MmlSemanticVariable, object> (argdef,  arg.ResolvedValue));
 			}
 			var argsBak = ctx.MacroArguments;

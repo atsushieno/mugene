@@ -113,28 +113,34 @@ namespace Commons.Music.Midi.Mml.Parser
 			input = new MmlParserInput (tokens);
 		}
 
-		public List<MmlOperationUse> ParseOperations ()
-		{
-			var o = Parse () as List<MmlOperationUse>;
-			if (o == null)
-				throw new MmlException ("operations are expected, but got an expression.", input.Location);
-			return o;
-		}
+        public List<MmlOperationUse> ParseOperations ()
+        {
+            var results = Parse ();
+            var o = results as List<MmlOperationUse>;
+            if (o == null) {
+                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "operations are expected, but got an expression.");
+                return new List<MmlOperationUse> ();
+            }
+            return o;
+        }
 
-		public MmlValueExpr ParseExpression ()
-		{
-			var o = Parse () as MmlValueExpr;
-			if (o == null)
-				throw new MmlException ("an expression is expected, but got operations.", input.Location);
-			return o;
-		}
+        public MmlValueExpr ParseExpression ()
+        {
+            var o = Parse () as MmlValueExpr;
+            if (o == null) {
+                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "an expression is expected, but got operations.");
+                return null;
+            }
+            return o;
+        }
 		
 		object Parse ()
 		{
 			try {
 				return yyparse (input);
 			} catch (yyParser.yyException ex) {
-				throw new MmlException ("MML parser error", current_location, ex);
+				Util.Report (MmlDiagnosticVerbosity.Error, current_location, "MML parser error: {0}", ex);
+                return null;
 			}
 		}
 
