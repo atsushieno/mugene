@@ -357,21 +357,23 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlSemanticTreeBuilder
 	{
-		public static MmlSemanticTreeSet Compile (MmlTokenSet tokenSet)
+		public static MmlSemanticTreeSet Compile (MmlTokenSet tokenSet, MmlCompiler contextCompiler)
 		{
-			var b = new MmlSemanticTreeBuilder (tokenSet);
+			var b = new MmlSemanticTreeBuilder (tokenSet, contextCompiler);
 			b.Compile ();
 			return b.result;
 		}
 
-		MmlSemanticTreeBuilder (MmlTokenSet tokenSet)
+		MmlSemanticTreeBuilder (MmlTokenSet tokenSet, MmlCompiler contextCompiler)
 		{
 			if (tokenSet == null)
 				throw new ArgumentNullException ("tokenSet");
+			this.compiler = contextCompiler;
 			token_set = tokenSet;
 			result = new MmlSemanticTreeSet () { BaseCount = tokenSet.BaseCount };
 		}
 
+		MmlCompiler compiler;
 		MmlTokenSet token_set;
 		MmlSemanticTreeSet result;
 
@@ -406,7 +408,7 @@ namespace Commons.Music.Midi.Mml
 				return ret;
 
 			var stream = new TokenStream (src.DefaultValueTokens, src.Location);
-			ret.DefaultValue = new Parser.MmlParser (stream.Source).ParseExpression ();
+			ret.DefaultValue = new Parser.MmlParser (compiler, stream.Source).ParseExpression ();
 
 			return ret;
 		}
@@ -432,7 +434,7 @@ namespace Commons.Music.Midi.Mml
 
 		void CompileOperationTokens (List<MmlOperationUse> data, TokenStream stream)
 		{
-			data.AddRange (new Parser.MmlParser (stream.Source).ParseOperations ());
+			data.AddRange (new Parser.MmlParser (compiler, stream.Source).ParseOperations ());
 		}
 	}
 

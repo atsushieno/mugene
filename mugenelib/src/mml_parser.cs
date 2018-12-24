@@ -95,6 +95,7 @@ namespace Commons.Music.Midi.Mml.Parser
 	public class MmlParser
 	{
 		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (null, MmlDataType.String, "DEFAULT ARGUMENT");
+        MmlCompiler compiler;
 		MmlParserInput input;
 		MmlLineInfo current_location;
 
@@ -102,8 +103,9 @@ namespace Commons.Music.Midi.Mml.Parser
 		// 2+: jay output
 		int yacc_verbose_flag;
 
-		public MmlParser (IList<MmlToken> tokens)
+		public MmlParser (MmlCompiler compiler, IList<MmlToken> tokens)
 		{
+            this.compiler = compiler;
 			try {
 				yacc_verbose_flag = int.Parse (Environment.GetEnvironmentVariable ("MUGENE_MML_DEBUG"));
 			} catch (Exception) {
@@ -118,7 +120,7 @@ namespace Commons.Music.Midi.Mml.Parser
             var results = Parse ();
             var o = results as List<MmlOperationUse>;
             if (o == null) {
-                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "operations are expected, but got an expression.");
+                compiler.Report (MmlDiagnosticVerbosity.Error, input.Location, "operations are expected, but got an expression.");
                 return new List<MmlOperationUse> ();
             }
             return o;
@@ -128,7 +130,7 @@ namespace Commons.Music.Midi.Mml.Parser
         {
             var o = Parse () as MmlValueExpr;
             if (o == null) {
-                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "an expression is expected, but got operations.");
+                compiler.Report (MmlDiagnosticVerbosity.Error, input.Location, "an expression is expected, but got operations.");
                 return null;
             }
             return o;
@@ -139,7 +141,7 @@ namespace Commons.Music.Midi.Mml.Parser
 			try {
 				return yyparse (input);
 			} catch (yyParser.yyException ex) {
-				Util.Report (MmlDiagnosticVerbosity.Error, current_location, "MML parser error: {0}", ex);
+				compiler.Report (MmlDiagnosticVerbosity.Error, current_location, "MML parser error: {0}", ex);
                 return null;
 			}
 		}
@@ -459,7 +461,7 @@ namespace Commons.Music.Midi.Mml.Parser
         yyVal = yyV > yyTop ? null : yyVals[yyV]; // yyVal = yyDefault(yyV > yyTop ? null : yyVals[yyV]);
         switch (yyN) {
 case 1:
-#line 183 "mugenelib/src/mml_parser.jay"
+#line 185 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new List<MmlOperationUse> ();
 	}
@@ -471,7 +473,7 @@ case 5:
   case_5();
   break;
 case 6:
-#line 205 "mugenelib/src/mml_parser.jay"
+#line 207 "mugenelib/src/mml_parser.jay"
   {
 		current_location = ((MmlToken) yyVals[0+yyTop]).Location;
 	}
@@ -480,13 +482,13 @@ case 7:
   case_7();
   break;
 case 9:
-#line 220 "mugenelib/src/mml_parser.jay"
+#line 222 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = yyVals[-1+yyTop];
 	}
   break;
 case 10:
-#line 226 "mugenelib/src/mml_parser.jay"
+#line 228 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new List<MmlValueExpr> ();
 	}
@@ -498,85 +500,85 @@ case 13:
   case_13();
   break;
 case 14:
-#line 248 "mugenelib/src/mml_parser.jay"
+#line 250 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = skipped_argument;
 	}
   break;
 case 19:
-#line 262 "mugenelib/src/mml_parser.jay"
+#line 264 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlConditionalExpr ((MmlValueExpr) yyVals[-4+yyTop], (MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 21:
-#line 269 "mugenelib/src/mml_parser.jay"
+#line 271 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlComparisonExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop], (ComparisonType) yyVals[-1+yyTop]);
 	}
   break;
 case 22:
-#line 275 "mugenelib/src/mml_parser.jay"
+#line 277 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = ComparisonType.Lesser;
 	}
   break;
 case 23:
-#line 279 "mugenelib/src/mml_parser.jay"
+#line 281 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = ComparisonType.LesserEqual;
 	}
   break;
 case 24:
-#line 283 "mugenelib/src/mml_parser.jay"
+#line 285 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = ComparisonType.Greater;
 	}
   break;
 case 25:
-#line 287 "mugenelib/src/mml_parser.jay"
+#line 289 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = ComparisonType.GreaterEqual;
 	}
   break;
 case 27:
-#line 294 "mugenelib/src/mml_parser.jay"
+#line 296 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlAddExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 28:
-#line 298 "mugenelib/src/mml_parser.jay"
+#line 300 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlAddExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 29:
-#line 302 "mugenelib/src/mml_parser.jay"
+#line 304 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlSubtractExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 31:
-#line 309 "mugenelib/src/mml_parser.jay"
+#line 311 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlMultiplyExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 32:
-#line 313 "mugenelib/src/mml_parser.jay"
+#line 315 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlDivideExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 33:
-#line 317 "mugenelib/src/mml_parser.jay"
+#line 319 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlModuloExpr ((MmlValueExpr) yyVals[-2+yyTop], (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 36:
-#line 325 "mugenelib/src/mml_parser.jay"
+#line 327 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = new MmlParenthesizedExpr ((MmlValueExpr) yyVals[-1+yyTop]);
 	}
@@ -609,13 +611,13 @@ case 48:
   case_48();
   break;
 case 49:
-#line 393 "mugenelib/src/mml_parser.jay"
+#line 395 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = 1;
 	}
   break;
 case 50:
-#line 397 "mugenelib/src/mml_parser.jay"
+#line 399 "mugenelib/src/mml_parser.jay"
   {
 		yyVal = ((int) yyVals[-1+yyTop]) + 1;
 	}
@@ -656,7 +658,7 @@ case 50:
  All more than 3 lines long rules are wrapped into a method
 */
 void case_4()
-#line 189 "mugenelib/src/mml_parser.jay"
+#line 191 "mugenelib/src/mml_parser.jay"
 {
 		var l = new List<MmlOperationUse> ();
 		l.Add ((MmlOperationUse) yyVals[0+yyTop]);
@@ -664,7 +666,7 @@ void case_4()
 	}
 
 void case_5()
-#line 195 "mugenelib/src/mml_parser.jay"
+#line 197 "mugenelib/src/mml_parser.jay"
 {
 		var l = (List<MmlOperationUse>) yyVals[-1+yyTop];
 		l.Add ((MmlOperationUse) yyVals[0+yyTop]);
@@ -672,7 +674,7 @@ void case_5()
 	}
 
 void case_7()
-#line 207 "mugenelib/src/mml_parser.jay"
+#line 209 "mugenelib/src/mml_parser.jay"
 {
 		var i = (MmlToken) yyVals[-2+yyTop];
 		var o = new MmlOperationUse ((string) i.Value, i.Location);
@@ -682,7 +684,7 @@ void case_7()
 	}
 
 void case_12()
-#line 231 "mugenelib/src/mml_parser.jay"
+#line 233 "mugenelib/src/mml_parser.jay"
 {
 		var l = new List<MmlValueExpr> ();
 		l.Add ((MmlValueExpr) yyVals[0+yyTop]);
@@ -690,7 +692,7 @@ void case_12()
 	}
 
 void case_13()
-#line 237 "mugenelib/src/mml_parser.jay"
+#line 239 "mugenelib/src/mml_parser.jay"
 {
 		var a = (MmlValueExpr) yyVals[-2+yyTop];
 		var l = (List<MmlValueExpr>) yyVals[0+yyTop];
@@ -699,58 +701,58 @@ void case_13()
 	}
 
 void case_40()
-#line 332 "mugenelib/src/mml_parser.jay"
+#line 334 "mugenelib/src/mml_parser.jay"
 {
         var expr = (MmlValueExpr) yyVals[0+yyTop];
 		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (expr.Location, MmlDataType.Number, -1), expr);
 	}
 
 void case_41()
-#line 337 "mugenelib/src/mml_parser.jay"
+#line 339 "mugenelib/src/mml_parser.jay"
 {
         var expr = (MmlValueExpr) yyVals[0+yyTop];
 		yyVal = new MmlAddExpr (new MmlVariableReferenceExpr (expr.Location, "__length"), expr);
 	}
 
 void case_42()
-#line 344 "mugenelib/src/mml_parser.jay"
+#line 346 "mugenelib/src/mml_parser.jay"
 {
 		var i = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlVariableReferenceExpr (i.Location, (string) i.Value);
 	}
 
 void case_43()
-#line 351 "mugenelib/src/mml_parser.jay"
+#line 353 "mugenelib/src/mml_parser.jay"
 {
 		var t = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlConstantExpr (t.Location, MmlDataType.String, (string) t.Value);
 	}
 
 void case_44()
-#line 358 "mugenelib/src/mml_parser.jay"
+#line 360 "mugenelib/src/mml_parser.jay"
 {
 		var n = (MmlToken) yyVals[0+yyTop];
-		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (compiler, n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
 		yyVal = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 
 void case_45()
-#line 364 "mugenelib/src/mml_parser.jay"
+#line 366 "mugenelib/src/mml_parser.jay"
 {
 		var n = (MmlToken) yyVals[0+yyTop];
-		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (compiler, n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
 		yyVal = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 
 void case_46()
-#line 372 "mugenelib/src/mml_parser.jay"
+#line 374 "mugenelib/src/mml_parser.jay"
 {
 		var t = (MmlToken) yyVals[0+yyTop];
 		yyVal = new MmlConstantExpr (t.Location, MmlDataType.Number, t.Value);
 	}
 
 void case_47()
-#line 377 "mugenelib/src/mml_parser.jay"
+#line 379 "mugenelib/src/mml_parser.jay"
 {
 		var t = (MmlToken) yyVals[-1+yyTop];
 		var d = (int) yyVals[0+yyTop];
@@ -758,7 +760,7 @@ void case_47()
 	}
 
 void case_48()
-#line 383 "mugenelib/src/mml_parser.jay"
+#line 385 "mugenelib/src/mml_parser.jay"
 {
 		var d = (int) yyVals[0+yyTop];
 		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr (input.Location, "__length"));
@@ -916,7 +918,7 @@ void case_48()
    -1,  273,
   };
 
-#line 406 "mugenelib/src/mml_parser.jay"
+#line 408 "mugenelib/src/mml_parser.jay"
 
 	}
 #line default

@@ -10,22 +10,24 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlMacroExpander
 	{
-		public static void Expand (MmlSemanticTreeSet source)
+		public static void Expand (MmlSemanticTreeSet source, MmlCompiler contextCompiler)
 		{
-			new MmlMacroExpander (source).Expand ();
+			new MmlMacroExpander (source, contextCompiler).Expand ();
 		}
 
-		MmlMacroExpander (MmlSemanticTreeSet source)
+		MmlMacroExpander (MmlSemanticTreeSet source, MmlCompiler contextCompiler)
 		{
+			this.compiler = contextCompiler;
 			this.source = source;
 		}
 
+		MmlCompiler compiler;
 		MmlSemanticTreeSet source;
 		Stack<MmlSemanticMacro> expansion_stack = new Stack<MmlSemanticMacro> ();
 
 		void Expand ()
 		{
-			var ctx = new MmlResolveContext (source, null);
+			var ctx = new MmlResolveContext (source, null, compiler);
 
 			// resolve variables without any context.
 			foreach (MmlSemanticVariable variable in source.Variables.Values) {

@@ -15,7 +15,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (Arguments.Count != types.Length) {
 				if (Arguments.Count < minParams || minParams < 0) {
-					Util.Report (MmlDiagnosticVerbosity.Error, Location, "Insufficient argument(s)");
+					ctx.Compiler.Report (MmlDiagnosticVerbosity.Error, Location, "Insufficient argument(s)");
 					return;
 				}
 			}
@@ -68,15 +68,14 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public double DoubleValue {
-			get { return (double) GetTypedValue (ResolvedValue, MmlDataType.Number, Location); }
-		}
+		public double GetDoubleValue (MmlResolveContext ctx) => (double) GetTypedValue (ctx, ResolvedValue, MmlDataType.Number, Location);
 
-		public string StringValue {
-			get { return ResolvedValue.ToString (); }
-		}
+		public string StringValue => ResolvedValue.ToString ();
 
-		public static object GetTypedValue (object value, MmlDataType type, MmlLineInfo location, bool throwException = false)
+		public static object GetTypedValue (MmlResolveContext ctx, object value, MmlDataType type, MmlLineInfo location, bool throwException = false)
+			=> GetTypedValue (ctx.Compiler, value, type, location, throwException);
+
+		public static object GetTypedValue (MmlCompiler compiler, object value, MmlDataType type, MmlLineInfo location, bool throwException = false)
 		{
 			switch (type) {
 			case MmlDataType.Any:
@@ -107,7 +106,7 @@ namespace Commons.Music.Midi.Mml
 					break; // error
 				return new MmlLength (denom);
 			}
-			Util.Report ( MmlDiagnosticVerbosity.Error, location, "Invalid value {0} for the expected data type {1}", value, type);
+			compiler.Report ( MmlDiagnosticVerbosity.Error, location, "Invalid value {0} for the expected data type {1}", value, type);
 			return null;
 		}
 	}
@@ -120,7 +119,7 @@ namespace Commons.Music.Midi.Mml
 				if (type == MmlDataType.Buffer)
 					ResolvedValue = new StringBuilder ();
 				else
-					ResolvedValue = GetTypedValue (Value, type, Location);
+					ResolvedValue = GetTypedValue (ctx, Value, type, Location);
 			}
 		}
 	}
@@ -131,7 +130,7 @@ namespace Commons.Music.Midi.Mml
 		{
 			if (Scope == 3) {
 				if (ctx.GlobalContext == null)
-					Util.Report ( MmlDiagnosticVerbosity.Error, null, "Global variable '{0}' cannot be resolved at this compilation phase", Name);
+					ctx.Compiler.Report ( MmlDiagnosticVerbosity.Error, null, "Global variable '{0}' cannot be resolved at this compilation phase", Name);
 				else
 					ResolveCore (ctx.GlobalContext, type, true);
 			}
@@ -144,17 +143,17 @@ namespace Commons.Music.Midi.Mml
 				object _arg = ctx.MacroArguments [Name];
 				if (_arg != null) {
 					var arg = (KeyValuePair<MmlSemanticVariable,object>) _arg;
-					ResolvedValue = GetTypedValue (arg.Value, type, Location);
+					ResolvedValue = GetTypedValue (ctx, arg.Value, type, Location);
 					return;
 				}
 			}
 
 			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables.Get (Name);
 			if (variable == null)
-				Util.Report (MmlDiagnosticVerbosity.Error, Location, "Cannot resolve variable '{0}'", Name);
+				ctx.Compiler.Report (MmlDiagnosticVerbosity.Error, Location, "Cannot resolve variable '{0}'", Name);
 			else {
 				var val = ctx.EnsureDefaultResolvedVariable (variable);
-				ResolvedValue = GetTypedValue (val, type, Location);
+				ResolvedValue = GetTypedValue (ctx, val, type, Location);
 			}
 		}
 	}
@@ -175,9 +174,9 @@ namespace Commons.Music.Midi.Mml
 			Left.Resolve (ctx, type);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
-				ResolvedValue = new MmlLength ((int) (Left.DoubleValue + Right.DoubleValue)) { IsValueByStep = true };
+				ResolvedValue = new MmlLength ((int) (Left.GetDoubleValue (ctx) + Right.GetDoubleValue (ctx))) { IsValueByStep = true };
 			else
-				ResolvedValue = Left.DoubleValue + Right.DoubleValue;
+				ResolvedValue = Left.GetDoubleValue (ctx) + Right.GetDoubleValue (ctx);
 		}
 	}
 
@@ -188,9 +187,9 @@ namespace Commons.Music.Midi.Mml
 			Left.Resolve (ctx, type);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
-				ResolvedValue = new MmlLength ((int) (Left.DoubleValue - Right.DoubleValue)) { IsValueByStep = true };
+				ResolvedValue = new MmlLength ((int) (Left.GetDoubleValue (ctx) - Right.GetDoubleValue (ctx))) { IsValueByStep = true };
 			else
-				ResolvedValue = Left.DoubleValue - Right.DoubleValue;
+				ResolvedValue = Left.GetDoubleValue (ctx) - Right.GetDoubleValue (ctx);
 		}
 	}
 
@@ -205,9 +204,9 @@ namespace Commons.Music.Midi.Mml
 			Left.Resolve (ctx, MmlDataType.Number);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
-				ResolvedValue = new MmlLength ((int) (Left.DoubleValue * Right.DoubleValue)) { IsValueByStep = true };
+				ResolvedValue = new MmlLength ((int) (Left.GetDoubleValue (ctx) * Right.GetDoubleValue (ctx))) { IsValueByStep = true };
 			else
-				ResolvedValue = Left.DoubleValue * Right.DoubleValue;
+				ResolvedValue = Left.GetDoubleValue (ctx) * Right.GetDoubleValue (ctx);
 		}
 	}
 
@@ -218,9 +217,9 @@ namespace Commons.Music.Midi.Mml
 			Left.Resolve (ctx, type);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
-				ResolvedValue = new MmlLength ((int) (Left.DoubleValue / Right.DoubleValue)) { IsValueByStep = true };
+				ResolvedValue = new MmlLength ((int) (Left.GetDoubleValue (ctx) / Right.GetDoubleValue (ctx))) { IsValueByStep = true };
 			else
-				ResolvedValue = Left.DoubleValue / Right.DoubleValue;
+				ResolvedValue = Left.GetDoubleValue (ctx) / Right.GetDoubleValue (ctx);
 		}
 	}
 
@@ -231,9 +230,9 @@ namespace Commons.Music.Midi.Mml
 			Left.Resolve (ctx, type);
 			Right.Resolve (ctx, type);
 			if (type == MmlDataType.Length)
-				ResolvedValue = new MmlLength ((int) (Left.DoubleValue % Right.DoubleValue)) { IsValueByStep = true };
+				ResolvedValue = new MmlLength ((int) (Left.GetDoubleValue (ctx) % Right.GetDoubleValue (ctx))) { IsValueByStep = true };
 			else
-				ResolvedValue = (int) Left.DoubleValue % (int) Right.DoubleValue;
+				ResolvedValue = (int) Left.GetDoubleValue (ctx) % (int) Right.GetDoubleValue (ctx);
 		}
 	}
 
@@ -366,14 +365,19 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlResolveContext
 	{
-		public MmlResolveContext (MmlSemanticTreeSet song, MmlResolveContext globalContext)
+		public MmlResolveContext (MmlSemanticTreeSet song, MmlResolveContext globalContext, MmlCompiler contextCompiler)
 		{
 			GlobalContext = globalContext;
 			SourceTree = song;
 			MacroArguments = new Hashtable ();
 			Values = new Dictionary<MmlSemanticVariable,object> ();
 			Loops = new Stack<Loop> ();
+			this.compiler = contextCompiler ?? globalContext.compiler;
 		}
+
+		MmlCompiler compiler;
+
+		internal MmlCompiler Compiler => compiler;
 
 		public MmlResolveContext GlobalContext { get; private set; }
 
@@ -403,19 +407,21 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlEventStreamGenerator
 	{
-		public static MmlResolvedMusic Generate (MmlSemanticTreeSet source)
+		public static MmlResolvedMusic Generate (MmlSemanticTreeSet source, MmlCompiler contextCompiler)
 		{
-			var gen = new MmlEventStreamGenerator (source);
+			var gen = new MmlEventStreamGenerator (source, contextCompiler);
 			gen.Generate ();
 			return gen.result;
 		}
 
-		MmlEventStreamGenerator (MmlSemanticTreeSet source)
+		MmlEventStreamGenerator (MmlSemanticTreeSet source, MmlCompiler contextCompiler)
 		{
 			this.source = source;
+			this.compiler = contextCompiler;
 			result = new MmlResolvedMusic () { BaseCount = source.BaseCount };
 		}
 
+		MmlCompiler compiler;
 		MmlSemanticTreeSet source;
 		MmlResolveContext global_context;
 		MmlResolvedMusic result;
@@ -423,18 +429,16 @@ namespace Commons.Music.Midi.Mml
 
 		void Generate ()
 		{
-			global_context = new MmlResolveContext (source, null);
+			global_context = new MmlResolveContext (source, null, compiler);
 
 			foreach (var track in source.Tracks) {
 				var rtrk = new MmlResolvedTrack (track.Number, source);
 				result.Tracks.Add (rtrk);
-				var tctx = new MmlResolveContext (source, global_context);
+				var tctx = new MmlResolveContext (source, global_context, compiler);
 				var list = track.Data;
 				current_output = rtrk.Events;
 				ProcessOperations (rtrk, tctx, list, 0, list.Count, null);
 				Sort (current_output);
-				foreach (var ev in current_output)
-					Util.DebugWriter.WriteLine ("{0} {1} {2}", ev.Tick, ev.Operation, ev.Arguments.Count);
 			}
 		}
 
@@ -475,7 +479,7 @@ namespace Commons.Music.Midi.Mml
 				switch (oper.Name) {
 				case "__PRINT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
-					Util.Report (MmlDiagnosticVerbosity.Information, oper.Location, oper.Arguments [0].StringValue);
+					compiler.Report (MmlDiagnosticVerbosity.Information, oper.Location, oper.Arguments [0].StringValue);
 					break;
 					}
 				case "__LET": {
@@ -483,7 +487,7 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables.Get (name);
 					if (variable == null) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
 						break;
 					}
 					oper.Arguments [1].Resolve (rctx, variable.Type);
@@ -498,11 +502,11 @@ namespace Commons.Music.Midi.Mml
 					string name = oper.Arguments [0].StringValue;
 					var variable = (MmlSemanticVariable) source.Variables.Get (name);
 					if (variable == null) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
 						break;
 					}
 					if (variable.Type != MmlDataType.Buffer) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
 						break;
 					}
 					var sb = (StringBuilder) rctx.EnsureDefaultResolvedVariable (variable);
@@ -521,17 +525,17 @@ namespace Commons.Music.Midi.Mml
 					string format = oper.Arguments [1].StringValue;
 					var variable = (MmlSemanticVariable)source.Variables.Get (name);
 					if (variable == null) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable not found: {0}", name);
 						break;
 					}
 					if (is_string_format) {
 						if (variable.Type != MmlDataType.String) {
-							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a string: {0}", name);
+							compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a string: {0}", name);
 							break;
 						}
 					} else {
 						if (variable.Type != MmlDataType.Buffer) {
-							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
+							compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Target variable is not a buffer: {0}", name);
 							break;
 						}
 					}
@@ -542,7 +546,7 @@ namespace Commons.Music.Midi.Mml
 						else
 							((StringBuilder) rctx.EnsureDefaultResolvedVariable (variable)).Append (v);
 					} catch (FormatException ex) {
-						Util.Report ( MmlDiagnosticVerbosity.Error, oper.Location, "Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message);
+						compiler.Report ( MmlDiagnosticVerbosity.Error, oper.Location, "Format error while applying '{0}' to '{1}': {2}", format, name, ex.Message);
 						break;
 					}
 					break;
@@ -595,7 +599,7 @@ namespace Commons.Music.Midi.Mml
 				case "__SAVE_OPER_BEGIN":
 					oper.ValidateArguments (rctx, 0);
 					if (storeIndex >= 0) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "__SAVE_OPER_BEGIN works only within a simple list without nested uses");
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "__SAVE_OPER_BEGIN works only within a simple list without nested uses");
 						break;
 					}
 					storeIndex = listIndex + 1;
@@ -653,7 +657,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, oper.Arguments.Count);
 					loop = rctx.CurrentLoop;
 					if (loop == null)
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop break operation must be inside a pair of loop start and end");
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop break operation must be inside a pair of loop start and end");
 					if (loop.FirstBreakAt == null)
 						loop.FirstBreakAt = new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition);
 					foreach (var cl in loop.CurrentBreaks)
@@ -663,7 +667,7 @@ namespace Commons.Music.Midi.Mml
 					// FIXME: actually this logic does not make sense as now it is defined with fixed-length arguments...
 					if (oper.Arguments.Count == 0) { // default loop break
 						if (loop.Breaks.ContainsKey (-1) && loop.Breaks.Values.All (b => b.Source != listIndex))
-							Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Default loop break is already defined in current loop");
+							compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Default loop break is already defined in current loop");
 						loop.Breaks.Add (-1, new LoopLocation (listIndex, current_output.Count, rctx.TimelinePosition));
 						loop.CurrentBreaks.Add (-1);
 					} else {
@@ -674,7 +678,7 @@ namespace Commons.Music.Midi.Mml
 								break; // after the last argument.
 							loop.CurrentBreaks.Add (num);
 							if (loop.Breaks.ContainsKey (num) && loop.Breaks.Values.All (b => b.Source != listIndex)) {
-								Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop section {0} was already defined in current loop", num);
+								compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop section {0} was already defined in current loop", num);
 								break;
 							}
 							// specified loop count is for human users. Here the number is for program, hence -1.
@@ -689,7 +693,7 @@ namespace Commons.Music.Midi.Mml
 					oper.ValidateArguments (rctx, 0, MmlDataType.Number);
 					loop = rctx.CurrentLoop;
 					if (loop == null) {
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop has not started");
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Loop has not started");
 						break;
 					}
 					foreach (var cl in loop.CurrentBreaks)
@@ -703,7 +707,7 @@ namespace Commons.Music.Midi.Mml
 						loopCount = oper.Arguments [0].IntValue;
 						break;
 					default:
-						Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Arguments at loop end exceeded");
+						compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Arguments at loop end exceeded");
 						break;
 					}
 					
@@ -717,7 +721,7 @@ namespace Commons.Music.Midi.Mml
 					// - add sequence for each break. If no explicit break, then use default.
 					foreach (var p in loop.Breaks) {
 						if (p.Key > loopCount) {
-							Util.Report (MmlDiagnosticVerbosity.Error, list [p.Value.Source].Location, "Loop break specified beyond the loop count");
+							compiler.Report (MmlDiagnosticVerbosity.Error, list [p.Value.Source].Location, "Loop break specified beyond the loop count");
 							loop.Breaks.Clear ();
 						}
 					}
@@ -749,7 +753,7 @@ namespace Commons.Music.Midi.Mml
 								if (l + 1 == loopCount)
 									break; // this is to break the loop at the last iteration.
 								if (!loop.Breaks.TryGetValue (-1, out lb)) {
-									Util.Report (MmlDiagnosticVerbosity.Error, list [loop.BeginAt.Source].Location, "No corresponding loop break specification for iteration at {0} from the innermost loop", l + 1);
+									compiler.Report (MmlDiagnosticVerbosity.Error, list [loop.BeginAt.Source].Location, "No corresponding loop break specification for iteration at {0} from the innermost loop", l + 1);
 									loop.Breaks.Clear ();
 								}
 							}
@@ -779,11 +783,11 @@ namespace Commons.Music.Midi.Mml
 		{
 			var macro = (MmlSemanticMacro) track.Macros [oper.Name];
 			if (macro == null) {
-				Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Macro {0} was not found", oper.Name);
+				compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Macro {0} was not found", oper.Name);
 				return;
 			}
 			if (expansion_stack.Contains (macro)) {
-				Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Illegally recursive macro reference to {0} is found", macro.Name);
+				compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Illegally recursive macro reference to {0} is found", macro.Name);
 				return;
 			}
 			expansion_stack.Push (macro);
@@ -799,7 +803,7 @@ namespace Commons.Music.Midi.Mml
 					arg = argdef.DefaultValue;
 				arg.Resolve (ctx, argdef.Type);
 				if (args.Contains (argdef.Name))
-					Util.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Argument name must be identical to all other argument names. Argument '{0}' in '{1}' macro", argdef.Name, oper.Name);
+					compiler.Report (MmlDiagnosticVerbosity.Error, oper.Location, "Argument name must be identical to all other argument names. Argument '{0}' in '{1}' macro", argdef.Name, oper.Name);
 				args.Add (argdef.Name, new KeyValuePair<MmlSemanticVariable, object> (argdef,  arg.ResolvedValue));
 			}
 			var argsBak = ctx.MacroArguments;

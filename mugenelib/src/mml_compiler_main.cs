@@ -20,34 +20,11 @@ namespace Commons.Music.Midi.Mml
 
 		static Util ()
 		{
-			DebugWriter = TextWriter.Null;
 		}
-		public static TextWriter DebugWriter { get; set; }
-		
+
 		public static IList<string> DefaultIncludes {
 			get { return default_includes; }
 		}
-
-		public static bool ContinueOnError { get; set; } = false;
-
-		static readonly MmlDiagnosticReporter reportConsole = (verbosity, location, message, args) => {
-			string kind = verbosity == MmlDiagnosticVerbosity.Error ? "error" : verbosity == MmlDiagnosticVerbosity.Warning ? "warning" : "information";
-			string loc = location != null ? string.Format ("{0} ({1}, {2})", location.File, location.LineNumber, location.LinePosition) : null;
-			string output = string.Format ("{0} : {1}: {2}", loc, kind, string.Format (message, args));
-			switch (verbosity) {
-			case MmlDiagnosticVerbosity.Information:
-				DebugWriter.WriteLine (output);
-				break;
-			default:
-				if (ContinueOnError)
-					Console.Error.WriteLine (output);
-				else
-					throw new MmlException (output, null);
-				break;
-			}
-		};
-
-		public static MmlDiagnosticReporter Report { get; set; } = reportConsole;
 	}
 
 	public enum MmlDiagnosticVerbosity
@@ -76,6 +53,30 @@ namespace Commons.Music.Midi.Mml
 				if (value == null)
 					throw new ArgumentNullException ("value");
 				resolver = value;
+			}
+		}
+
+		public MmlDiagnosticReporter Report => ReportOnConsole;
+
+		public TextWriter DebugWriter { get; set; } = TextWriter.Null;
+
+		public bool ContinueOnError { get; set; } = false;
+
+		void ReportOnConsole (MmlDiagnosticVerbosity verbosity, MmlLineInfo location, string format, params object [] args)
+		{
+			string kind = verbosity == MmlDiagnosticVerbosity.Error ? "error" : verbosity == MmlDiagnosticVerbosity.Warning ? "warning" : "information";
+			string loc = location != null ? string.Format ("{0} ({1}, {2})", location.File, location.LineNumber, location.LinePosition) : null;
+			string output = string.Format ("{0} : {1}: {2}", loc, kind, args != null && args.Any () ? string.Format (format, args) : format);
+			switch (verbosity) {
+			case MmlDiagnosticVerbosity.Information:
+				DebugWriter.WriteLine (output);
+				break;
+			default:
+				if (ContinueOnError)
+					Console.Error.WriteLine (output);
+				else
+					throw new MmlException (output, null);
+				break;
 			}
 		}
 
@@ -127,7 +128,7 @@ Options:
 			string helpmsg = string.Format (help, GetType ().Assembly.GetName ().Version);
 
 			if (args == null || args.Length == 0) {
-				Util.Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
+				Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
 				return;
 			}
 
@@ -180,7 +181,7 @@ Options:
 						continue;
 					}
 					if (arg == "--help") {
-						Util.Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
+						Report (MmlDiagnosticVerbosity.Error, null, helpmsg);
 						return;
 					}
 					break;
@@ -201,7 +202,7 @@ Options:
 
 			using (var output = File.Create (outfilename))
 				Compile (noDefault, inputs, metaWriter, output, disableRunningStatus);
-			Util.Report (MmlDiagnosticVerbosity.Information, null, "Written SMF file ... {0}", outfilename);
+			Report (MmlDiagnosticVerbosity.Information, null, "Written SMF file ... {0}", outfilename);
 		}
 
 		public class MmlCompilerOptions
@@ -246,16 +247,16 @@ Options:
 		public MmlSemanticTreeSet BuildSemanticTree (MmlTokenSet tokens)
 		{
 			// token streams -> semantic trees
-			return MmlSemanticTreeBuilder.Compile (tokens);
+			return MmlSemanticTreeBuilder.Compile (tokens, this);
 		}
 
 		public MidiMusic GenerateMusic (MmlSemanticTreeSet tree)
 		{
 			// semantic trees -> simplified streams
-			MmlMacroExpander.Expand (tree);
+			MmlMacroExpander.Expand (tree, this);
 
 			// simplified streams -> raw events
-			var resolved = MmlEventStreamGenerator.Generate (tree);
+			var resolved = MmlEventStreamGenerator.Generate (tree, this);
 
 			// raw events -> SMF
 			var smf = MmlSmfGenerator.Generate (resolved);

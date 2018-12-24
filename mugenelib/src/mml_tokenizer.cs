@@ -321,16 +321,6 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlTokenizerSource
 	{
-		MmlLexer match_longest;
-
-		public MmlLexer MatchLongest {
-			get {
-				if (match_longest == null)
-					match_longest = new MmlMatchLongestLexer (this);
-				return match_longest;
-			}
-		}
-
 		// can be switched
 		public MmlLexer Lexer { get; set; }
 
@@ -348,9 +338,9 @@ namespace Commons.Music.Midi.Mml
 
 		public List<string> PrimitiveOperations { get; private set; }
 
-		public MmlTokenizerSource ()
+		public MmlTokenizerSource (MmlCompiler compiler)
 		{
-			Lexer = MatchLongest;
+			Lexer = new MmlMatchLongestLexer (compiler, this);
 
 			Tracks = new List<MmlTrackSource> ();
 			Macros = new List<MmlMacroSource> ();
@@ -401,7 +391,7 @@ namespace Commons.Music.Midi.Mml
 
 		public void Process (IEnumerable<MmlInputSource> inputs)
 		{
-			result = new MmlTokenizerSource ();
+			result = new MmlTokenizerSource (compiler);
 			DoProcess (inputs);
 		}
 
@@ -536,7 +526,7 @@ namespace Commons.Music.Midi.Mml
 				}
 			}
 			if (range == null) {
-				Util.Report (MmlDiagnosticVerbosity.Error, line.Location, "Current line indicates no track number, and there was no indicated tracks previously.");
+				compiler.Report (MmlDiagnosticVerbosity.Error, line.Location, "Current line indicates no track number, and there was no indicated tracks previously.");
 				return null;
 			}
 
@@ -645,13 +635,17 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract class MmlLexer
 	{
-		protected MmlLexer (MmlTokenizerSource source)
+		protected MmlLexer (MmlCompiler compiler, MmlTokenizerSource source)
 		{
+			this.compiler = compiler;
 			TokenizerSource = source;
 		}
 
+		MmlCompiler compiler;
 		MmlSourceLineSet input;
 		int current_line;
+
+		internal MmlCompiler Compiler => compiler;
 
 		// It contains all macro definitions.
 		public MmlTokenizerSource TokenizerSource { get; private set; }
@@ -979,7 +973,7 @@ namespace Commons.Music.Midi.Mml
 					}
 					return true;
 				default:
-					Util.Report (MmlDiagnosticVerbosity.Error, Line.Location, String.Format ("Unexpected escaped token: '\\{0}'", (char) ch_));
+					compiler.Report (MmlDiagnosticVerbosity.Error, Line.Location, String.Format ("Unexpected escaped token: '\\{0}'", (char) ch_));
 					return false;
 				}
 			case '$':
@@ -1065,8 +1059,8 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlMatchLongestLexer : MmlLexer
 	{
-		public MmlMatchLongestLexer (MmlTokenizerSource source)
-			: base (source)
+		public MmlMatchLongestLexer (MmlCompiler compiler, MmlTokenizerSource source)
+			: base (compiler, source)
 		{
 		}
 
@@ -1191,6 +1185,8 @@ namespace Commons.Music.Midi.Mml
 		Dictionary<string,string> aliases = new Dictionary<string, string> ();
 		MmlTokenSet result;
 
+		MmlCompiler compiler => source.Lexer.Compiler;
+
 		public void Process ()
 		{
 			// process pragmas
@@ -1243,7 +1239,7 @@ namespace Commons.Music.Midi.Mml
 						source.Lexer.SkipWhitespaces ();
 					}
 					if (source.Lexer.Advance ())
-						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
+						compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
 					source.Lexer.NewIdentifierMode = false;
 					break;
 				case "track":
@@ -1252,10 +1248,10 @@ namespace Commons.Music.Midi.Mml
 					result.Conditional.Tracks.AddRange (tracks);
 					source.Lexer.SkipWhitespaces ();
 					if (source.Lexer.Advance ())
-						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
+						compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Extra conditional tokens");
 					break;
 				default:
-					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Unexpected compilation condition type '{0}'", category));
+					compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Unexpected compilation condition type '{0}'", category));
 					break;
 				}
 				break;
@@ -1272,7 +1268,7 @@ namespace Commons.Music.Midi.Mml
 				case "text":
 					break;
 				default:
-					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Invalid #meta directive argument: {0}", identifier));
+					compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, String.Format ("Invalid #meta directive argument: {0}", identifier));
 					break;
 				}
 				result.MetaTexts.Add (new MmlMetaTextToken { TypeLocation = typeLoc, MetaType = meta_map [identifier], TextLocation = textLoc, Text = text });
@@ -1283,7 +1279,7 @@ namespace Commons.Music.Midi.Mml
 				identifier = source.Lexer.ReadNewIdentifier ();
 				source.Lexer.SkipWhitespaces (true);
 				if (aliases.ContainsKey (identifier))
-					Util.Report ( MmlDiagnosticVerbosity.Warning, source.Lexer.Line.Location, "Warning: overwriting definition {0}, redefined at {1}", identifier);
+					compiler.Report ( MmlDiagnosticVerbosity.Warning, source.Lexer.Line.Location, "Warning: overwriting definition {0}, redefined at {1}", identifier);
 				aliases [identifier] = source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition);
 				source.Lexer.NewIdentifierMode = false;
 				break;
@@ -1374,7 +1370,7 @@ namespace Commons.Music.Midi.Mml
 
 				source.Lexer.NewIdentifierMode = false;
 				if (!source.Lexer.Advance ()) {
-					Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "type name is expected after ':' in macro argument definition");
+					compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "type name is expected after ':' in macro argument definition");
 					return;
 				}
 				switch (source.Lexer.CurrentToken) {
@@ -1384,7 +1380,7 @@ namespace Commons.Music.Midi.Mml
 				case MmlTokenType.KeywordBuffer:
 					break;
 				default:
-					Util.Report ( MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Data type name is expected, but got {0}", source.Lexer.CurrentToken);
+					compiler.Report ( MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Data type name is expected, but got {0}", source.Lexer.CurrentToken);
 					return;
 				}
 				arg.Type = (MmlDataType) source.Lexer.Value;
@@ -1401,7 +1397,7 @@ namespace Commons.Music.Midi.Mml
 					if (!source.Lexer.Advance ()) {
 						if (isVariable)
 							return;
-						Util.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Incomplete argument default value definition");
+						compiler.Report (MmlDiagnosticVerbosity.Error, source.Lexer.Line.Location, "Incomplete argument default value definition");
 						return;
 					}
 					switch (source.Lexer.CurrentToken) {

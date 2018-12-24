@@ -95,6 +95,7 @@ namespace Commons.Music.Midi.Mml.Parser
 	public class MmlParser
 	{
 		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (null, MmlDataType.String, "DEFAULT ARGUMENT");
+        MmlCompiler compiler;
 		MmlParserInput input;
 		MmlLineInfo current_location;
 
@@ -102,8 +103,9 @@ namespace Commons.Music.Midi.Mml.Parser
 		// 2+: jay output
 		int yacc_verbose_flag;
 
-		public MmlParser (IList<MmlToken> tokens)
+		public MmlParser (MmlCompiler compiler, IList<MmlToken> tokens)
 		{
+            this.compiler = compiler;
 			try {
 				yacc_verbose_flag = int.Parse (Environment.GetEnvironmentVariable ("MUGENE_MML_DEBUG"));
 			} catch (Exception) {
@@ -118,7 +120,7 @@ namespace Commons.Music.Midi.Mml.Parser
             var results = Parse ();
             var o = results as List<MmlOperationUse>;
             if (o == null) {
-                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "operations are expected, but got an expression.");
+                compiler.Report (MmlDiagnosticVerbosity.Error, input.Location, "operations are expected, but got an expression.");
                 return new List<MmlOperationUse> ();
             }
             return o;
@@ -128,7 +130,7 @@ namespace Commons.Music.Midi.Mml.Parser
         {
             var o = Parse () as MmlValueExpr;
             if (o == null) {
-                Util.Report (MmlDiagnosticVerbosity.Error, input.Location, "an expression is expected, but got operations.");
+                compiler.Report (MmlDiagnosticVerbosity.Error, input.Location, "an expression is expected, but got operations.");
                 return null;
             }
             return o;
@@ -139,7 +141,7 @@ namespace Commons.Music.Midi.Mml.Parser
 			try {
 				return yyparse (input);
 			} catch (yyParser.yyException ex) {
-				Util.Report (MmlDiagnosticVerbosity.Error, current_location, "MML parser error: {0}", ex);
+				compiler.Report (MmlDiagnosticVerbosity.Error, current_location, "MML parser error: {0}", ex);
                 return null;
 			}
 		}
@@ -357,13 +359,13 @@ StepConstant :
 	Percent NumberLiteral
 	{
 		var n = (MmlToken) $2;
-		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (compiler, n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
 		$$ = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 	| Percent Minus NumberLiteral
 	{
 		var n = (MmlToken) $3;
-		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (compiler, n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
 		$$ = new MmlConstantExpr (n.Location, MmlDataType.Length, l);
 	}
 
