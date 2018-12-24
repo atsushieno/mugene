@@ -67,14 +67,14 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		public double DoubleValue {
-			get { return (double) GetTypedValue (ResolvedValue, MmlDataType.Number); }
+			get { return (double) GetTypedValue (ResolvedValue, MmlDataType.Number, Location); }
 		}
 
 		public string StringValue {
 			get { return ResolvedValue.ToString (); }
 		}
 
-		public static object GetTypedValue (object value, MmlDataType type)
+		public static object GetTypedValue (object value, MmlDataType type, MmlLineInfo location, bool throwException = false)
 		{
 			switch (type) {
 			case MmlDataType.Any:
@@ -105,8 +105,7 @@ namespace Commons.Music.Midi.Mml
 					break; // error
 				return new MmlLength (denom);
 			}
-			// FIXME: supply location
-			throw new MmlException (String.Format ("Invalid value {0} for the expected data type {1}", value, type), null);
+			throw new MmlException (String.Format ("Invalid value {0} for the expected data type {1}", value, type), location);
 		}
 	}
 
@@ -118,7 +117,7 @@ namespace Commons.Music.Midi.Mml
 				if (type == MmlDataType.Buffer)
 					ResolvedValue = new StringBuilder ();
 				else
-					ResolvedValue = GetTypedValue (Value, type);
+					ResolvedValue = GetTypedValue (Value, type, Location);
 			}
 		}
 	}
@@ -141,17 +140,16 @@ namespace Commons.Music.Midi.Mml
 				object _arg = ctx.MacroArguments [Name];
 				if (_arg != null) {
 					var arg = (KeyValuePair<MmlSemanticVariable,object>) _arg;
-					ResolvedValue = GetTypedValue (arg.Value, type);
+					ResolvedValue = GetTypedValue (arg.Value, type, Location);
 					return;
 				}
 			}
 
 			var variable = (MmlSemanticVariable) ctx.SourceTree.Variables [Name];
 			if (variable == null)
-				// FIXME: supply location
-				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), null);
+				throw new MmlException (String.Format ("Cannot resolve variable '{0}'", Name), Location);
 			var val = ctx.EnsureDefaultResolvedVariable (variable);
-			ResolvedValue = GetTypedValue (val, type);
+			ResolvedValue = GetTypedValue (val, type, Location);
 		}
 	}
 

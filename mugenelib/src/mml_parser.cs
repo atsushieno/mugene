@@ -94,7 +94,7 @@ namespace Commons.Music.Midi.Mml.Parser
 
 	public class MmlParser
 	{
-		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (MmlDataType.String, "DEFAULT ARGUMENT");
+		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (null, MmlDataType.String, "DEFAULT ARGUMENT");
 		MmlParserInput input;
 		MmlLineInfo current_location;
 
@@ -578,13 +578,13 @@ case 36:
 case 40:
 #line 330 "mugenelib/src/mml_parser.jay"
   {
-		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) yyVals[0+yyTop]);
+		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, -1), (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 41:
 #line 334 "mugenelib/src/mml_parser.jay"
   {
-		yyVal = new MmlAddExpr (new MmlVariableReferenceExpr ("__length"), (MmlValueExpr) yyVals[0+yyTop]);
+		yyVal = new MmlAddExpr (new MmlVariableReferenceExpr (input.Location, "__length"), (MmlValueExpr) yyVals[0+yyTop]);
 	}
   break;
 case 42:
@@ -704,37 +704,37 @@ void case_42()
 #line 338 "mugenelib/src/mml_parser.jay"
 {
 		var i = (MmlToken) yyVals[0+yyTop];
-		yyVal = new MmlVariableReferenceExpr ((string) i.Value);
+		yyVal = new MmlVariableReferenceExpr (input.Location, (string) i.Value);
 	}
 
 void case_43()
 #line 345 "mugenelib/src/mml_parser.jay"
 {
 		var t = (MmlToken) yyVals[0+yyTop];
-		yyVal = new MmlConstantExpr (MmlDataType.String, (string) t.Value);
+		yyVal = new MmlConstantExpr (input.Location, MmlDataType.String, (string) t.Value);
 	}
 
 void case_44()
 #line 352 "mugenelib/src/mml_parser.jay"
 {
 		var n = (MmlToken) yyVals[0+yyTop];
-		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
-		yyVal = new MmlConstantExpr (MmlDataType.Length, l);
+		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		yyVal = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
 	}
 
 void case_45()
 #line 358 "mugenelib/src/mml_parser.jay"
 {
 		var n = (MmlToken) yyVals[0+yyTop];
-		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
-		yyVal = new MmlConstantExpr (MmlDataType.Length, l);
+		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		yyVal = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
 	}
 
 void case_46()
 #line 366 "mugenelib/src/mml_parser.jay"
 {
 		var t = (MmlToken) yyVals[0+yyTop];
-		yyVal = new MmlConstantExpr (MmlDataType.Number, t.Value);
+		yyVal = new MmlConstantExpr (input.Location, MmlDataType.Number, t.Value);
 	}
 
 void case_47()
@@ -742,14 +742,14 @@ void case_47()
 {
 		var t = (MmlToken) yyVals[-1+yyTop];
 		var d = (int) yyVals[0+yyTop];
-		yyVal = new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+		yyVal = new MmlConstantExpr (input.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
 	}
 
 void case_48()
 #line 377 "mugenelib/src/mml_parser.jay"
 {
 		var d = (int) yyVals[0+yyTop];
-		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr ("__length"));
+		yyVal = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr (input.Location, "__length"));
 	}
 
 #line default

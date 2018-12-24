@@ -47,7 +47,7 @@ namespace Commons.Music.Midi.Mml
 			Macros = new List<MmlMacroDefinition> ();
 			Variables = new List<MmlVariableDefinition> ();
 			Tracks = new List<MmlTrack> ();
-			MetaTexts = new List<KeyValuePair<byte, string>> ();
+			MetaTexts = new List<MmlMetaTextToken> ();
 		}
 
 		public int BaseCount { get; set; }
@@ -56,7 +56,7 @@ namespace Commons.Music.Midi.Mml
 		public List<MmlMacroDefinition> Macros { get; private set; }
 		public List<MmlVariableDefinition> Variables { get; private set; }
 		public List<MmlTrack> Tracks { get; private set; }
-		public List<KeyValuePair<byte,string>> MetaTexts { get; private set; }
+		public List<MmlMetaTextToken> MetaTexts { get; private set; }
 		
 		public MmlTrack GetTrack (int number)
 		{
@@ -67,6 +67,14 @@ namespace Commons.Music.Midi.Mml
 			}
 			return t;
 		}
+	}
+
+	public class MmlMetaTextToken
+	{
+		public byte MetaType { get; set; }
+		public MmlLineInfo TypeLocation { get; set; }
+		public string Text { get; set; }
+		public MmlLineInfo TextLocation { get; set; }
 	}
 
 	public class MmlCompilationCondition
@@ -1248,9 +1256,11 @@ namespace Commons.Music.Midi.Mml
 				}
 				break;
 			case "meta":
+				var typeLoc = source.Lexer.Line.Location;
 				source.Lexer.NewIdentifierMode = true;
 				var identifier = source.Lexer.ReadNewIdentifier ();
 				source.Lexer.SkipWhitespaces (true);
+				var textLoc = source.Lexer.Line.Location;
 				var text = source.Lexer.ReadStringLiteral ();
 				switch (identifier) {
 				case "title":
@@ -1260,7 +1270,7 @@ namespace Commons.Music.Midi.Mml
 				default:
 					throw new MmlException (String.Format ("Invalid #meta directive argument: {0}", identifier), source.Lexer.Line.Location);
 				}
-				result.MetaTexts.Add (new KeyValuePair<byte,string> (meta_map [identifier], text));
+				result.MetaTexts.Add (new MmlMetaTextToken { TypeLocation = typeLoc, MetaType = meta_map [identifier], TextLocation = textLoc, Text = text });
 				source.Lexer.NewIdentifierMode = false;
 				break;
 			case "define":

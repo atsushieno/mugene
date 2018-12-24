@@ -74,15 +74,15 @@ namespace Commons.Music.Midi.Mml
 			switch (Type) {
 			case MmlDataType.Number:
 			case MmlDataType.Length:
-				DefaultValue = new MmlConstantExpr (Type, 0);
+				DefaultValue = new MmlConstantExpr (Location, Type, 0);
 				break;
 			case MmlDataType.String:
-				DefaultValue = new MmlConstantExpr (Type, "");
+				DefaultValue = new MmlConstantExpr (Location, Type, "");
 				break;
 			case MmlDataType.Buffer:
 				// Note that it never fills a specific StringBuilder object
 				// It should be instantiated in each Resolve() evaluation instead.
-				DefaultValue = new MmlConstantExpr (Type, null);
+				DefaultValue = new MmlConstantExpr (Location, Type, null);
 				break;
 			case MmlDataType.Any:
 				// it happens only for macro arg definition.
@@ -103,6 +103,13 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract partial class MmlValueExpr
 	{
+		protected MmlValueExpr (MmlLineInfo location)
+		{
+			this.Location = location;
+		}
+
+		public MmlLineInfo Location { get; private set; } 
+
 		public static int ComputeLength (int baseValue, int dots)
 		{
 			int ret = baseValue;
@@ -114,7 +121,8 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlConstantExpr : MmlValueExpr
 	{
-		public MmlConstantExpr (MmlDataType type, object value)
+		public MmlConstantExpr (MmlLineInfo location, MmlDataType type, object value)
+			: base (location)
 		{
 			Type = type;
 			Value = value;
@@ -138,11 +146,12 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlVariableReferenceExpr : MmlValueExpr
 	{
-		public MmlVariableReferenceExpr (string name)
-			: this (name, 1)
+		public MmlVariableReferenceExpr (MmlLineInfo location, string name)
+			: this (location, name, 1)
 		{
 		}
-		public MmlVariableReferenceExpr (string name, int scope)
+		public MmlVariableReferenceExpr (MmlLineInfo location, string name, int scope)
+			: base (location)
 		{
 			Scope = scope;
 			Name = name;
@@ -161,6 +170,7 @@ namespace Commons.Music.Midi.Mml
 	public partial class MmlParenthesizedExpr : MmlValueExpr
 	{
 		public MmlParenthesizedExpr (MmlValueExpr content)
+			: base (content.Location)
 		{
 			Content = content;
 		}
@@ -176,6 +186,7 @@ namespace Commons.Music.Midi.Mml
 	public abstract partial class MmlArithmeticExpr : MmlValueExpr
 	{
 		protected MmlArithmeticExpr (MmlValueExpr left, MmlValueExpr right)
+			: base (left.Location)
 		{
 			Left = left;
 			Right = right;
@@ -253,6 +264,7 @@ namespace Commons.Music.Midi.Mml
 	public partial class MmlConditionalExpr : MmlValueExpr
 	{
 		public MmlConditionalExpr (MmlValueExpr condition, MmlValueExpr trueExpr, MmlValueExpr falseExpr)
+			: base (condition.Location)
 		{
 			Condition = condition;
 			TrueExpr = trueExpr;
@@ -272,6 +284,7 @@ namespace Commons.Music.Midi.Mml
 	public partial class MmlComparisonExpr : MmlValueExpr
 	{
 		public MmlComparisonExpr (MmlValueExpr left, MmlValueExpr right, ComparisonType type)
+			: base (left.Location)
 		{
 			Left = left;
 			Right = right;
@@ -367,8 +380,8 @@ namespace Commons.Music.Midi.Mml
 			var metaTrack = new MmlSemanticTrack (0);
 			foreach (var p in token_set.MetaTexts) {
 				var use = new MmlOperationUse (MmlPrimitiveOperation.MidiMeta.Name, null);
-				use.Arguments.Add (new MmlConstantExpr (MmlDataType.Number, p.Key));
-				use.Arguments.Add (new MmlConstantExpr (MmlDataType.String, p.Value));
+				use.Arguments.Add (new MmlConstantExpr (p.TypeLocation, MmlDataType.Number, p.MetaType));
+				use.Arguments.Add (new MmlConstantExpr (p.TextLocation, MmlDataType.String, p.Text));
 				metaTrack.Data.Add (use);
 			}
 			if (metaTrack.Data.Count > 0)

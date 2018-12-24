@@ -94,7 +94,7 @@ namespace Commons.Music.Midi.Mml.Parser
 
 	public class MmlParser
 	{
-		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (MmlDataType.String, "DEFAULT ARGUMENT");
+		static readonly MmlValueExpr skipped_argument = new MmlConstantExpr (null, MmlDataType.String, "DEFAULT ARGUMENT");
 		MmlParserInput input;
 		MmlLineInfo current_location;
 
@@ -326,57 +326,57 @@ UnaryExpr :
 	NumberOrLengthConstant
 	| Minus NumberOrLengthConstant
 	{
-		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, -1), (MmlValueExpr) $2);
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, -1), (MmlValueExpr) $2);
 	}
 	| Caret NumberOrLengthConstant
 	{
-		$$ = new MmlAddExpr (new MmlVariableReferenceExpr ("__length"), (MmlValueExpr) $2);
+		$$ = new MmlAddExpr (new MmlVariableReferenceExpr (input.Location, "__length"), (MmlValueExpr) $2);
 	}
 
 VariableReference :
 	Dollar CanBeIdentifier
 	{
 		var i = (MmlToken) $2;
-		$$ = new MmlVariableReferenceExpr ((string) i.Value);
+		$$ = new MmlVariableReferenceExpr (input.Location, (string) i.Value);
 	}
 
 StringConstant :
 	StringLiteral
 	{
 		var t = (MmlToken) $1;
-		$$ = new MmlConstantExpr (MmlDataType.String, (string) t.Value);
+		$$ = new MmlConstantExpr (input.Location, MmlDataType.String, (string) t.Value);
 	}
 
 StepConstant :
 	Percent NumberLiteral
 	{
 		var n = (MmlToken) $2;
-		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
-		$$ = new MmlConstantExpr (MmlDataType.Length, l);
+		var l = new MmlLength ((int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
 	}
 	| Percent Minus NumberLiteral
 	{
 		var n = (MmlToken) $3;
-		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number)) { IsValueByStep = true };
-		$$ = new MmlConstantExpr (MmlDataType.Length, l);
+		var l = new MmlLength (-1 * (int) (double) MmlValueExpr.GetTypedValue (n.Value, MmlDataType.Number, n.Location)) { IsValueByStep = true };
+		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, l);
 	}
 
 NumberOrLengthConstant :
 	NumberLiteral
 	{
 		var t = (MmlToken) $1;
-		$$ = new MmlConstantExpr (MmlDataType.Number, t.Value);
+		$$ = new MmlConstantExpr (input.Location, MmlDataType.Number, t.Value);
 	}
 	| NumberLiteral Dots
 	{
 		var t = (MmlToken) $1;
 		var d = (int) $2;
-		$$ = new MmlConstantExpr (MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+		$$ = new MmlConstantExpr (input.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
 	}
 	| Dots
 	{
 		var d = (int) $1;
-		$$ = new MmlMultiplyExpr (new MmlConstantExpr (MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr ("__length"));
+		$$ = new MmlMultiplyExpr (new MmlConstantExpr (input.Location, MmlDataType.Number, MmlValueExpr.LengthDotsToMultiplier (d)), new MmlVariableReferenceExpr (input.Location, "__length"));
 	}
 	;
 
