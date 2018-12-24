@@ -16,6 +16,8 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-lan
 
 const mugene_scheme = "mugene";
 
+var diagnostics : vscode.DiagnosticCollection;
+
 class MugeneTextDocumentContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri> ();
 	private _emitter = new events.EventEmitter ();
@@ -85,13 +87,24 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	let mugeneCommand = (os.platform() === 'win32') ? mugeneExePath : "mono";
 	let arg = (os.platform() === 'win32') ? "" : mugeneExePath;
 		
-	var proc = child_process.spawn (mugeneCommand, [arg, uri.fsPath], {shell: true});
+	var reports = new Array<vscode.Diagnostic> ();
+	var proc = child_process.spawn (mugeneCommand, [arg, uri.fsPath]);
 	proc.on("exit", (code, _) => {
 		if (code == 0) {
 		    vscode.window.showInformationMessage("mugene successfully finished");
 		} else {
 	    	vscode.window.showInformationMessage("failed to run mugene, at exit code " + code);
 		}
+		if (diagnostics != null)
+		diagnostics.dispose();
+		diagnostics = vscode.languages.createDiagnosticCollection("mugene");
+		diagnostics.set (uri, reports);
+	});
+	proc.stdout.on("data", (msg) => {
+		reports.push(new vscode.Diagnostic(new vscode.Range (1, 1, 1, 1), msg.toString(), vscode.DiagnosticSeverity.Information));
+	});
+	proc.stderr.on("data", (msg) => {
+		reports.push(new vscode.Diagnostic(new vscode.Range (1, 1, 1, 1), msg.toString(), vscode.DiagnosticSeverity.Error));
 	});
 }
 
