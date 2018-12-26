@@ -59,26 +59,17 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlDiagnosticReporter Report { get; set; }
 
-		public TextWriter DebugWriter { get; set; } = TextWriter.Null;
-
 		public bool ContinueOnError { get; set; } = false;
 
 		void ReportOnConsole (MmlDiagnosticVerbosity verbosity, MmlLineInfo location, string format, params object [] args)
 		{
 			string kind = verbosity == MmlDiagnosticVerbosity.Error ? "error" : verbosity == MmlDiagnosticVerbosity.Warning ? "warning" : "information";
 			string loc = location != null ? string.Format ("{0} ({1}, {2})", location.File, location.LineNumber, location.LinePosition) : null;
-			string output = string.Format ("{0} : {1}: {2}", loc, kind, args != null && args.Any () ? string.Format (format, args) : format);
-			switch (verbosity) {
-			case MmlDiagnosticVerbosity.Information:
-				DebugWriter.WriteLine (output);
-				break;
-			default:
-				if (ContinueOnError)
-					Console.Error.WriteLine (output);
-				else
-					throw new MmlException (output, null);
-				break;
-			}
+			string output = string.Format ("{0}{1}{2}: {3}", loc, loc != null ? " : " : "", kind, args != null && args.Any () ? string.Format (format, args) : format);
+			if (verbosity != MmlDiagnosticVerbosity.Error || ContinueOnError)
+				Console.Error.WriteLine (output);
+			else
+				throw new MmlException (output, null);
 		}
 
 		public void Compile (string [] args)

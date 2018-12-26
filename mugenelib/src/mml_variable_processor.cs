@@ -479,7 +479,7 @@ namespace Commons.Music.Midi.Mml
 				switch (oper.Name) {
 				case "__PRINT": {
 					oper.Arguments [0].Resolve (rctx, MmlDataType.String);
-					compiler.Report (MmlDiagnosticVerbosity.Information, oper.Location, oper.Arguments [0].StringValue);
+					compiler.Report (MmlDiagnosticVerbosity.Information, oper.Location, oper.Arguments [0].StringValue, extraTailArgs);
 					break;
 					}
 				case "__LET": {

@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
+import * as fs from 'fs';
 import * as events from 'events';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
@@ -58,6 +59,27 @@ class MugeneTextDocumentContentProvider implements vscode.TextDocumentContentPro
 	}
 }
 
+// Now I figured out that MSBuild compatible output syntax is kind of shit... but anyways.
+function getValidFilePathFromCompilerOutput (s: string) : string {
+	var parts = s.split(" (");
+	var path = "";
+	for (var idx in parts) {
+		var part = parts [idx];
+		var test = path + (path == "" ? "" : " (") + part;
+		try {
+			var stat = fs.statSync(test);
+			if (stat.isFile) {
+				path = test;
+				continue;
+			}
+			return path;
+		} catch (err) {
+			return path;
+		}
+	}
+	return null;
+}
+
 function showPreview (uri: vscode.Uri) {
 	if (!(uri instanceof vscode.Uri)) {
 		if (vscode.window.activeTextEditor) {
@@ -75,6 +97,8 @@ function getSpecialSchemeUri (uri: any): vscode.Uri {
 	});
 }
 
+let line_column_regex = / \(([0-9]+),\s([0-9]+)\)\s*:\s*([a-zA-Z]+)\s*:\s*(.*)/;
+
 function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	if (!(uri instanceof vscode.Uri)) {
 		if (vscode.window.activeTextEditor) {
@@ -88,7 +112,7 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	let arg = (os.platform() === 'win32') ? "" : mugeneExePath;
 		
 	var reports = new Array<vscode.Diagnostic> ();
-	var proc = child_process.spawn (mugeneCommand, [arg, uri.fsPath]);
+	var proc = child_process.spawn (mugeneCommand, [arg, "--verbose", uri.fsPath]);
 	proc.on("exit", (code, _) => {
 		if (code == 0) {
 		    vscode.window.showInformationMessage("mugene successfully finished");
@@ -96,16 +120,37 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	    	vscode.window.showInformationMessage("failed to run mugene, at exit code " + code);
 		}
 		if (diagnostics != null)
-		diagnostics.dispose();
+			diagnostics.dispose();
 		diagnostics = vscode.languages.createDiagnosticCollection("mugene");
 		diagnostics.set (uri, reports);
 	});
 	proc.stdout.on("data", (msg) => {
-		reports.push(new vscode.Diagnostic(new vscode.Range (1, 1, 1, 1), msg.toString(), vscode.DiagnosticSeverity.Information));
+		reports.push(parseCompilerOutput(uri.fsPath, msg));
 	});
 	proc.stderr.on("data", (msg) => {
-		reports.push(new vscode.Diagnostic(new vscode.Range (1, 1, 1, 1), msg.toString(), vscode.DiagnosticSeverity.Error));
+		reports.push(parseCompilerOutput(uri.fsPath, msg));
 	});
+}
+
+function parseCompilerOutput(contextFile: string, msg: String | Buffer): vscode.Diagnostic {
+	var file = getValidFilePathFromCompilerOutput(msg.toString());
+	var line = 0;
+	var col = 0;
+	var type = vscode.DiagnosticSeverity.Information;
+	if (file == contextFile) {
+		msg = msg.slice (file.length); // " (n,m) error: msg"
+		var match = line_column_regex.exec(msg.toString());
+		if (match != null) {
+			line = Number.parseInt (match [1]) - 1;
+			col = Number.parseInt (match [2]) - 1;
+			switch (match [3].toLowerCase()) {
+				case "error": type = vscode.DiagnosticSeverity.Error; break;
+				case "warning": type = vscode.DiagnosticSeverity.Warning; break;
+			}
+			msg = match [4];
+		}
+	}
+	return new vscode.Diagnostic(new vscode.Range (line, col, line, col), msg.toString(), type);
 }
 
 function processDocument (_: vscode.TextDocument) : Promise<string> {
