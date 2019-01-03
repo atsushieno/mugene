@@ -9,6 +9,9 @@
 		"type": "git",
 		"url": "https://github.com/atsushieno/mugene"
 	},
+	"engines": {
+		"vscode": "^1.23.0"
+	},
 	"scripts": {
 		"postinstall": "cd client && npm install && cd ..",
 		"compile": "npm run compile:client && npm run compile:server",
@@ -20,8 +23,11 @@
 	"devDependencies": {
 		"@types/mocha": "^5.2.0",
 		"@types/node": "^8.0.0",
-		"@types/rx-lite": "^4.0.8",
+		"@types/rx-lite": "^4.0.6",
 		"vscode": "^1.1.21",
 		"typescript": "^2.8.3"
+	},
+	"dependencies": {
+		"rx-lite": "^4.0.6"
 	}
 }
