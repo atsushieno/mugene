@@ -210,15 +210,15 @@ namespace Commons.Music.Midi.Mml
 			return null;
 		}
 
-		protected override Result<ArrayOrObject<Location, Location>, ResponseError> GotoDefinition (TextDocumentPositionParams @params)
+		protected override Result<LocationSingleOrArray, ResponseError> GotoImplementation (TextDocumentPositionParams @params)
 		{
 			Compile ();
 
 			var p = @params;
-			var result = new ArrayOrObject<Location, Location> ();
+			var result = new LocationSingleOrArray (new Location [0]);
 			var token = FindToken (p.textDocument.uri, p.position, MmlTokenType.Identifier);
 			if (token == null)
-				return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (new Location [0]); // empty
+				return Result<LocationSingleOrArray, ResponseError>.Success (result); // empty
 
 			var name = token.Value.ToString ();
 
@@ -233,10 +233,10 @@ namespace Commons.Music.Midi.Mml
 				};
 				using (var log = TextWriter.Null)//File.AppendText ("/home/atsushi/Desktop/log.txt"))
 					log.WriteLine ($"-> {loc.uri} ({loc.range.start.line}, {loc.range.start.character})");
-				return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (loc);
+				return Result<LocationSingleOrArray, ResponseError>.Success (loc);
 			}
 
-			return Result<ArrayOrObject<Location, Location>, ResponseError>.Success (new Location [0]);
+			return Result<LocationSingleOrArray, ResponseError>.Success (result);
 		}
 
 		// our comipler line number != LSP expected line number
@@ -304,14 +304,14 @@ namespace Commons.Music.Midi.Mml
 			return Result<SymbolInformation [], ResponseError>.Success (results.ToArray ());
 		}
 
-		protected override Result<SymbolInformation [], ResponseError> DocumentSymbols (DocumentSymbolParams @params)
+		protected override Result<DocumentSymbolResult, ResponseError> DocumentSymbols (DocumentSymbolParams @params)
 		{
 			var p = @params;
 			EnsureDocumentOpened (p.textDocument.uri, null);
 			Compile ();
 			var results = new List<SymbolInformation> ();
 			AddSymbols (results, m => FileMatches (p.textDocument.uri, m.Location.File), v => FileMatches (p.textDocument.uri, v.Location?.File));
-			return Result<SymbolInformation [], ResponseError>.Success (results.ToArray ());
+			return Result<DocumentSymbolResult, ResponseError>.Success (results.ToArray ());
 		}
 
 		#endregion
