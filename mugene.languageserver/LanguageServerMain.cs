@@ -210,6 +210,11 @@ namespace Commons.Music.Midi.Mml
 			return null;
 		}
 
+		protected override Result<LocationSingleOrArray, ResponseError> GotoDefinition (TextDocumentPositionParams @params)
+		{
+			return GotoImplementation (@params);
+		}
+
 		protected override Result<LocationSingleOrArray, ResponseError> GotoImplementation (TextDocumentPositionParams @params)
 		{
 			Compile ();
@@ -267,7 +272,7 @@ namespace Commons.Music.Midi.Mml
 					containerName = macro.Location.File, // FIXME: specifying full path still doesn't open default macros...
 					name = macro.Name,
 					// FIXME: last location should be of an end of the token.
-					location = new Location { uri = GetUri (macro.Location.File, true), range = ToRange (macro.Location, macro.Data.Last ().Location) }
+					location = new Location { uri = GetUri (macro.Location.File, true), range = ToRange (macro.Location, macro.Data.LastOrDefault ()?.Location ?? macro.Location) }
 				});
 			}
 			foreach (var variable in semantic_tree.Variables.Values.Where (v => variableFilter (v) && v.Location != null)) {
