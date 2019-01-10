@@ -521,7 +521,7 @@ namespace Commons.Music.Midi.Mml
 					result.Lexer.SkipWhitespaces (false);
 				}
 				if (result.Lexer.IsNumber (line.PeekChar ())) {
-					range = result.Lexer.ReadRange ().ToArray ();
+					range = result.Lexer.ReadRange (false).ToArray ();
 					result.Lexer.SkipWhitespaces (true);
 				}
 			}
@@ -807,7 +807,7 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public virtual IEnumerable<int> ReadRange ()
+		public virtual IEnumerable<int> ReadRange (bool whitespacesAcceptable)
 		{
 			int i = ReadNumber ();
 			switch (Line.PeekChar ()) {
@@ -818,7 +818,8 @@ namespace Commons.Music.Midi.Mml
 					throw LexerError ("Invalid range specification: larger number must appear later");
 				while (i <= j)
 					yield return i++;
-				SkipWhitespaces ();
+				if (whitespacesAcceptable)
+					SkipWhitespaces ();
 				if (Line.PeekChar () == ',')
 					goto case ',';
 				break;
@@ -826,7 +827,7 @@ namespace Commons.Music.Midi.Mml
 				yield return i;
 				Line.ReadChar ();
 				// recursion
-				foreach (int ii in ReadRange ())
+				foreach (int ii in ReadRange (whitespacesAcceptable))
 					yield return ii;
 				break;
 			default:
@@ -1247,7 +1248,7 @@ namespace Commons.Music.Midi.Mml
 					break;
 				case "track":
 					source.Lexer.SkipWhitespaces (true);
-					var tracks = source.Lexer.ReadRange ().ToArray ();
+					var tracks = source.Lexer.ReadRange (true).ToArray ();
 					result.Conditional.Tracks.AddRange (tracks);
 					source.Lexer.SkipWhitespaces ();
 					if (source.Lexer.Advance ())
@@ -1317,7 +1318,7 @@ namespace Commons.Music.Midi.Mml
 			var location = source.Lexer.Line.Location.Clone ();
 			var ch = source.Lexer.Line.PeekChar ();
 			if (ch == '#' || source.Lexer.IsNumber ((char) ch)) {
-				range = source.Lexer.ReadRange ().ToArray ();
+				range = source.Lexer.ReadRange (false).ToArray ();
 				source.Lexer.SkipWhitespaces (true);
 			}
 

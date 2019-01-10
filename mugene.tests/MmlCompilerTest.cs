@@ -111,6 +111,8 @@ B	a1
 		{
 			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
 				, "#conditional track 1-10,21-30");
+			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
+				, "1-100 l4");
 		}
 	}
 }
