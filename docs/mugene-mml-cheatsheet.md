@@ -8,11 +8,14 @@
 #meta title "(Song title)"
 #meta copyright "(copyright lines)"
 #meta text "arranged by (your name)"
+//#conditional block A,B,C
+//#conditional track 1,2,5-10
 
 //---- track 1 / channel 1: Piano ----
 1	CH1 @73 V110 //  `@`: program/bank `V`: channel volume
 	l8 o5 v100 //`o`: octave, `l`: default length, `v`: default velocity
-	c4d4e2  c4d4e2 // begain with spaces or tabs: the same track continues.
+A	c4d4e2  c4d4e2 // begain with spaces or tabs: the same track continues.
+// Blocks (`A` above) can be specified before the track number (or the actual MML content if the track number is skipped)
 
 // assign track 10-12 as drum part (MML commmands switch to drum mode)
 #define DRUMTRACKS 10,11,12

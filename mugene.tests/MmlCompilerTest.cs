@@ -105,6 +105,13 @@ B	a1
 			Console.WriteLine(result);
 			Assert.AreEqual ("00C000903078308030009034783080340090377830803700903C7830803C00FF2F0", result.Substring (40), "MIDI bytes");
 		}
+
+		[Test]
+		public void MultipleConditionalTrackRanges ()
+		{
+			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
+				, "#conditional track 1-10,21-30");
+		}
 	}
 }
 

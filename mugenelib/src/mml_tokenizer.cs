@@ -818,6 +818,9 @@ namespace Commons.Music.Midi.Mml
 					throw LexerError ("Invalid range specification: larger number must appear later");
 				while (i <= j)
 					yield return i++;
+				SkipWhitespaces ();
+				if (Line.PeekChar () == ',')
+					goto case ',';
 				break;
 			case ',':
 				yield return i;
