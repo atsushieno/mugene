@@ -114,6 +114,15 @@ B	a1
 			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
 				, "1-100 l4");
 		}
+		
+		[Test]
+		public void MetaTextInVariousLengths ()
+		{
+			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
+				, "0 MARKER \"A\"");
+			MmlTestUtility.TestCompile (nameof (MultipleConditionalTrackRanges)
+				, "0 MARKER \"Section A\"");
+		}
 	}
 }
 

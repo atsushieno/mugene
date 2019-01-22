@@ -37,10 +37,10 @@ namespace Commons.Music.Midi.Mml
 			int cur = 0;
 			foreach (var ev in source.Events) {
 				MidiEvent evt;
-				if (ev.Arguments.Count == 3)
-					evt = new MidiEvent (ev.Arguments [0], ev.Arguments [1], ev.Arguments [2], null);
-				else if (ev.Arguments [0] == 0xFF)
+				if (ev.Arguments [0] == 0xFF)
 					evt = new MidiEvent (ev.Arguments [0], ev.Arguments [1], 0, ev.Arguments.Skip (2).ToArray ());
+				else if (ev.Arguments.Count == 3)
+					evt = new MidiEvent (ev.Arguments [0], ev.Arguments [1], ev.Arguments [2], null);
 				else
 					evt = new MidiEvent (ev.Arguments [0], 0, 0, ev.Arguments.Skip (1).ToArray ());
 				var msg = new MidiMessage (ev.Tick - cur, evt);
