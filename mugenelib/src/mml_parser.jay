@@ -379,7 +379,7 @@ NumberOrLengthConstant :
 	{
 		var t = (MmlToken) $1;
 		var d = (int) $2;
-		$$ = new MmlConstantExpr (t.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+		$$ = new MmlConstantExpr (t.Location, MmlDataType.Length, new MmlLength ((int) (double) t.Value) { Dots = d });
 	}
 	| Dots
 	{

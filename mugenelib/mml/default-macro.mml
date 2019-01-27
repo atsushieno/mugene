@@ -9,6 +9,8 @@
 #macro JUMP val:length { __LET{"__timeline_position", $val} }
 #macro REWIND val:length { __LET {"__timeline_position", $__timeline_position - $val} }
 
+#macro | { } // It can be used as a "bar"
+
 // They should go before primitive MIDI operation definitions
 #variable __channel:number = 0
 #variable __dummy_step:number

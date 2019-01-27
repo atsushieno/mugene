@@ -288,7 +288,7 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlResolvedTrack
 	{
-		public MmlResolvedTrack (int number, MmlSemanticTreeSet source)
+		public MmlResolvedTrack (double number, MmlSemanticTreeSet source)
 		{
 			Number = number;
 			Events = new List<MmlResolvedEvent> ();
@@ -298,7 +298,7 @@ namespace Commons.Music.Midi.Mml
 					Macros [m.Name] = m; // possibly overwrite.
 		}
 
-		public int Number { get; set; }
+		public double Number { get; set; }
 		public List<MmlResolvedEvent> Events { get; private set; }
 		public Hashtable Macros { get; private set; }
 	}

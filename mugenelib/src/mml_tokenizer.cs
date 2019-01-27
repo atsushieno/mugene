@@ -58,7 +58,7 @@ namespace Commons.Music.Midi.Mml
 		public List<MmlTrack> Tracks { get; private set; }
 		public List<MmlMetaTextToken> MetaTexts { get; private set; }
 		
-		public MmlTrack GetTrack (int number)
+		public MmlTrack GetTrack (double number)
 		{
 			MmlTrack t = Tracks.FirstOrDefault (tr => tr.Number == number);
 			if (t == null) {
@@ -82,10 +82,10 @@ namespace Commons.Music.Midi.Mml
 		public MmlCompilationCondition ()
 		{
 			Blocks = new List<string> ();
-			Tracks = new List<int> ();
+			Tracks = new List<double> ();
 		}
 
-		public List<int> Tracks { get; private set; }
+		public List<double> Tracks { get; private set; }
 		public IList<string> Blocks { get; private set; }
 		
 		public bool ShouldCompileBlock (string name)
@@ -93,7 +93,7 @@ namespace Commons.Music.Midi.Mml
 			return name == null || Blocks.Count == 0 || Blocks.Contains (name);
 		}
 		
-		public bool ShouldCompileTrack (int track)
+		public bool ShouldCompileTrack (double track)
 		{
 			return Tracks.Count == 0 || Tracks.Contains (track);
 		}
@@ -119,7 +119,7 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlMacroDefinition : MmlOperationDefinition
 	{
-		public MmlMacroDefinition (string name, IList<int> targetTracks, MmlLineInfo location)
+		public MmlMacroDefinition (string name, IList<double> targetTracks, MmlLineInfo location)
 		{
 			Name = name;
 			TargetTracks = targetTracks;
@@ -127,7 +127,7 @@ namespace Commons.Music.Midi.Mml
 			Tokens = new List<MmlToken> ();
 		}
 
-		public IList<int> TargetTracks { get; private set; }
+		public IList<double> TargetTracks { get; private set; }
 		public MmlLineInfo Location { get; private set; }
 		public List<MmlToken> Tokens { get; private set; }
 	}
@@ -149,13 +149,13 @@ namespace Commons.Music.Midi.Mml
 	
 	public class MmlTrack
 	{
-		public MmlTrack (int number)
+		public MmlTrack (double number)
 		{
 			Number = number;
 			Tokens = new List<MmlToken> ();
 		}
 
-		public int Number { get; private set; }
+		public double Number { get; private set; }
 		public List<MmlToken> Tokens { get; private set; }
 	}
 
@@ -503,7 +503,7 @@ namespace Commons.Music.Midi.Mml
 		}
 
 		string previous_section;
-		int [] previous_range;
+		double [] previous_range;
 
 		MmlSourceLineSet ProcessTrackLine (MmlLine line)
 		{
@@ -512,7 +512,7 @@ namespace Commons.Music.Midi.Mml
 			result.Lexer.SetCurrentInput (line);
 
 			string section = previous_section;
-			int [] range = previous_range;
+			double [] range = previous_range;
 			if (result.Lexer.IsWhitespace (line.PeekChar ()))
 				result.Lexer.SkipWhitespaces (true);
 			else {
@@ -585,16 +585,16 @@ namespace Commons.Music.Midi.Mml
 
 	public class MmlTrackSource : MmlSourceLineSet
 	{
-		public MmlTrackSource (string blockName, IEnumerable<int> tracks)
+		public MmlTrackSource (string blockName, IEnumerable<double> tracks)
 		{
 			BlockName = blockName;
-			Tracks = new List<int> ();
+			Tracks = new List<double> ();
 			foreach (var i in tracks)
 				Tracks.Add (i);
 		}
 
 		public string BlockName { get; private set; }
-		public IList<int> Tracks { get; private set; }
+		public IList<double> Tracks { get; private set; }
 	}
 
 	public class MmlMacroSource : MmlSourceLineSet
@@ -712,7 +712,7 @@ namespace Commons.Music.Midi.Mml
 			return '0' <= c && c <= '9';
 		}
 
-		public virtual int ReadNumber ()
+		public virtual double ReadNumber (bool acceptFloatingPoint)
 		{
 			var line = Line;
 			int ch_ = line.PeekChar ();
@@ -744,13 +744,20 @@ namespace Commons.Music.Midi.Mml
 				}
 				return val;
 			} else {
-				int val = 0;
+				int val = 0, digits = 0, floatingPointAt = 0;
 				while (true) {
-					val = val * 10 + (line.ReadChar () - '0');
-					if (!IsNumber ((char) line.PeekChar ()))
+					var ch2 = line.ReadChar ();
+					if (ch2 == '.')
+						floatingPointAt = digits;
+					else {
+						val = val * 10 + (ch2 - '0');
+						digits++;
+					}
+					ch2 = (char) line.PeekChar ();
+					if (!(acceptFloatingPoint && ch2 == '.') && !IsNumber (ch2))
 						break;
-				} 
-				return val;
+				}
+				return floatingPointAt > 0 ? val * Math.Pow (0.1, digits - floatingPointAt) : val;
 			}
 		}
 
@@ -790,7 +797,7 @@ namespace Commons.Music.Midi.Mml
 					default:
 						Line.Location.LinePosition--;
 						if (ch == '#' || '0' <= ch && ch <= '9') {
-							sb.Append ((char) ReadNumber ());
+							sb.Append ((char) ReadNumber (false));
 							ch = Line.ReadChar ();
 							if (ch != ';')
 								throw LexerError ("Unexpected string escape sequence: ';' is expected after number escape sequence");
@@ -807,13 +814,13 @@ namespace Commons.Music.Midi.Mml
 			}
 		}
 
-		public virtual IEnumerable<int> ReadRange (bool whitespacesAcceptable)
+		public virtual IEnumerable<double> ReadRange (bool whitespacesAcceptable)
 		{
-			int i = ReadNumber ();
+			double i = ReadNumber (true);
 			switch (Line.PeekChar ()) {
 			case '-':
 				Line.ReadChar ();
-				int j = ReadNumber ();
+				double j = ReadNumber (true);
 				if (j < i)
 					throw LexerError ("Invalid range specification: larger number must appear later");
 				while (i <= j)
@@ -827,7 +834,7 @@ namespace Commons.Music.Midi.Mml
 				yield return i;
 				Line.ReadChar ();
 				// recursion
-				foreach (int ii in ReadRange (whitespacesAcceptable))
+				foreach (var ii in ReadRange (whitespacesAcceptable))
 					yield return ii;
 				break;
 			default:
@@ -989,7 +996,7 @@ namespace Commons.Music.Midi.Mml
 				return true;
 			}
 			if (ch == '#' || IsNumber (ch)) {
-				Value = ReadNumber ();
+				Value = ReadNumber (false);
 				CurrentToken = MmlTokenType.NumberLiteral;
 				return true;
 			}
@@ -1314,7 +1321,7 @@ namespace Commons.Music.Midi.Mml
 					line.Text = line.Text.Replace (entry.Key, entry.Value);
 			source.Lexer.SetCurrentInput (src);
 
-			int [] range = null;
+			double [] range = null;
 			var location = source.Lexer.Line.Location.Clone ();
 			var ch = source.Lexer.Line.PeekChar ();
 			if (ch == '#' || source.Lexer.IsNumber ((char) ch)) {

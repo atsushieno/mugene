@@ -27,19 +27,19 @@ namespace Commons.Music.Midi.Mml
 
 	public partial class MmlSemanticTrack
 	{
-		public MmlSemanticTrack (int number)
+		public MmlSemanticTrack (double number)
 		{
 			Number = number;
 			Data = new List<MmlOperationUse> ();
 		}
 
-		public int Number { get; private set; }
+		public double Number { get; private set; }
 		public List<MmlOperationUse> Data { get; private set; }
 	}
 
 	public partial class MmlSemanticMacro
 	{
-		public MmlSemanticMacro (MmlLineInfo location, string name, IList<int> targetTracks)
+		public MmlSemanticMacro (MmlLineInfo location, string name, IList<double> targetTracks)
 		{
 			Location = location;
 			Name = name;
@@ -50,7 +50,7 @@ namespace Commons.Music.Midi.Mml
 
 		public MmlLineInfo Location { get; private set; }
 		public string Name { get; private set; }
-		public IList<int> TargetTracks { get; private set; }
+		public IList<double> TargetTracks { get; private set; }
 		public List<MmlSemanticVariable> Arguments { get; private set; }
 		public List<MmlOperationUse> Data { get; private set; }
 	}

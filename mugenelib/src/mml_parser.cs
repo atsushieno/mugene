@@ -756,7 +756,7 @@ void case_47()
 {
 		var t = (MmlToken) yyVals[-1+yyTop];
 		var d = (int) yyVals[0+yyTop];
-		yyVal = new MmlConstantExpr (t.Location, MmlDataType.Length, new MmlLength ((int) t.Value) { Dots = d });
+		yyVal = new MmlConstantExpr (t.Location, MmlDataType.Length, new MmlLength ((int) (double) t.Value) { Dots = d });
 	}
 
 void case_48()
