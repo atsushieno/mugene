@@ -129,6 +129,7 @@ B	a1
 		{
 			MmlTestUtility.TestCompile (nameof (DoubleTrackNumber)
 				, "1.1 c2d4\n11 e2f4\n0.11 gab");
+			MmlTestUtility.TestCompile (nameof (DoubleTrackNumber) + " - 2", "0-100,2.1	r1");
 		}
 	}
 }
