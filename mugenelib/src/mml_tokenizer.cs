@@ -310,13 +310,6 @@ namespace Commons.Music.Midi.Mml
 				return -1;
 			return Text [Location.LinePosition++];
 		}
-
-		public MmlLine Clone ()
-		{
-			var loc = new MmlLineInfo (Location.File, Location.LineNumber);
-			loc.LinePosition = Location.LinePosition;
-			return new MmlLine (loc, Text);
-		}
 	}
 
 	public class MmlTokenizerSource
