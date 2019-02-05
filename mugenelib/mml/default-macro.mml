@@ -128,7 +128,8 @@
 #macro DTE msb:number,lsb:number { DTEM$msb DTEL$lsb }
 #macro SOS val:number { CC#42,$val } // sostenuto
 #macro SOFT val:number { CC#43,$val } // soft pedal
-#macro LEGATO val:number { CC#54,$val }
+#macro LEGATO val:number { CC#44,$val }
+#macro HX val:number { CC#45,$val } // Hold 2 (release parameter based)
 #variable __reverb_send_depth:number
 #macro RSD val:number { __LET{"__reverb_send_depth", $val} CC#5B,$val }
 #macro RSD+ val:number { RSD $__reverb_send_depth + $val }
