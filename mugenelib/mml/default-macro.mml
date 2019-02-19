@@ -84,16 +84,18 @@
 #macro ( val:number=$__velocity_sense { __LET{"__velocity", $__velocity - $val} }
 #macro ) val:number=$__velocity_sense { __LET{"__velocity", $__velocity + $val} }
 #macro TIMING val:number { __LET{"__timing", $val} }
-#variable __expression:number
-#macro E val:number { __LET{"__expression", $val} CC#0B,$val }
-#macro E+ val:number { E $__expression + $val }
-#macro E- val:number { E $__expression - $val }
+
+
 #variable __tempo:number
 #variable __tempo_tmp:number
 #macro TEMPO val:number { __LET{"__tempo", $val} __LET{"__tempo_tmp", 1000000 * {60 / $val}} __MIDI_META {#51, $__tempo_tmp / #10000, {$__tempo_tmp % #10000} / #100, $__tempo_tmp % #100} }
 #macro t val:number { TEMPO $val }
 #macro t+ val:number { t $__tempo + $val }
 #macro t- val:number { t $__tempo - $val }
+#variable __expression:number
+#macro E val:number { __LET{"__expression", $val} CC#0B,$val }
+#macro E+ val:number { E $__expression + $val }
+#macro E- val:number { E $__expression - $val }
 #variable __modulation:number
 #macro M val:number { __LET{"__modulation", $val} CC1,$val }
 #macro M+ val:number { M $__modulation + $val }
