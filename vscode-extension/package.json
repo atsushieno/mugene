@@ -3,7 +3,7 @@
 	"description": "language server for mugene MML compiler",
 	"author": "atsushieno",
 	"license": "MIT",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"publisher": "atsushieno",
 	"repository": {
 		"type": "git",
@@ -21,11 +21,11 @@
 		"watch:client": "npm run prebuild && tsc -w -p client/tsconfig.json"
 	},
 	"devDependencies": {
-		"@types/mocha": "^5.2.0",
-		"@types/node": "^8.0.0",
+		"@types/mocha": "^5.2.6",
+		"@types/node": "^8.10.40",
 		"@types/rx-lite": "^4.0.6",
-		"vscode": "^1.1.21",
-		"typescript": "^2.8.3"
+		"typescript": "^2.8.3",
+		"vscode": "^1.1.29"
 	},
 	"dependencies": {
 		"rx-lite": "^4.0.6"
