@@ -80,6 +80,7 @@
 #macro Kg= { __LET{"__trans_g", 0} }
 #macro Ka= { __LET{"__trans_a", 0} }
 #macro Kb= { __LET{"__trans_b", 0} }
+#macro VELOCITY_SENSE val:number { __LET{"__velocity_sense", $val } }
 #macro v val:number { __LET{"__velocity", $val} }
 #macro ( val:number=$__velocity_sense { __LET{"__velocity", $__velocity - $val} }
 #macro ) val:number=$__velocity_sense { __LET{"__velocity", $__velocity + $val} }
