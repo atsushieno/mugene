@@ -1,0 +1,155 @@
+// Common --------------------------
+#meta title "coral labyrinth"
+#meta copyright "atsushieno"
+#meta text "for album 'mugene fantasy suite'"
+
+0	GM_SYSTEM_ON
+
+
+// control ---------------------------------------
+- 0 BEAT23,8 t130
+	r1
+A	MARKER "Section A"
+	[ r1r1r2.. ]4
+B	MARKER "Section B"
+	[ r1r1r2.. ]4
+C	MARKER "Section C"
+	[ r1r1r2.. ]4
+D	MARKER "Section D"
+	[ r1r1r2.. ]4
+E	MARKER "Section E"
+	[ r1r1r2.. ]4
+F	MARKER "Section F"
+	[ r1r1r2.. ]4
+G	MARKER "Section G"
+	[ r1r1r2.. ]4
+H	MARKER "Section H"
+	[ r1r1r2.. ]4
+
+
+// piano L ------------------------------------------
+_ 1	CH1 @1 o2 V80 v80 l16 RSD60 CSD35 DSD20 H100 ENV_DECAY94
+	r1
+//;!A -	[a0>a1<r1r2..]3 f0>f1<r1r2..
+A	[r1 r1 r2..]4
+B	[a0>a1<r1r2..]3 f0>f1<r1r2..
+C	[a0>a1<r1r2..]3 f0>f1<r1r2..
+D	a0>a1<r1r2.. f0>f1<r1r2..  d0>d1<r1r2.. e0>e1<r1r2..
+E	a0>a1<r1r2.. f0>f1<r1r2..  g0>g1<r1r2.. d0>d1<r1r2..
+F	a0>a1<r1r2.. d0>d1<r1r2..  g0>g1<r1r2.. f0>f1<r1r2..
+G	a0>a1<r1r2.. f0>f1<r1r2..  g0>g1<r1r2.. d0>d1<r1r2..
+H	a0>a1<r1r2.. d0>d1<r1r2..  g0>g1<r1r2.. f0>f1<r1r2..
+	<a0>a1^1^2..
+
+
+
+// slow strings -----------------------------------
+#macro 3 ES { E_64,127,0,4,48 }
+#macro 3 SEQ_CA  { \
+	ES a0>e0g0b1^1^2.. \
+	ES <b0>c0f0a1^1^2.. \
+	ES <g0>d0b0>d1^1^2.. \
+	ES <<f0a0>d0f1^1^2..< \
+	}
+#macro 3 SEQ_CB  { \
+	a0>e0g0b1^1^2.. \
+	<b0>c0f0a1^1^2.. \
+	<g0>d0b1^1^2.. \
+	<f0a0>d1^1^2..< \
+	}
+#macro 3 SEQ_CC  { \
+	a0>e0g0b1^1^2.. \
+	<b0>c0f0a1^1^2.. \
+	<g0>d0b1^1^2.. \
+	<f0a0>d0a1^1^2..< \
+	}
+_ 3	CH3 @49,8 o4 V60 v80 l16 RSD60 CSD40 DSD30 M20
+	r1	
+A	V_40,60,0,1^1^2..,8
+	SEQ_CA
+B	SEQ_CA
+C	SEQ_CB
+D	SEQ_CC
+E	SEQ_CB
+F	SEQ_CB
+G	SEQ_CB
+H	SEQ_CC
+
+
+_ 23	CH3 o6 v90 l16 q16
+	r1
+A	[ r1r1r2.. ]4
+B	e1^1^2..  d1^1^2..  f+1^1^2..  <b1^1^2..>
+C 	g1^1^2..,,65  r1^1^2..  d1^1^2..  f1^1^2..,,65
+D	e1^1^2..  <b1^1^2..,,60  r1^1^2..  r1^1^2..>
+E	[ r1r1r2.. ]2  d1^1^2..,,65  <b1^1^2..,,65>
+F	e1^1^2..,,65  d1^1^2..,,65  f+1^1^2..  <b1^1^2..,,65>
+G 	g1^1^2..,,65  r1^1^2..  d1^1^2..  f1^1^2..,,65
+H	e1^1^2..,,65  <b1^1^2..,,60  r1^1^2..  r1^1^2..
+
+
+// Acoustic guitar -----------------------
+#macro 5 SEQ_A { \
+	H100 <a>gd<ag>eda gd<b>gdc<g>a g<b>ed<fg4 H0 \
+	H100 g>gd<ag>eda gd<b>gdc<g>f g<b>ed<fg4> H0 E127 \
+	H100 gd<ba>ad<bg> gd<ba>aed<b> ad<ba>ae4 H0 \
+	H100 gd<ba>aed<b> gd<ba>ad<bg> ad<ba>ae4 H0 \
+	}
+_ 5	CH5 @25 o5 V60 v80 l8 RSD40 CSD20 DSD60 P44
+	r1
+A	[r1 r1 r2..]4
+B	SEQ_A
+C	SEQ_A
+D	SEQ_A
+E	SEQ_A
+F	SEQ_A
+G	SEQ_A
+H	SEQ_A
+
+
+// Piccolo ----------------------------------
+#macro 6 SEQ_B { \
+	[ea>ea<]34ae \
+	[r-1r-1r-2..]4 \
+	[E_32,127,0,1^1^2..,12r1r1r2..E_127,32,0,1^1^2..,12r1r1r2..]2 \
+	}
+_ 6	CH6 @72 o5 V50 v80 l12 RSD60 CSD20 DSD20 P24
+	r1
+A	E32
+A	SEQ_B
+B	SEQ_B
+C	SEQ_B
+D	SEQ_B
+E	SEQ_B
+F	SEQ_B
+G	SEQ_B
+H	SEQ_B
+
+
+// Acoustic Piano R ---------------------
+_ 7	CH7 @0 o6 V60 v80 l8 RSD40 CSD20 DSD20 H100 P84
+	r1
+A	V50
+A	[a>cdg<]23
+B	V60
+	[a>cdg<]23
+C	[a>cdg<]23
+D	[a>cdg<]23
+E	[a>cdg<]23
+F	[a>cdg<]23
+G	[a>cdg<]23
+H	[a>cdg<]23
+
+
+
+// Echo(raindrop) ---------------------
+_ 8	CH8 @102 o7 V60 v80 l8 RSD40 CSD20 DSD20 P104
+	r1
+A	[ r1r1r2.. ]4
+B	[ r1r1r2.. ]4
+C	[ r1r1r2.. ]4
+D	[ r1r1r2.. ]4
+E	r2d4.r1^1  r2e4.r1^1  r2a4.r1^1  r2d4.r1^1
+F	r2b4.r1^1  r2e4.r1^1  r2e4.r1^1  r2f4.r1^1
+H	r2b4.r1^1  r2a4.r1^1  r2b4.r1^1  r2e4.r1^1
+G	r2c4.r1^1  r2a4.r1^1  r2f4.r1^1  r2e4.r1^1

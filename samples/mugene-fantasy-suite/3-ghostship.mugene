@@ -1,0 +1,358 @@
+// Common --------------------------
+#meta title "ghostship"
+#meta copyright "atsushieno"
+#meta text "for album 'mugene fantasy suite'"
+
+_0 GM_SYSTEM_ON
+
+#macro HOF { r%-1H0r%1 }
+
+
+// control ------------------------------
+_ 0	BEAT4,4 r1
+A	MARKER "Section A"
+	t110 [r1]2  t112[r1]2  t114[r1]2  t115[r1]2
+	[r1]8
+B	MARKER "Section B"
+	[ r1  BEAT7,8r2..BEAT4,4 ]3  r1  BEAT3,4r2.BEAT4,4
+	[ r1  BEAT7,8r2..BEAT4,4  r1  BEAT3,4r2.BEAT4,4 ]2
+C	MARKER "Section C"
+	t120
+	[ BEAT3,4r2.r2.  BEAT4,4r1BEAT7,8r2..]2
+	BEAT3,4r2.r2.  BEAT4,4r1BEAT7,8r2..
+	BEAT3,4r2.r2.  t_120,80,0,1..,8 BEAT4,4r1BEAT7,8r2..
+D	MARKER "Section D"
+	t125 [ BEAT3,4r2. BEAT9,8r1r8  BEAT3,4r2. BEAT7,8r2..]2
+	t130 [ BEAT3,4r2. BEAT9,8r1r8 ]2
+	t135 [ BEAT3,4r2. BEAT9,8r1r8 ]2
+E	MARKER "Section E"
+	 BEAT3,4
+	t145 [ r1. ]4
+	t147 [ r1. ]2
+	t150 [ r1. ]2
+F	MARKER "Section F"
+	BEAT5,4 t155 [ r1r4 ]10
+G	MARKER "Section G"
+	BEAT4,4 t120 [r1]4  t_120,80,0,2.,32 t_80,50,2.,4 r1
+
+
+// contrabass ------------------------------
+_ 1	CH1 @43 o3 V110 v80 l8 RSD40 CSD20 DSD10 BEND_CENT_MODE24
+	r1
+A	[r1]8
+	[r1]8
+
+B	[ r1 r2..]3  r1 r2.
+	E_32,127,0,1e1e2.<a^  1^  2.>
+	f1f2..  <a1  g2.>
+
+C	[
+	d2.e2.<  a1^  4a4g4.>
+	d2.e2.< : a1^  2..>
+	]2  E_127,32,1,2..,8  a1^2..> E127
+
+D	r2..r1  r2.r2..
+	c2.f+^1  g+2.c+^2.
+	c2.f+^1  g+2.e2..f+4
+	c2.f+^1  g+2.c+^1
+
+E	V90 l16 q6
+	[
+	K-5 cc+f+f+>cc< gg>c+c+gg  bbff<bb> ff<bbff
+	K-2 cc+f+f+>cc< gg>c+c+gg  bbff<bb> ff<bbff
+	K1 cc+f+f+>cc< gg>c+c+gg  bbff<bb> ff<bbff
+	K4 cc+f+f+>cc< gg>c+c+gg  bbff<bb> ff<bbff
+	]2
+
+
+// piano R ------------------------------
+#macro 2	HON  { H110 }
+_ 2	CH2 @1,1 o5 V120 v80 l8 RSD80 CSD20 DSD20 BEND_CENT_MODE24
+	TVF_CUTOFF67 ENV_DECAY84 ENV_RELEASE74
+	r1
+A	HONr4.g4e4b4g4>d^2< HOF
+	HONr4.b4g4b0>d2<b0>c0e^2<HOF
+	HONr4.g4e4b4g4>d^2HOF
+	HONr4.E100<a0>d0f4c4<b0>g4e4<b0>e0b^2<HOF
+	E90 HONr4.g4e4E95b4g4>d^4e4< HOF
+	E100 HONr4.b4g4E105b0>d2<b0>c0e^2<HOF
+	E110 HONr4.g4e4b4g4>d^2HOF
+	E120 HONr4.c4<a4>e4g4d0b^2<HOF E127
+
+B	HONr4.g4e4b4g4>d2< HOF
+	HONr4.b4g4b0>d2<b0>e2<HOF
+	HONr4.g4e4b4g4>d2HOF
+	HONr4.c4<a4>e4g4d0b4.<HOF
+	HONr4.g4e4b4g4>d4e4< HOF
+	HONe0a0>c<bae4dcg0b4a0>c4<b0>d4c0e<HOF
+	HONr4.g4e4b4g4>d4e4HOF
+	HONr4.<a0>d0f4c4<b0>g4e4<b0>e0b4.<HOF
+
+C	HONra0>c4<a0>c4<a0>c<b4f0g4deHOF
+	HONr<a,,60>e<a,,60>ae,,60be,,60>c<baec<ba>HOF
+	HONra0>c4<a0>c4<a0>c<b4f0g4deHOF
+	HONr<a,,60>e<a,,60>ae,,60be,,60>c<baegc,,60<a,,60>HOF
+	HONra0>c4<a0>c4<a0>c<b4f0g4deHOF
+	HONr<a,,60>e<a,,60>ae,,60be,,60>cd,,60<b>c,,60<ba,,60d,,60HOF
+	HONra0>c4<a0>c4<a0>c<b4f0g4deHOF
+	HONr<a,,60>e<a,,60>ae,,60be,,60>c^2.<HOF
+
+D	[ r8 [e0f+0>c4<]7  r8[f0g+0>c0d4<]6 ]2
+	[ r8 [e0f+0>c4<]7  r8[f0g+0>c0d4<]7 ]2
+
+E	V100 v70 o4 l48 GATE_DENOM8 Q24
+	[r1.]7 r1 cd+ef+ga+> cd+ef+ga+> cd+ef+ga+> cd+ef+ga+
+F	l16 o5 v75 Q8
+	  [
+	[c0d+0f+0a8 c0d+0f+0a8 c0d+0f+0a8,,60]3 [c0d+0f+0a]2
+	  [d+0f+0a0>c8< d+0f+0a0>c8< d+0f+0a0>c8,,60<]3 [d+0f+0a0>c<]2
+	  :
+	[ [<g0b0>d+0f4.]2 [<g0b0>d+0f4]2 ]2
+	  ]2
+	K5
+	[c0d+0f+0a8 c0d+0f+0a8 c0d+0f+0a8,,60]3 [c0d+0f+0a]2
+	  [d+0f+0a0>c8< d+0f+0a0>c8< d+0f+0a0>c8,,60<]3 [d+0f+0a0>c<]2
+	K8 [d+0f+0a0>c8< d+0f+0a0>c8< d+0f+0a0>c8,,60<]3 [d+0f+0a0>c<]2
+	K-2 l48 o7 Q24
+	c<a+f+d+c<a+f+d+c<a+f+d+c<a+>>>  f+d+c<a+f+d+c<a+f+d+c<a+f+d+>>>
+	c<a+f+d+c<a+f+d+c<a+f+d+c<a+>>>  f+d+c<a+f+d+c<a+f+d+c<a+f+d+
+	r2r-12
+
+G	l4 o6 K0 E100
+	r1  r2.rceg>  c<ca+cg+cge  c48f48a1-24
+
+
+// piano L ------------------------------
+_ 3	CH2 o3 v80 l8
+	r1
+A	[ a,,95>ea2.^1< ]2
+	f,,90>cg2.^1  <a,,90>d,,70f2.<g,,85>c,,60f2.<
+	[ a,,95>ea2.^1< ]2
+	f,,90>cg2.^1<  f,,90>c,,70g2.<g,,85>d,,60g2.<
+
+B	[ a>ea2^8^1< ]2
+	f>cg2^8^1<  f>c,,70g2.<g>c,,60g2<
+	a>ea2^8^1<  a>ea1.<
+	f>cg2^8^1<  f>c,,70g2.<g>c,,60g2<
+
+C	[ a0>d4>d4<d4<b0>e4>e4<e4  <a0>e1^2..< ]2
+	[ a0>d4>d4<d4<b0>e4>e4<e4  <a0>e1^2..< ]2
+
+D	[ c0>c2.<c0>c^1<  d0>d2.<d0>d^2.< ]2
+	[ c0>c2.<c0>c^1<  d0>d2.<d0>d^1< ]2
+
+E 3	[ [ a>er2< ]3  a>fr2< ]4
+F 3	l8
+	[
+	[ cf+ ]10 <[g4g>g4<gg4g4]2>
+	]2
+	[<g4g>g4<gg4g4]2
+
+
+// piccolo ------------------------------
+_ 4	CH3 @72,16 o7 V100 v80 l16 RSD80 CSD10 DSD30 M40 BEND_CENT_MODE24
+	r1
+A	[r1]8
+	[r1]8
+
+B	E_64,127,0,2
+	c2..<b>c  <e2^8d4  g2.f4^  4e4.d4>
+	c2..<b>c  <e2^8d4  g2.d4  e4g4b4>
+	c2..<b>c  <e2^8d4  g2.f4^  4e4d4>
+	c2..<b>c  <e2^8d4  g2.d4  e4g4b4>
+
+C	[ r2.  r2.  r1  r2.. ]2
+	[ r2.  r2.  r1  r2.. ]2
+
+
+// violin ------------------------------
+_ 5	CH4 @40 o4 V90 v80 l16 RSD20 CSD10 DSD20 BEND_CENT_MODE24
+	r1
+A	[r1]8
+	[r1]8
+B	[ r1  r2.. ]3  r1  r2.
+B	[ r1  r2..  r1  r2. ]2
+C	[ r2. r2.  r1 r2.. ]4
+D	[ r2. r1r8 ]2  [ r2. r2.. ]2
+	[ r2. r1r8 ]4
+
+E	[r1.]4 o5 q6
+	[ [eef+f+]12 ]2
+	[r-1.]4 q5
+	[b-b->cc<]3 [bb>cc<]3 [bb>c+c+<]3 >[c+c+dd]3<
+	[b-b->cc<]3 [bb>cc<]3 [bb>c+c+<]3 >[c+c+dd]3
+	[r-1.]2 q6
+	[b-b->cc<]3 [bb>cc<]3 [bb>c+c+<]3 >[c+c+dd]3
+
+
+// viola ------------------------------
+_ 6	CH5 @41 o4 V100 v80 l16 RSD40 CSD10 DSD20 BEND_CENT_MODE24 M30
+	r1
+A	[r1]8
+	[r1]8
+B	[ r1  r2.. ]3  r1  r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2. r2.  r1 r2.. ]4
+D	[ r2. r1r8 ]2  [ r2. r2.. ]2
+	[ r2. r1r8 ]4
+
+E	[
+	cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K3 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K-6 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K-3 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	]2
+	[r-1.]6
+	cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K3 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K6 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K9 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K3 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+	K6 cd+f+a>ce ga+>c+ega+  bg+fd<bg+ fd<bg+fd
+
+
+// bell ------------------------------
+_7	CH6 @8 o8 V60 v80 l16 RSD40 CSD10 DSD10 BEND_CENT_MODE24
+	r1
+A	[r1]8
+	[r1]8
+
+B	[ r1 r2..]3  r1 r2.
+	r1  r2r8[ed+]2  e8<b4>d4c4<g+4..a4..>
+	r1  r2..  r1  r2.
+
+
+// tubular bells --------------
+_ 8 CH7	@14 o5 V100 v80 l8 RSD60 DSD60 TVF_CUTOFF44
+	r1
+A	[r1]8
+	[r1]8
+B	[ r1 r2..]3  r1 r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2.r2.  r1r2..]2
+	[ r2.r2.  r1r2..]2
+
+D	[ r2..r1  r2..r2. ]2
+	[ a+>c+f2.< ]7 [r-1]7
+	>> [ r4.a^2  r4.f^2  r4.g+^2  r4.:e^2 ]2  e8
+
+
+// choir ------------------------------
+_ 9	CH8 @54,9 o4 V60 v80 l16 RSD40 CSD40 DSD10 BEND_CENT_MODE24 M20
+	r1
+A	[r1]8
+	[r1]8
+
+B	E_64,127,0,1,16 b0>c0e0a1^2..^1^2..<
+	b0>d0f0a1^2..&g1&b2.
+	V+5 c0d0e0a0b1^2..&>c1^2.<
+	V+5 d0f0a0b0c0d1^2..^1e0g0b0>d0e2.<
+
+C	[
+	d0f0a0>c2.<e0a0b2&>d4  <e0a0>c0e2..&<g1
+	d0f0a0>c2.<e0a0b2&>d4 : <e0a0>c0e2..^1<
+	]2  E_127,32,0,1...,8<e0a0>c0e2..^1<E127
+
+D	[ r2.. r1 ]2  [ r2.. r2. ]2
+	[ r2.. r1 ]4
+E	[ r1. ]4
+	[ r1. ]2
+	[ r1. ]2
+F	[ r1. ]9
+
+G	r2. E64 E_64,127,0,1,8 c0e0g+0>c4^1^1^1<
+	E_80,127,0,2,32 E_127,0,1,2.,16 c0f0a0>c1^1^1
+
+
+// strings -----------------------------
+_ 13	CH9 @54,9 o4 v80 l16 RSD40 CSD40 DSD10 BEND_CENT_MODE24 M20
+	r1
+
+A	[r1]8
+	[r1]8
+B	[ r1 r2..]3  r1 r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2.r2.  r1r2..]2
+	[ r2.r2.  r1r2..]2
+D	[ r2.. r1 ]2  [ r2.. r2. ]2
+	[ r2.. r1 ]4
+E	[ r1. ]4
+	[ r1. ]2
+	[ r1. ]2
+
+F	@48 V70 E110
+F	d0f+0g+0>c1^1^2<  <b0>d0g0b1^1^2
+F	d0f+0g+0>c1^1^2<
+	K3 d0f+0g+0b1^4
+	K6 d0f+0g+0b1^4
+F	K7 E_110,127,1,1,16 d0e0>c+1^1^2
+
+G	K0 E_127,80,1,1,16 E_80,0,1^1^1,1,16 c0f0a1^1^1^1
+
+
+// timpani ------------------------------
+_ 11	CH11 @47 o4 V90 v80 l16 RSD40 CSD40 DSD20
+	r1
+
+A	[r1]8
+	[r1]8
+B	[ r1 r2..]3  r1 r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2.r2.  r1r2..]2
+	[ r2.r2.  r1r2..]2
+D	[ r2.. r1 ]2  [ r2.. r2. ]2
+	[ r2.. r1 ]4
+
+E	[c8<g8r2>]7  c8<g8>r4 E_64,127,0,4 [<g32>]8
+E	[c8c8,,70<g8,,60>c8:c8,,70<g,,60g,,60>]8  E_64,127,0,4 [<g32>]8
+F	[ c8c8,,70<g8,,60> c8c8,,70<g8,,60> c8,,70<g8,,60> c8<g16,,70g16,,60> ]9
+	<[g24[g24,,60]5]5
+
+
+// rev. cymbal ----------------------------
+_ 12	CH12 @119 o4 V85 v80 l16 RSD80 CSD40 DSD40
+	r1
+
+A	[r1]8
+	[r1]8
+B	[ r1 r2..]3  r1 r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2.r2.  r1r2..]2
+	[ r2.r2.  r1r2..]2
+
+D	[ r2.. r1 ]2  [ r2.. r2. ]2
+	[ r2.. r1 ]3  r2.. r2
+	  >c0,1.<
+	  // I have no any better idea to generate chick rev. cymbal sound.
+	  c24,4c+24,4d24,4d+24,4e24,4f24,4
+	  f+24,4g24,4g+24,4a24,4a+24,4b24,4
+	  c24,4c+24,4d24,4d+24,4e24,4f24,4
+	  f+24,4g24,4g+24,4a24,1.a+24,1.b24,1.
+
+E	E_127,0,0,16 [r1.]7
+	E127 r2.>c0,2.<c12,4c+12,4d12,4d+12,4e12,4f12,4
+
+F	E_127,0,0,16 [r1.]10
+
+
+// organ ------------------------------
+_ 14	CH13 @19 V65 v70 l16 RSD40 CSD20
+	r1
+
+A	[r1]8
+	[r1]8
+B	[ r1 r2..]3  r1 r2.
+	[ r1  r2..  r1  r2. ]2
+C	[ r2.r2.  r1r2..]2
+	[ r2.r2.  r1r2..]2
+D	[ r2.. r1 ]2  [ r2.. r2. ]2
+	[ r2.. r1 ]4
+E	[r1.]8
+F	l16 GATE_DENOM8 Q21 o6
+	<a8>[afc+]6fa>c+[afc+]5a>c+<<  d8[b0ag:d]13
+	<a8>[afc+]6fa>c+[afc+]5a>c+<<
+	Q8 (10
+	K5 c0d+0f0a0>c1^4<  d+0f0a0>c0d+1^4<
+	E_127,32,1^4,1^1^1^1^1^1,8
+	K8 c0d+0f0a0>c1^4<  d+0f0a0>c0d+1^4<
+G	K0 f0a0>c0f1^1^1

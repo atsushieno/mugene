@@ -1,0 +1,411 @@
+// Common --------------------------
+#meta title "das stromreiters"
+#meta copyright "atsushieno"
+#meta text "for album 'mugene fantasy suite'"
+// Part I: the stormriders
+// Part II: infancy (the next generation)
+// Part III: departure
+
+_ 0 GM_SYSTEM_ON t120
+
+_ 0-100,2.1,13.1,13.2,13.3 r1
+
+#macro M_ON val:number=60 { M_0,$val,4,4 }
+
+
+// Control ---------------------
+_ 0 BEAT3,4
+_	t155
+A	MARKER "Section A"
+	[r1.]8
+B	MARKER "Section B"
+	[r1.]8
+C	MARKER "Section C"
+	[r1.]3  r2 t_155,140,0,2r1
+D	MARKER "Section D"
+	BEAT4,4 [r1]2 t_140,125,0,1.,4 [r1]2
+	[r1]4
+E	MARKER "Section E"
+	t125
+	[r1]5  t_120,60,0,1,32 r1
+F	MARKER "Section F"
+	t125
+	[r1]9  t_125,100,16 r1
+H	MARKER "Section H"
+	t120 [r1.]8
+I	MARKER "Section I"
+	t121 [r1. t+1]4 [r1. r1. t+1]2
+J	MARKER "Section J"
+	t155
+	[r1.]8
+K	MARKER "Section K"
+	[r1.]3
+L	MARKER "Section L"
+	[r1.]8
+
+
+// Trombone -----------------
+_ 1	CH1 @57 V100 o4 l16 GATE_DENOM8 Q7 RSD60 CSD40 DSD40 BEND_CENT_MODE24 P74
+A	r2.g4>c4g4  d2.e-4f4b-4  a2.g8agf4.c8  f1
+	  K-5c4d4
+	e-2.c4g4e-4  f2.f4b-4g4>  c1^8r8<br>cr  d1.
+B	[r1.]8
+C	DSD0 K0
+	o5 c,,60re-rgrb-r>c4c4<b-8>cr<arfr  g1.
+	e-8,,60b-r>cre-rg4g4f8grdr<b-r>  d1.
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I	V90 o4 l16
+	E_64,127,0,1.^1.^1.^1.,8
+	[ r8[a0>d<]2[a0>dr<]2 rra0>dr< ]2  g0b0>d1.<
+	[ r8[a0>d0f<]2[a0>d0fr<]2 rra0>d0fr< ]2  g0b0>d0g1.<
+	[ r8[a0>d<]2[a0>dr<]2 rra0>dr< ]2
+	  r8[a0>d<]2[a0>dr<]4 g0b0>d2.<
+	[ r8[a0>d<]2[a0>dr<]2 rra0>d0fr< ]2
+	  r8[g0b0>d<]2[g0b0>dr<]4 g0b0>d0g2.<
+J	r1. r1. r1. r1.
+	[rrb-rb-r]3 rrb-r(15b-b-)15  >c1.
+	[rre-re-r]3 rre-r(15e-e-)15  f1.
+K	[r1.]3
+L	V100 o4 Q7
+	r2.g4>c4g4  d2.e-4f4b-4  a2.g8agf4.c8  f1
+	  K-5c4d4
+	e-2.c4g4e-4  f2.f4b-4>d4  ENV_RELEASE79 Q5q2l12c6c6ccc6c6cc  c6cc6r2.
+
+
+
+// Trumpet -----------------
+_ 2		CH2 @56 V100 v100 o5 l16 GATE_DENOM8 Q7 M40 BEND_CENT_MODE24 P84
+_ 2.1	CH2 o5 l16 v70
+A 2		r1.  r1.  r1.  r1c4d4
+		e-2.e-4g4e-4  f2.d4b-4g4>  c1^4crcr  c1.
+A 2.1	K-5 r1.  r1.  r1.  r1c4d4
+		e-2.c4g4e-4  f2.f4b-4g4>  c1^4<br>cr  d1.
+B 2,2.1	[r1.]8
+C 2	< v80 l16 K-5
+	r8e-8,,60grb-r>c4c4<b-8>cr<arfr  g1.
+	K-5 e-8,,60b-r>cre-rg4g4f8grdr<b-r>  d1.
+C 2.1	< K0 l16
+	r1.  r1.  g8b-r>cre-rg4g4f8grdr<b-r>  d1.
+D 2,2.1	[r1]8
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I 2	o5 Q7 ENV_ATTACK94 M40
+	V85 r1.  r2[d0g12]3d0g2.
+	V90 r1.  r2[d0g0b12]3d0g0b2.
+	V80
+	[ r8[f0a0>d<]2[f0a0>dr<]2 rra0>dr< ]2 g0>d0g2< [g0>d0g12<]3g0>d0g2.<
+	[ r8[a0>d0f<]2[a0>d0fr<]2 rra0>d0fr< ]2 g0b0>d0g2< [g0b0>d0g12<]3g0b0>d0g2.<
+I 2.1	[r1.]8
+J 2	l16 o5 Q8 ENV_ATTACK64
+	r1. r1. r1. r1.
+	K-7 [rrc0grc0gr]3 rrc0gr(15c0gc0g)15  d0g1d0g2
+	K0 [rre-0b-re-0b-r]3 rre-0b-r(15e-0b-e-0b-)15  f0>c1<[f0>c4<]2
+J 2.1	[r1.]8
+K 2	[r1.]3
+K 2.1	[r1.]3
+L 2		V100 v100 o5 Q7
+		r1.  r1.  r1.  r1c4d4
+		e-2.e-4g4e-4  f2.d4b-4g4>  Q6q2l12c6c6ccc6c6cc  c6cc4r2.
+L 2.1	v100 o5 Q7
+		K-5 r1.  r1.  r1.  r1c4d4
+		e-2.c4g4e-4  f2.f4b-4>d4   ENV_RELEASE79 Q5q2l12c6c6ccc6c6cc  c6cc4r2.
+
+
+// Horn --------------------
+_ 3	CH3 @60 V110 v80 o5 l16 GATE_DENOM8 BEND_CENT_MODE24 P69
+A	[  [ c0<g8> (30 [ c0<g8> ]2 )30 ]3 (30 [c0<g8>]3 )30  ]2
+	[  [ c0f8 (30 [ c0f8 ]2 )30 ]3 (30 [c0f8]3 )30  ]2
+	[ <a-0>c8 (30 [ <a-0>c8 ]2 )30 ]3 (30 [<a-0>c8]3 )30
+	[ <g0>d8 (30 [ <g0>d8 ]2 )30 ]3 (30 [<g0>d8]3 )30
+	[ c0<g8> (30 [ c0<g8> ]2 )30 ]3 (30 [c0<g8>]3 )30
+	[ c0f8 (30 [ c0f8 ]2 )30 ]3 (30 [c0f8]3 )30
+B	[r1.]2  v100 Q7 <r1r8g8b-r>dr  M_ON g1.M0
+B	[r1.]4
+C	v70 [ [ c0<g4> (30 c0<g8> )30 ]3 (30c0<g4.>)30 ]2
+C	[ [ c0<g4> (30 c0<g8> )30 ]3 (30c0<g4.>)30 ]2
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I	[r1.]8
+J	@60 V110 v80 o4 l16 GATE_DENOM8 BEND_CENT_MODE24 P69
+	  [
+	[ c0g8 (30 [ c0g8 ]2 )30 ]2 [ c0g8 (30 c0g8 )30 ]3
+	[ d0g8 (30 [ d0g8 ]2 )30 ]2 [ d0g8 (30 d0g8 )30 ]3
+	[ <b-0>e-8 (30 [ <b-0>e-8 ]2 )30 ]2 [ <b-0>e-8 (30 <b-0>e-8 )30 ]3
+	[ f0>c8< (30 [ f0>c8< ]2 )30 ]2 [ f0>c8< (30 f0>c8< )30 ]3
+	  ]2
+K	[r1.]3
+L	v80
+	[  [ c0<g8> (30 [ c0<g8> ]2 )30 ]3 (30 [c0<g8>]3 )30  ]2
+	[  [ c0f8 (30 [ c0f8 ]2 )30 ]3 (30 [c0f8]3 )30  ]2
+	[ <a-0>c8 (30 [ <a-0>c8 ]2 )30 ]3 (30 [<a-0>c8]3 )30
+	[ <g0>d8 (30 [ <g0>d8 ]2 )30 ]3 (30 [<g0>d8]3 )30
+	[ [ c0<g12>r12 ]2 [c0<g12>]2 ]2  c0<g6>c0<g12 >c0<g4r2.
+
+
+// Timpani ----------------
+_ 4	CH4 @47 V100 P79 l16 v100
+A	[
+	c8c8,,80c8,,60c4.r4r4<g4>  c4.c4.r4r2
+	c4.c4.r4r4<g4>  c4.c4.r4 : r2
+	]2  < E_64,127,0,4.,24[g24]12 >
+B	c1r4.<g8>  c1.  <g1r4.g8  g1.
+	[r1.]4
+C	[ c4.c4.<g4>c4<g4>  c4.c4.<g4>c4<E_64,127,0,4,24[g32]8> ]2
+D	c1  [r1]7
+E	[r1]6
+F	[r1]10
+H	[r1.]6  c1.,,65  r1.
+I	c1.,,65  r1.  c1.  r1.
+	[ c8c,,60c8c,,60c8c8<g8,,60> ]8
+J	[ c4c8,,60c4.<g4,,80>c4,,80<g8g8,,60> ]8
+K	[ c4.[c4,,70<g8,,60>]3 ]3
+L	[
+	c8c8,,80c8,,60c4.r4r4<g4>  c4.c4.r4r2 :
+	c4.c4.r4r4<g4>  c4.c4.r4r2
+	]2  [c6]6  c6c12c1
+
+
+// Strings Section 1 -----------------
+_ 5	CH5 @48 V90 o6 l16 v100 BEND_CENT_MODE24 DSD30
+A	K-4 [r1.]7  r1r4l24cdef+gal16
+B	K-4
+	b1^4argr  f+2.e4f+4g4  f+4.<br>b1^  1.
+	[r1.]4
+C	K0
+	[r1.]3  r1r8l24rr<gb->de-fgb->l16
+D	c4.<b-a-g4f4  d0b-4.c0a-<b-0>g<a-0>f4<g0>e-4
+	(10 c0a-4.<b-0>g<a-0>f<g0>e-4<f0>d4  <b-0>g4.<a-0>f<g0>e-<f0>d4<e-0>c4
+	(10 <d0a0>f1^1  (10<d0b0>g1. (10<<f0g0b0>d0f2
+E	<f0g0>c0e-1^1^1  <c0e-0f0a1^1^1
+F	[r1]10
+H	[r1.]8
+I	V100 RSD40 o6
+	[r1.]7  r2. r2l32<b->cde-fga-b->
+J	[ c0,8< r1.  r1.  r1.  r1r8l24<b->cde-fga-b->c ]2
+K	l16 < [ g8fre-rf8e-rdre-8drcrd8cr<b-r> ]3
+
+
+// Violin ----------------
+_ 6	CH6 V80 v80 o5 l16 BEND_CENT_MODE24 P34
+	@40,1 RSD20 CSD20 DSD20 Q6
+A	[ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]4
+B	[fr]10fgfg [fr]12 [gr]10gdgd[gr]12
+	v60 [fr]10fgfg [fr]12 [gr]10gdgd[gr]12
+C	>[r1.]3  r1r8l24rr<gb->de-fgb->l16
+D	Q8 c4.<b-a-g4f4  b-4.a-gf4e-4 a-4.gfe-4d4  g4.fe-d4c4
+	f1^1  g1.r2
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I	o6 V80 v60 l24 ENV_ATTACK69
+	E_64,127,0,1.,24 [ [fgfgfg]12 ]4
+J	E127 o5 l16 V65
+	[ [r8g8>cr<gr]2  r8[g>c<]3 ]4
+	[r1.]4
+K	V70
+	[r1.]2 K5 g8fre-rf8e-rdre-8drcrd8cr<b-r>
+L	K0 v80 o5 Q7
+	[ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]2
+
+
+// Viola ----------------
+_ 7	CH7 V80 v80 o5 l16 BEND_CENT_MODE24 ENV_ATTACK69 P48
+	@41,1 RSD20 CSD20 DSD20 Q6
+A	K-5 [ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]4
+B	K-5
+	[cr]10cccc [cr]12  [cr]10cccc [cr]12
+	v60 [cr]10cccc [cr]12  [cr]10cccc [cr]12
+C	[r1.]4
+D	Q8 K0 > r1  d4.c-<b-a-4g4> c4.<b-a-g4f4  b-4.a-gf4e-4
+	a1^1  b1.r2
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I	[r1.]8
+J	o5
+	[ [r8c8frcr]2  r8[e-f]3 ]2
+	[r8e-8gre-r]2  r8[fg]3  [r8f8arfr]2  r8[ga]3
+	[r1.]4
+K	V80
+	[r1.]2  l16 e-8drcrd8cr<b-r>c8<b-ra-rb-8a-rfr
+L	o5 Q7
+	K-5 [ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]2
+
+
+// Strings Section 2 ---------------
+_ 8	CH8 @48 V90 o5 l16 BEND_CENT_MODE24 q4
+A	v70
+	[ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]4
+B	v90
+	[fr]10fgfg [fr]12 [gr]10gdgd[gr]12
+	[fr]10fgfg [fr]12 [gr]10gdgd[gr]12
+C	q6
+	[ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b-  [e-f]2e-8[e-f]7e-4 ]2
+D	<< v70 V70
+	f2g2  b-2>e-2  <a-2>d2  g1<
+	(10 f1  f1  g1  b2)30f2 >>
+E	v40 V70
+	[r1]6
+F	[r1]4
+	E_64,127,0,4,48 c0f1  )10 E_64,127,0,4,48 c0f1
+	E_64,127,0,4,48 d0f0a1   )10 d0f0a1
+	E_64,127,0,4,48 g0b1^1
+H	[r1.]8
+I	o6 v60 l24
+	E32 E_32,127,0,1.^1.^1.^1.,8
+	[ [ [fg:fgfg]6 : fgfg ]2 frrr ]4
+J	v80 o5 l16 V60
+	c0e-0g1.  c0f0a0>c1.<  e-0g0b-1.  c0f0a1.
+	c0e-0g0b-1.  c0f0a0>c1.<  e-0g0b-0>e-1.<  f0a0>c0f1.
+K	V70 q0
+	r1r8l24<b->cde-fga-b->c<
+	l16 K5 [ g8fre-rf8e-rdre-8drcrd8cr<b-r> ]2
+L	V90 o5 K0 v70 q4
+	[ [e-f]3e-8e-fga-b->cde- b-a-gfe-dc<b- ]4
+	[ [e-f]2e-8[e-f]7e-4 ]2
+
+
+// Contrabass ---------------
+_ 9	CH9 @43 V100 v100 o3 l8 P44
+A	c1^4c4c1.  f1^4c4  f1.
+	<a-1.g1.>  c1^4<g4>  c1c4<b-4>
+B	<[a-4]12  [b-4]12  [f4]12  [g4]9>d4<b4f4
+C	c2c2g2  >c2.<g4g2  c2c2f2  >c4.<g4.c4b-2
+D	(20
+	f2g2  b-2>e-2  <a-2>d2  g2c2<
+	(10 f1  f1  g1  b2)30f2
+E	>c1^1^1  E_127,64,0,1^1^1,8 f1^1^1<
+F	[r1]4
+	E127 V80 f1^1  >d1d1  r1r1
+H	[r1.]8
+I	[r1.]8
+J	[r1.]4
+	<g4.>c4.<g4>c4<g4  >c4.c4.c4c2<  b-4.b-4.b-4b2  f1.
+K	[r1.]3
+L	o3 V100
+	c1^4c4c1.  f1^4c4  f1.
+	<a-1.g1.>  c1.
+
+
+// Piccolo ---------------------
+#macro 11 M_ON { M_0,80,4,4 } // override (default = 80)
+_ 11	CH11 @72 o6 V90 l8 P44 DSD30
+A	[r1.]8
+B	q8 v80 [rccrcc]7 rcc v100 l16 q0 drfrar>
+	M_ONc1^4M0<b-ra-r  M_ON g2.f4g4a-4M0  a4.dr>M_ONd1^  1.M0<
+C	[v70 r1r4g>ce-f  [ga-ga-(]5 : g(5e-(5c(5<g)15 ]2  r4
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	V80 o6 v60 l24
+	r1.  r1. r1.
+	E_64,127,0,1.,16 [ [ [fgfgfg]6 ]2 ]2  [fgfgfg]6
+I	[ [ [fgfgfg]6 ]2 ]2
+
+
+// Clarinet ---------------------
+_ 12	CH12 @71 o6 V80 l8 P44 DSD30
+A	[r1.]8
+B	q8 v80 [rffrff]8
+	v100 l16 q0 >r1.  M_ON c1^4<b-ra-r M0  f4.r8M_ONg1M0  M_ONa2.b2.M0
+C	< K7 [v70 r1r4g>ce-f  [ga-ga-(]5 : g(5e-(5c(5<g)15 ]2  r4 K0
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	o7 v60 l24 K0 V80
+	r1.  r1.
+	E_64,127,0,1.,16
+	[ [ [fgfgfg]6 ]2 ]3
+I	[ [ [fgfgfg]6 ]2 ]2
+
+
+// Choir -------------------------
+_ 13	CH13 @52,11 V90 P64
+_ 13.1,13.2,13.3	CH13 o5 v80 l8
+A 13	[r1.]7  r1 E_64,127,0,4,32 r2
+A 13.1	[r1.]7  r1<a2
+A 13.2	[r1.]7  r1c2
+A 13.3	[r1.]7  r1e-2
+B 13.1	a1.^1.  b-1.^1.  a1.^1.  a1.b1.
+B 13.2	c1.^1.  d1.^1.  c1.^1.  c1.d1.
+B 13.3	e-1.^1.  f1.^1.  f1.^1.  f1.f1.
+C 13,13.1,13.2,13.3	[r1.]4
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	[r1.]8
+I	E_64,127,0,1.^1.,8 V80
+I 13.1,13.2,13.3 o4
+	[r1.]4
+
+
+// Harp ----------------------
+_ 15	CH15 @46 o4 V100 v80 P74
+A	[r1.]8
+B	[r1.]8
+C	[r1.]4
+D	[r1]4
+	l4f,,60>cfa>  c<afc  l6<gb>dl8gb>dg<l24dgb>dgb^2..<
+E	r1  c4e-4g4>c4<  r1  r1  g3>c3e-3  ^16g4..^  2
+
+
+// Tuba ----------------------
+_ 16	CH3
+A	[r1.]8
+B	[r1.]8
+C	[r1.]4
+D	[r1]8
+E	@58 o4 V110 v100 RSD40 ENV_ATTACK84 ENV_DECAY94 P54
+	r2r4g4  >c4g4d2^  4e-4f4b-4  a1^  2g2  f2e-2
+F	E_127,64,0,1,32 d1 r1
+	V90 E127 GATE_DENOM8 Q6 o5 v80
+	r4d0<a2>d0<a4>  r4d0<b2>d0<b4>
+	[ r4c0f2c0f4 ]2  r4d0f2d0f4  r4<a0>d0f2<a0>d0f4
+	<b0>d0g1^1
+H	l8 o4 Q6 ENV_RELEASE84
+	[r1.]4
+	[rf0a4f0arf0a]2  [rg0b4g0brg0b]2
+	[rf0>c4<f0>c<rf0>c<]2  [rg0>d4<g0>d<rg0>d<]2
+I	V100
+	  [
+	[rf0a4f0arf0a]2  [rg0b4g0brg0b]2
+	[rf0a0>c4<f0a0>c<rf0a0>c<]2  [rg0>d4<g0>d<rg0>d<]2
+	  ]2
+
+
+// Flute ------------------------
+_ 17 CH12
+A	[r1.]8
+B	[r1.]8
+C	[r1.]4
+D	[r1]8
+E	@73 o5 V110 v80 l4 M20 GATE_DENOM8 Q7 ENV_ATTACK84
+	[r1]6
+F	b-a->dc gfde-  f1c1<
+	b-a->dc gfde-  c<b->fe-4
+	b-a-ga-  M_0,40,8,4 g1^1 M0
+
+
+// Pizzicato Strings -----------
+_ 18	CH15
+A	[r1.]8
+B	[r1.]8
+C	[r1.]4
+D	[r1]8
+E	[r1]6
+F	[r1]10
+H	@45 o4 V80 v80 P74 l16
+	[ dfgb>dfrgbrgd<  dfgb>drfrgrbr< ]8
+I	E_127,64,0,1.^1.,8 [ dfgb>dfrgbrgd<  dfgb>drfrgrbr< ]2
+	[r1.]2
