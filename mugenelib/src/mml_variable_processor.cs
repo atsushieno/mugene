@@ -822,6 +822,7 @@ namespace Commons.Music.Midi.Mml
 			var msgBlockByTime = new Dictionary<int,List<MmlResolvedEvent>> ();
 			int m = 0;
 			int prev = 0;
+
 			while (m < l.Count) {
 				var e = l [m];
 				List<MmlResolvedEvent> pl;
@@ -829,12 +830,10 @@ namespace Commons.Music.Midi.Mml
 					pl = new List<MmlResolvedEvent> ();
 					msgBlockByTime.Add (e.Tick, pl);
 				}
-				for (; m < l.Count; m++) {
+				prev = l [m].Tick;
+				pl.Add (l [m]);
+				for (m++; m < l.Count && l [m].Tick == prev; m++)
 					pl.Add (l [m]);
-					if (m + 1 < l.Count && l [m + 1].Tick != prev)
-						break;
-				}
-				m++;
 			}
 			
 			l.Clear ();
