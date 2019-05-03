@@ -1283,7 +1283,7 @@ namespace Commons.Music.Midi.Mml
 				identifier = source.Lexer.ReadNewIdentifier ();
 				source.Lexer.SkipWhitespaces (true);
 				if (aliases.ContainsKey (identifier))
-					compiler.Report ( MmlDiagnosticVerbosity.Warning, source.Lexer.Line.Location, "Warning: overwriting definition {0}, redefined at {1}", identifier);
+					compiler.Report ( MmlDiagnosticVerbosity.Warning, source.Lexer.Line.Location, "Warning: overwriting definition {0}, redefined at {1}", identifier, source.Lexer.Line.Location);
 				aliases [identifier] = source.Lexer.Line.Text.Substring (source.Lexer.Line.Location.LinePosition);
 				source.Lexer.NewIdentifierMode = false;
 				break;

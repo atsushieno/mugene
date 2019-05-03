@@ -65,7 +65,11 @@ namespace Commons.Music.Midi.Mml
 		{
 			string kind = verbosity == MmlDiagnosticVerbosity.Error ? "error" : verbosity == MmlDiagnosticVerbosity.Warning ? "warning" : "information";
 			string loc = location != null ? string.Format ("{0} ({1}, {2})", location.File, location.LineNumber, location.LinePosition) : null;
-			string output = string.Format ("{0}{1}{2}: {3}", loc, loc != null ? " : " : "", kind, args != null && args.Any () ? string.Format (format, args) : format);
+			string output = string.Format ("{0}{1}{2}: {3}",
+				 loc,
+				 loc != null ? " : " : "",
+				 kind,
+				 args != null && args.Any () ? string.Format (format, args) : format);
 			if (verbosity != MmlDiagnosticVerbosity.Error || ContinueOnError)
 				Console.Error.WriteLine (output);
 			else
