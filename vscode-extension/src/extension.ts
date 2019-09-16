@@ -189,7 +189,7 @@ function activatePreview(context: ExtensionContext) {
 function activateLSP(context: ExtensionContext) {
 
 	// The server is implemented in C#
-	let serverCommand = context.asAbsolutePath(path.join('server', 'mugene.languageserver.tool.exe'));
+	let serverCommand = context.asAbsolutePath(path.join('out', 'server', 'mugene.languageserver.tool.exe'));
 	let commandOptions = { stdio: 'pipe' };
 	
 	// If the extension is launched in debug mode then the debug server options are used
@@ -209,14 +209,14 @@ function activateLSP(context: ExtensionContext) {
 		documentSelector: [{scheme: 'file', language: 'mugene'}],
 		synchronize: {
 			// Synchronize the setting section 'languageServerExample' to the server
-			configurationSection: 'mugeneLSP',
+			configurationSection: 'mugene',
 			// Notify the server about file changes to '.clientrc files contain in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
 	}
 	
 	// Create the language client and start the client.
-	let lsp = new LanguageClient('mugeneLSP', 'mugene Language Server', serverOptions, clientOptions).start();
+	let lsp = new LanguageClient('mugene', 'mugene Language Server', serverOptions, clientOptions).start();
 	
 	// Push the disposable to the context's subscriptions so that the 
 	// client can be deactivated on extension deactivation

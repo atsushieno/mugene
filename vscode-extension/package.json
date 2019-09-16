@@ -3,14 +3,14 @@
 	"description": "mugene MML compiler support",
 	"author": "Atsushi Eno",
 	"license": "MIT",
-	"version": "0.2.4",
+	"version": "0.2.5",
 	"publisher": "atsushieno",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/atsushieno/mugene"
 	},
 	"engines": {
-		"vscode": "^1.23.0"
+		"vscode": "^1.33.0"
 	},
 	"categories": [
 		"Other"
@@ -41,13 +41,13 @@
 			"type": "object",
 			"title": "Mugene LSP configuration",
 			"properties": {
-				"mugeneLSP.maxNumberOfProblems": {
+				"mugene.maxNumberOfProblems": {
 					"scope": "resource",
 					"type": "number",
 					"default": 100,
 					"description": "Controls the maximum number of problems produced by the server."
 				},
-				"mugeneLSP.trace.server": {
+				"mugene.trace.server": {
 					"scope": "window",
 					"type": "string",
 					"enum": [
@@ -80,11 +80,11 @@
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^11.13.8",
 		"@types/rx-lite": "^4.0.6",
-		"typescript": "^3.4.5",
-		"vscode": "^1.1.33"
+		"typescript": "^3.6.3",
+		"vscode": "^1.1.36"
 	},
 	"dependencies": {
 		"rx-lite": "^4.0.8",
-		"vscode-languageclient": "^3.3.0"
+		"vscode-languageclient": "^5.2.1"
 	}
 }
