@@ -4,3 +4,5 @@ obj/
 samples/*.mid
 samples/*.vsq
 *.userprefs
+.idea/
+

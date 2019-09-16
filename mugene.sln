@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Private.LanguageServer", "e
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tests", "mugene.languageserver.tests\mugene.languageserver.tests.csproj", "{158126F2-50A9-4C95-83D8-746F34340CEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tool", "vscode-extension\client\csharp\mugene.languageserver.tool.csproj", "{83388180-C66E-4B3B-BC25-2321B37CF4DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mugene.languageserver.tool", "vscode-extension\csharp\mugene.languageserver.tool.csproj", "{83388180-C66E-4B3B-BC25-2321B37CF4DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

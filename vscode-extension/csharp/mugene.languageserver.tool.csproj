@@ -37,18 +37,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\mugene.languageserver\mugene.languageserver.csproj">
+    <ProjectReference Include="..\..\mugene.languageserver\mugene.languageserver.csproj">
       <Project>{A8C9FF2D-927B-4ACF-8407-3595DA234E96}</Project>
       <Name>mugene.languageserver</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\external\Private.LanguageServer.csproj">
+    <ProjectReference Include="..\..\external\Private.LanguageServer.csproj">
       <Project>{EC564FE9-F001-416D-9FA8-513047B4BB7E}</Project>
       <Name>Private.LanguageServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="CopyMml" AfterTargets="Build">
-    <Exec Condition="'$(OS)' != 'Windows'" Command="cp $(MSBuildThisFileDirectory)..\..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
-    <Exec Condition="'$(OS)' == 'Windows'" Command="copy $(MSBuildThisFileDirectory)..\..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
+    <Exec Condition="'$(OS)' != 'Windows'" Command="cp $(MSBuildThisFileDirectory)..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
+    <Exec Condition="'$(OS)' == 'Windows'" Command="copy $(MSBuildThisFileDirectory)..\..\mugenelib\mml\*.mml $(OutputPath)mml" />
   </Target>
 </Project>
