@@ -167,6 +167,10 @@ namespace Commons.Music.Midi.Mml
 	{
 		public virtual TextReader Resolve (string file)
 		{
+			if (file == null)
+				throw new ArgumentNullException (nameof (file));
+			if (file.Length == 0)
+				throw new ArgumentException ("Empty filename is passed", nameof (file));
 			var ret = OnResolve (file);
 			if (ret == null)
 				throw new IOException ($"MML stream {file} could not be resolved.");
