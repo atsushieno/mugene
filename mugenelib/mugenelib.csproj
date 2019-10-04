@@ -5,7 +5,7 @@
     <ReleaseVersion>0.7</ReleaseVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="managed-midi" Version="1.9.11" />
+    <PackageReference Include="managed-midi" Version="1.9.12" />
     <EmbeddedResource Include="mml/*.mml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>%(Filename)%(Extension)</LogicalName>

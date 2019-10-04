@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\mugene\*.cs" />
-    <PackageReference Include="managed-midi" Version="1.9.11" />
+    <PackageReference Include="managed-midi" Version="1.9.12" />
     <ProjectReference Include="..\..\mugenelib\mugenelib.csproj" />
   </ItemGroup>
 

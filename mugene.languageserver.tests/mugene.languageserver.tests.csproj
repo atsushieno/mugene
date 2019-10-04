@@ -14,6 +14,6 @@
     <ProjectReference Include="..\external\Private.LanguageServer.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
   </ItemGroup>
 </Project>
