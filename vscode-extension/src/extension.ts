@@ -12,8 +12,8 @@ import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as rx from 'rx-lite';
 
-import { workspace, ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
+import { /*workspace,*/ ExtensionContext } from 'vscode';
+//import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
 
 const mugene_scheme = "mugene";
 
@@ -165,7 +165,8 @@ function processDocument (_: vscode.TextDocument) : Promise<string> {
 export function activate(context: ExtensionContext) {
 	activateCompiler(context)
 	activatePreview(context)
-	activateLSP(context)
+	// FIXME: enable it once issue is fixed
+	//activateLSP(context)
 }
 
 function activateCompiler(context: ExtensionContext) {
@@ -189,6 +190,8 @@ function activatePreview(context: ExtensionContext) {
 
 }
 
+// FIXME: the LSP server somehow causes 100% CPU usage on mono. Disable it until the issue gets fixed.
+/*
 function activateLSP(context: ExtensionContext) {
 
 	// The server is implemented in C#
@@ -214,7 +217,7 @@ function activateLSP(context: ExtensionContext) {
 			// Synchronize the setting section 'languageServerExample' to the server
 			configurationSection: 'mugene',
 			// Notify the server about file changes to '.clientrc files contain in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+			fileEvents: workspace.createFileSystemWatcher('** /.clientrc')
 		}
 	}
 	
@@ -225,3 +228,4 @@ function activateLSP(context: ExtensionContext) {
 	// client can be deactivated on extension deactivation
 	context.subscriptions.push(lsp);
 }
+*/
