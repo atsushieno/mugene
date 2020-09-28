@@ -131,6 +131,41 @@ B	a1
 				, "1.1 c2d4\n11 e2f4\n0.11 gab");
 			MmlTestUtility.TestCompile (nameof (DoubleTrackNumber) + " - 2", "0-100,2.1	r1");
 		}
+
+		[Test]
+		public void DrumTrackNoteVelocityIssue35 ()
+		{
+			string mml = @"
+#define DRUMTRACKS 10
+
+9	t120
+
+9	V120 l16
+	v127 n36,1  n36,1,1,64
+
+#macro DRUMTRACKS Ba { n36,0,127 r }
+#macro DRUMTRACKS Bb { n36,0,112 r }
+#macro DRUMTRACKS Bc { n36,0,96 r }
+#macro DRUMTRACKS Bd { n36,0,80 r }
+#macro DRUMTRACKS Be { n36,0,64 r }
+#macro DRUMTRACKS Sa { n38,0,127 r }
+#macro DRUMTRACKS Sb { n38,0,112 r }
+#macro DRUMTRACKS Sc { n38,0,96 r }
+#macro DRUMTRACKS Sd { n38,0,80 r }
+#macro DRUMTRACKS Se { n38,0,64 r }
+
+10	V120 l16
+	v127 n36,1  n36,1,1,64
+";
+			var music = new MmlCompiler ().Compile (false, mml);
+			var messages1 = music.Tracks [0].Messages.Where (m => m.Event.EventType == MidiEvent.NoteOn).ToArray ();
+			Assert.AreEqual (127, messages1 [0].Event.Lsb, "Messages1.Velocity1");
+			Assert.AreEqual (64, messages1 [1].Event.Lsb, "Messages1.Velocity2");
+
+			var messages2 = music.Tracks [1].Messages.Where (m => m.Event.EventType == MidiEvent.NoteOn).ToArray ();
+			Assert.AreEqual (127, messages2 [0].Event.Lsb, "Messages2.Velocity1");
+			Assert.AreEqual (64, messages2 [1].Event.Lsb, "Messages2.Velocity2");
+		}
 	}
 }
 
