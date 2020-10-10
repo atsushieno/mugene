@@ -1228,7 +1228,7 @@ namespace Commons.Music.Midi.Mml
 				throw new NotImplementedException ();
 			case "basecount":
 				source.Lexer.ExpectNext (MmlTokenType.NumberLiteral);
-				result.BaseCount = (int) source.Lexer.Value;
+				result.BaseCount = (int) (double) source.Lexer.Value;
 				MmlValueExpr.BaseCount = result.BaseCount;
 				break;
 			case "conditional":

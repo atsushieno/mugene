@@ -133,6 +133,18 @@ B	a1
 		}
 
 		[Test]
+		public void BaseCountSpec ()
+		{
+			MmlTestUtility.TestCompile (nameof (BaseCountSpec)
+				, @"
+#basecount 3840
+// -------- track 0 --------
+0	 o5 v100
+0	TRACKNAME ""Standard_Guitar_Demo"" BEAT4,4 t224 r1r1 t224 __MIDI_META { #2F}  
+");
+		}
+
+		[Test]
 		public void DrumTrackNoteVelocityIssue35 ()
 		{
 			string mml = @"
