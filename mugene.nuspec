@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>mugene</id>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <authors>Atsushi Eno</authors>
     <owners>Atsushi Eno</owners>
     <licenseUrl>https://github.com/atsushieno/mugene/LICENSE</licenseUrl>
@@ -11,10 +11,10 @@
     <summary>mugene MML to MIDI compiler</summary>
     <description>mugene MML to MIDI compiler</description>
     <releaseNotes>See github commit logs, there isn't a lot of commits.</releaseNotes>
-    <copyright>(C) 2009-2018, Atsushi Eno</copyright> 
+    <copyright>(C) 2009-2020, Atsushi Eno</copyright> 
     <tags>midi mono mml</tags>
     <dependencies>
-      <dependency id="managed-midi" version="1.9.12" />
+      <dependency id="managed-midi" version="1.9.14" />
     </dependencies>
   </metadata>
   <files>
