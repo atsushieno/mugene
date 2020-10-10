@@ -112,10 +112,11 @@ function compileMugene (uri: vscode.Uri, context : ExtensionContext) {
 	let arg = (os.platform() === 'win32') ? "" : mugeneExePath;
 		
 	var reports = new Array<vscode.Diagnostic> ();
+	var cwd = path.dirname(uri.fsPath);
 	if (arg == "")
-		var proc = child_process.spawn (mugeneCommand, ["--verbose", uri.fsPath]);
+		var proc = child_process.spawn (mugeneCommand, ["--verbose", uri.fsPath], {cwd: cwd});
 	else
-		var proc = child_process.spawn (mugeneCommand, [arg, "--verbose", uri.fsPath]);
+		var proc = child_process.spawn (mugeneCommand, [arg, "--verbose", uri.fsPath], {cwd: cwd});
 	proc.on("exit", (code, _) => {
 		if (code == 0) {
 		    vscode.window.showInformationMessage("mugene successfully finished");
