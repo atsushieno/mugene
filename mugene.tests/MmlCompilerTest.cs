@@ -178,6 +178,14 @@ B	a1
 			Assert.AreEqual (127, messages2 [0].Event.Lsb, "Messages2.Velocity1");
 			Assert.AreEqual (64, messages2 [1].Event.Lsb, "Messages2.Velocity2");
 		}
+
+		[Test]
+		public void IncludeResolveRelativePaths ()
+		{
+			var file = "Content/test1.mugene";
+			using (var reader = File.OpenText (file))
+			new MmlCompiler ().Compile (false, new MmlInputSource (file, reader));
+		}
 	}
 }
 

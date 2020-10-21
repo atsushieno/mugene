@@ -221,6 +221,11 @@ Options:
 			return Compile (skipDefaultMmlFiles, sources);
 		}
 
+		public MidiMusic Compile (bool skipDefaultMmlFiles, params MmlInputSource [] inputs)
+		{
+			return Compile (skipDefaultMmlFiles, (IEnumerable<MmlInputSource>) inputs);
+		}
+
 		public MidiMusic Compile (bool skipDefaultMmlFiles, IEnumerable<MmlInputSource> inputs)
 		{
 			return GenerateMusic (BuildSemanticTree (TokenizeInputs (skipDefaultMmlFiles, inputs)));

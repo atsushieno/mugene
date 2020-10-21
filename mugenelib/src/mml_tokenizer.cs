@@ -165,8 +165,11 @@ namespace Commons.Music.Midi.Mml
 
 	public abstract class StreamResolver
 	{
+		[Obsolete ("Use GetEntity instead")]
 		public virtual TextReader Resolve (string file)
 		{
+			// The implementation code is almost duplicate of GetEntity().
+			// Since we cannot simply replace OnResolve() "implementation" with GetEntity(), things get awkward here...
 			if (file == null)
 				throw new ArgumentNullException (nameof (file));
 			if (file.Length == 0)
@@ -176,18 +179,50 @@ namespace Commons.Music.Midi.Mml
 				throw new IOException ($"MML stream {file} could not be resolved.");
 			return ret;
 		}
+		
+		public TextReader GetEntity (string file)
+		{
+			if (file == null)
+				throw new ArgumentNullException (nameof (file));
+			if (file.Length == 0)
+				throw new ArgumentException ("Empty filename is passed", nameof (file));
+			var ret = OnGetEntity (file);
+			if (ret == null)
+				throw new IOException ($"MML stream {file} could not be resolved.");
+			return ret;
+		}
 
+		protected internal virtual TextReader OnGetEntity (string file)
+		{
+			throw new NotImplementedException ("You have to implement it. It is virtual only because of backward compatibility.");
+		}
+
+		[Obsolete ("Override OnGetEntity() instead")]
 		protected internal abstract TextReader OnResolve (string file);
 		
 		Stack<string> includes = new Stack<string> ();
 
-		public virtual void PushInclude (string file)
+		public string ResolveFilePath (string file)
 		{
-			if (includes.Contains (file))
-				throw new InvalidOperationException (string.Format ("File {0} is already being processed. Recursive inclusion is prohibited.", file));
-			includes.Push (file);
+			if (file == null)
+				return null;
+			if (!includes.Any ())
+				return Path.GetFullPath (file);
+			if (Path.IsPathRooted (file))
+				return file;
+			return new Uri (new Uri (includes.Peek ()), file).LocalPath;
 		}
 
+		[Obsolete ("It will become nonpublic.")]
+		public virtual void PushInclude (string file)
+		{
+			var abs = ResolveFilePath (file);
+			if (includes.Contains (abs))
+				throw new InvalidOperationException (string.Format ("File {0} is already being processed. Recursive inclusion is prohibited.", abs));
+			includes.Push (abs);
+		}
+
+		[Obsolete ("It will become nonpublic.")]
 		public virtual void PopInclude ()
 		{
 			includes.Pop ();
@@ -203,7 +238,9 @@ namespace Commons.Music.Midi.Mml
 			this.resolvers = resolvers;
 		}
 
-		protected internal override TextReader OnResolve (string file)
+		protected internal override TextReader OnResolve (string file) => OnGetEntity (file);
+		
+		protected internal override TextReader OnGetEntity (string file)
 		{
 			foreach (var r in resolvers) {
 				var ret = r.OnResolve (file);
@@ -212,11 +249,25 @@ namespace Commons.Music.Midi.Mml
 			}
 			return null;
 		}
+
+		public override void PushInclude (string file)
+		{
+			foreach (var r in resolvers)
+				r.PushInclude (file);
+		}
+
+		public override void PopInclude ()
+		{
+			foreach (var r in resolvers)
+				r.PopInclude ();
+		}
 	}
 
 	public class ManifestResourceStreamResolver : StreamResolver
 	{
-		protected internal override TextReader OnResolve (string file)
+		protected internal override TextReader OnResolve (string file) => OnGetEntity (file);
+		
+		protected internal override TextReader OnGetEntity (string file)
 		{
 			var res = GetType ().Assembly.GetManifestResourceStream (file);
 			return res == null ? null : new StreamReader (res);
@@ -225,10 +276,13 @@ namespace Commons.Music.Midi.Mml
 
 	public class LocalFileStreamResolver : StreamResolver
 	{
-		protected internal override TextReader OnResolve (string file)
+		protected internal override TextReader OnResolve (string file) => OnGetEntity (file);
+		
+		protected internal override TextReader OnGetEntity (string file)
 		{
-			if (File.Exists (file))
-				return File.OpenText (file);
+			var abs = ResolveFilePath (file);
+			if (File.Exists (abs))
+				return File.OpenText (abs);
 			string commonPath = Path.Combine (Path.GetDirectoryName (new Uri (GetType ().Assembly.CodeBase).LocalPath), "mml", file);
 			if (File.Exists (commonPath))
 				return File.OpenText (commonPath);
@@ -402,6 +456,7 @@ namespace Commons.Music.Midi.Mml
 				MmlSourceLineSet ls = null;
 				// inputs could grow up.
 				var input = inputList [i];
+				compiler.Resolver.PushInclude (input.File);
 				bool continued = false;
 				while (true) {
 					s = input.Reader.ReadLine ();
@@ -429,6 +484,7 @@ namespace Commons.Music.Midi.Mml
 					else
 						ls = ProcessTrackLine (MmlLine.Create (input.File, line, s));
 				}
+				compiler.Resolver.PopInclude ();
 			}
 		}
 
@@ -473,9 +529,7 @@ namespace Commons.Music.Midi.Mml
 		MmlSourceLineSet ProcessIncludeLine (MmlLine line)
 		{
 			string file = line.Text.Substring (line.Location.LinePosition).Trim ();
-			compiler.Resolver.PushInclude (file);
-			this.DoProcess (new MmlInputSource [] {new MmlInputSource (file, compiler.Resolver.Resolve (file))});
-			compiler.Resolver.PopInclude ();
+			this.DoProcess (new MmlInputSource [] {new MmlInputSource (file, compiler.Resolver.GetEntity (file))});
 			return new MmlUntypedSource (line);
 		}
 
